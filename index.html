@@ -65,10 +65,8 @@ tr:nth-child(even) td{background:#f8fafc}
 th.sticky-c1,th.sticky-c2{z-index:5;background:#1a3c5e}
 td.sticky-c1,td.sticky-c2{background:#fff}
 tr:nth-child(even) td.sticky-c1,tr:nth-child(even) td.sticky-c2{background:#f8fafc}
-/* Sunday row - red background */
 tr.sun-row td{background:#fff0f0 !important;color:#991b1b}
 tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;color:#991b1b;font-weight:700}
-/* Total row */
 .total-row td{background:#fef3c7 !important;font-weight:800;color:#92400e;border-top:2px solid #f59e0b}
 .total-row td.sticky-c1,.total-row td.sticky-c2{background:#fef3c7 !important;color:#92400e}
 .report-tabs{display:flex;gap:6px;padding:8px;background:#eef5fb;border-bottom:1px solid #d1dce8}
@@ -114,7 +112,6 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
 <div class="footer">My Daily Report © 2025 | Data: localStorage</div>
 
 <script>
-/* ================= CONSTANTS ================= */
 const ITEMS=[
   {id:"ghau",name:"ઘઉં",emoji:"🌾",bg:"#fff3cd",color:"#856404"},
   {id:"chokha",name:"ચોખા",emoji:"🍚",bg:"#d1e7dd",color:"#0a3622"},
@@ -124,22 +121,12 @@ const ITEMS=[
   {id:"chanadal",name:"ચણાદાળ",emoji:"🫛",bg:"#e0f2fe",color:"#01579b"}
 ];
 const DAYS_SHORT=["ર","સો","મં","બુ","ગુ","શુ","શ"];
-// ટૂંકા વાર નામ (table માટે)
 const DAYS_TBL=["રવિ","સોમ","મંગળ","બુધ","ગુરુ","શુક્ર","શનિ"];
 const DAYS_FULL=["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","ગુરુવાર","શુક્રવાર","શનિવાર"];
 const MONTHS_FULL=["જાન્યુઆરી","ફેબ્રુઆરી","માર્ચ","એપ્રિલ","મે","જૂન","જુલાઈ","ઓગસ્ટ","સપ્ટેમ્બર","ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર"];
 const DEFAULT_INV={ghau:{o:500,r:200},chokha:{o:300,r:100},tel:{o:50,r:20},chana:{o:80,r:30},dal:{o:80,r:30},chanadal:{o:80,r:30}};
 const STORAGE_KEY="mdr_react_v4";
 
-/* ================= USAGE RULES =================
-   પ્રતિ લાભાર્થી, ગ્રામ માં:
-   સવાર: ઘઉં 100g + તેલ 5g (દરરોજ)
-   બપોર: તેલ 8g (દરરોજ) +
-     સોમ/ગુરુ → ચોખા 100g + દાળ 30g
-     મંગ/શુક્ર → ઘઉં 100g + ચણા 30g
-     બુધ/શનિ → ચોખા 100g + ચણાદાળ 30g
-     રવિ → ઘઉં 100g + દાળ 30g
-*/
 function calcUsage(dow,n){
   n=Number(n)||0;
   const u={};
@@ -148,28 +135,13 @@ function calcUsage(dow,n){
     u[it.id+"nM"]=0; u[it.id+"nA"]=0;
   });
   if(n<=0) return u;
-
-  // સવાર
-  u.ghauM=100*n;     u.ghaunM=n;
-  u.telM=5*n;        u.telnM=n;
-
-  // બપોર (તેલ દરરોજ)
-  u.telA=8*n;        u.telnA=n;
-
-  if(dow===1||dow===4){ // સોમ/ગુરુ
-    u.chokhaA=100*n; u.chokhanA=n;
-    u.dalA=30*n;     u.dalnA=n;
-  } else if(dow===2||dow===5){ // મંગ/શુક્ર
-    u.ghauA=100*n;   u.ghaunA=n;
-    u.chanaA=30*n;   u.chananA=n;
-  } else if(dow===3||dow===6){ // બુધ/શનિ
-    u.chokhaA=100*n; u.chokhanA=n;
-    u.chanadalA=30*n; u.chanadalnA=n;
-  } else { // રવિ
-    u.ghauA=100*n;   u.ghaunA=n;
-    u.dalA=30*n;     u.dalnA=n;
-  }
-
+  u.ghauM=100*n; u.ghaunM=n;
+  u.telM=5*n;    u.telnM=n;
+  u.telA=8*n;    u.telnA=n;
+  if(dow===1||dow===4){ u.chokhaA=100*n; u.chokhanA=n; u.dalA=30*n; u.dalnA=n; }
+  else if(dow===2||dow===5){ u.ghauA=100*n; u.ghaunA=n; u.chanaA=30*n; u.chananA=n; }
+  else if(dow===3||dow===6){ u.chokhaA=100*n; u.chokhanA=n; u.chanadalA=30*n; u.chanadalnA=n; }
+  else { u.ghauA=100*n; u.ghaunA=n; u.dalA=30*n; u.dalnA=n; }
   ITEMS.forEach(it=>{ u[it.id]=u[it.id+"M"]+u[it.id+"A"]; });
   return u;
 }
@@ -210,18 +182,13 @@ function calcMonthUsage(y,m,ben){
   return total;
 }
 
-/* ================= STATE / STORAGE ================= */
 function loadState(){
-  try{
-    const s=localStorage.getItem(STORAGE_KEY);
-    if(s) return JSON.parse(s);
-  }catch(e){console.error("Load fail",e)}
+  try{ const s=localStorage.getItem(STORAGE_KEY); if(s) return JSON.parse(s); }catch(e){}
   return null;
 }
 function saveState(){
-  try{
-    localStorage.setItem(STORAGE_KEY,JSON.stringify({inv:state.inv,ben:state.ben}));
-  }catch(e){console.error("Save fail",e); alert("⚠️ Save નિષ્ફળ!")}
+  try{ localStorage.setItem(STORAGE_KEY,JSON.stringify({inv:state.inv,ben:state.ben})); }
+  catch(e){ alert("⚠️ Save નિષ્ફળ!"); }
 }
 
 const saved=loadState();
@@ -229,17 +196,12 @@ const now=new Date();
 const state={
   inv:saved?.inv ? {...JSON.parse(JSON.stringify(DEFAULT_INV)),...saved.inv} : JSON.parse(JSON.stringify(DEFAULT_INV)),
   ben:saved?.ben||{},
-  tab:0,
-  calY:now.getFullYear(),
-  calM:now.getMonth(),
-  modal:null,
-  modalVal:"",
-  rptTab:"daily"
+  tab:0, calY:now.getFullYear(), calM:now.getMonth(),
+  modal:null, modalVal:"", rptTab:"daily"
 };
 
 function fmt(n,d=0){if(n==null||isNaN(n))return"0";return Number(n).toFixed(d)}
 
-/* ================= INVENTORY PAGE ================= */
 function renderInventoryPage(curMU){
   let cards="";
   ITEMS.forEach(it=>{
@@ -268,7 +230,6 @@ function renderInventoryPage(curMU){
     </div>`;
 }
 
-/* ================= CALENDAR PAGE ================= */
 function renderCalendarPage(){
   const y=state.calY, m=state.calM;
   const first=new Date(y,m,1).getDay();
@@ -291,7 +252,6 @@ function renderCalendarPage(){
   }
   let heads="";
   DAYS_SHORT.forEach((d,i)=>{ heads+=`<div class="cal-day-head ${i===0?'sun':''}">${d}</div>`; });
-
   return `
     <div class="container">
       <div class="card">
@@ -311,7 +271,6 @@ function renderCalendarPage(){
     </div>`;
 }
 
-/* ================= MONTHLY PAGE ================= */
 function renderMonthlyPage(curMU){
   let rows="";
   ITEMS.forEach(it=>{
@@ -366,7 +325,6 @@ function renderMonthlyPage(curMU){
     </div>`;
 }
 
-/* ================= REPORT PAGE ================= */
 function renderReportPage(){
   const today=new Date();
   const todayK=dkf(today.getFullYear(),today.getMonth(),today.getDate());
@@ -374,7 +332,6 @@ function renderReportPage(){
   const todayU=calcUsage(today.getDay(),todayN);
   const curMU=calcMonthUsage(state.calY,state.calM,state.ben);
 
-  // ----- DAILY REPORT -----
   let dailyRows="";
   ITEMS.forEach(it=>{
     const iv=state.inv[it.id];
@@ -395,15 +352,11 @@ function renderReportPage(){
       </tr>`;
   });
 
-  // ----- MONTHLY DATE-WISE TABLE - all days (including Sundays/empty days) -----
+  // ----- MONTHLY DATE-WISE TABLE - બધા દિવસો બતાવો (રવિવાર + ખાલી દિવસો સહિત) -----
   const runningBal={};
-  ITEMS.forEach(it=>{
-    runningBal[it.id]=state.inv[it.id].o + state.inv[it.id].r;
-  });
+  ITEMS.forEach(it=>{ runningBal[it.id]=state.inv[it.id].o + state.inv[it.id].r; });
   const totals={n:0};
-  ITEMS.forEach(it=>{
-    totals[it.id+"M"]=0; totals[it.id+"A"]=0; totals[it.id]=0;
-  });
+  ITEMS.forEach(it=>{ totals[it.id+"M"]=0; totals[it.id+"A"]=0; totals[it.id]=0; });
 
   let dateRows="";
   const dim=new Date(state.calY,state.calM+1,0).getDate();
@@ -413,38 +366,31 @@ function renderReportPage(){
     const dow=new Date(state.calY,state.calM,d).getDay();
     const isSun=(dow===0);
     const u=calcUsage(dow,n);
-
-    // Update running balance & totals (if usage exists)
     totals.n+=n;
     let cols="";
     ITEMS.forEach(it=>{
-      const m=u[it.id+"M"]||0;
-      const a=u[it.id+"A"]||0;
+      const mg=u[it.id+"M"]||0;
+      const ag=u[it.id+"A"]||0;
       const t=u[it.id]||0;
       runningBal[it.id] -= t/1000;
-      totals[it.id+"M"]+=m;
-      totals[it.id+"A"]+=a;
+      totals[it.id+"M"]+=mg;
+      totals[it.id+"A"]+=ag;
       totals[it.id]+=t;
       cols+=`
-        <td>${m||"—"}</td>
-        <td>${a||"—"}</td>
+        <td>${mg||"—"}</td>
+        <td>${ag||"—"}</td>
         <td style="font-weight:700;color:${t?'#e67e22':'#cbd5e1'}">${t||"—"}</td>
         <td style="font-weight:700;color:#1b8f57">${fmt(runningBal[it.id],3)}</td>`;
     });
-
-    // રવિવાર ની row લાલ background માં બતાવો, બાકીના દિવસો માટે જો n>0 હોય તો જ બતાવો
-    // (પણ રવિવાર પણ બતાવવાનો છે ભલે n=0 હોય)
-    if(n>0 || isSun){
-      dateRows+=`<tr class="${isSun?'sun-row':''}">
-        <td class="sticky-c1"><b>${d}</b></td>
-        <td class="sticky-c2">${DAYS_TBL[dow]}</td>
-        <td style="${n>0?'color:#2563a8;font-weight:700':'color:#cbd5e1'}">${n||"—"}</td>
-        ${cols}
-      </tr>`;
-    }
+    // બધા દિવસોની row બતાવો
+    dateRows+=`<tr class="${isSun?'sun-row':''}">
+      <td class="sticky-c1"><b>${d}</b></td>
+      <td class="sticky-c2">${DAYS_TBL[dow]}</td>
+      <td style="${n>0?'color:#2563a8;font-weight:700':'color:#cbd5e1'}">${n||"—"}</td>
+      ${cols}
+    </tr>`;
   }
 
-  // Total row
   let totalCols="";
   ITEMS.forEach(it=>{
     totalCols+=`
@@ -461,15 +407,10 @@ function renderReportPage(){
     </tr>`;
 
   let invHeads="";
-  ITEMS.forEach(it=>{
-    invHeads+=`<th colspan="4" style="background:${it.color}">${it.emoji} ${it.name}</th>`;
-  });
+  ITEMS.forEach(it=>{ invHeads+=`<th colspan="4" style="background:${it.color}">${it.emoji} ${it.name}</th>`; });
   let subHeads="";
-  ITEMS.forEach(()=>{
-    subHeads+=`<th>સવાર(g)</th><th>બપોર(g)</th><th>કુલ(g)</th><th>બંધ સિલક(kg)</th>`;
-  });
+  ITEMS.forEach(()=>{ subHeads+=`<th>સવાર(g)</th><th>બપોર(g)</th><th>કુલ(g)</th><th>બંધ સિલક(kg)</th>`; });
 
-  // ----- MONTHLY SUMMARY -----
   let summaryRows="";
   ITEMS.forEach(it=>{
     const iv=state.inv[it.id];
@@ -528,7 +469,7 @@ function renderReportPage(){
         <button id="nextM">›</button>
       </div>
       <div class="section-body">
-        <h4 style="color:#1a3c5e;margin-bottom:8px;font-size:14px">📅 તારીખવાર વિગત (રવિવાર સહિત)</h4>
+        <h4 style="color:#1a3c5e;margin-bottom:8px;font-size:14px">📅 તારીખવાર વિગત (બધા દિવસો, રવિવાર લાલ રંગે)</h4>
         <div class="table-wrap" style="max-height:550px;overflow:auto">
           <table style="min-width:1400px">
             <thead>
@@ -541,7 +482,7 @@ function renderReportPage(){
               <tr>${subHeads}</tr>
             </thead>
             <tbody>
-              ${dateRows || `<tr><td colspan="${3+ITEMS.length*4}" style="padding:20px;color:#94a3b8">આ માસમાં હજુ કોઈ entry નથી</td></tr>`}
+              ${dateRows}
               ${totalRow}
             </tbody>
           </table>
@@ -589,7 +530,6 @@ function renderReportPage(){
     </div>`;
 }
 
-/* ================= MODAL ================= */
 function renderModal(){
   if(!state.modal) return "";
   const {y,m,d}=state.modal;
@@ -609,7 +549,6 @@ function renderModal(){
     </div>`;
 }
 
-/* ================= MAIN RENDER ================= */
 function render(){
   document.querySelectorAll('#nav button').forEach(b=>{
     b.classList.toggle('active', Number(b.dataset.tab)===state.tab);
@@ -629,7 +568,6 @@ function render(){
   }
 }
 
-/* ================= ACTIONS ================= */
 function openModal(d){
   const k=dkf(state.calY,state.calM,d);
   state.modal={y:state.calY,m:state.calM,d};
@@ -640,27 +578,16 @@ function closeModal(){ state.modal=null; state.modalVal=""; render(); }
 function saveModal(){
   const v=document.getElementById('modalInput').value.trim();
   const k=dkf(state.modal.y,state.modal.m,state.modal.d);
-  if(v===""||Number(v)<=0){ delete state.ben[k]; }
-  else { state.ben[k]=Number(v); }
-  saveState();
-  closeModal();
+  if(v===""||Number(v)<=0){ delete state.ben[k]; } else { state.ben[k]=Number(v); }
+  saveState(); closeModal();
 }
 function clearModal(){
   const k=dkf(state.modal.y,state.modal.m,state.modal.d);
-  delete state.ben[k];
-  saveState();
-  closeModal();
+  delete state.ben[k]; saveState(); closeModal();
 }
-function prevMonth(){
-  state.calM--;
-  if(state.calM<0){ state.calM=11; state.calY--; }
-  render();
-}
-function nextMonth(){
-  state.calM++;
-  if(state.calM>11){ state.calM=0; state.calY++; }
-  render();
-}
+function prevMonth(){ state.calM--; if(state.calM<0){state.calM=11;state.calY--;} render(); }
+function nextMonth(){ state.calM++; if(state.calM>11){state.calM=0;state.calY++;} render(); }
+
 function shareReport(){
   const today=new Date();
   const todayK=dkf(today.getFullYear(),today.getMonth(),today.getDate());
@@ -701,15 +628,13 @@ function importBackup(file){
       const data=JSON.parse(e.target.result);
       if(data.inv) state.inv=data.inv;
       if(data.ben) state.ben=data.ben;
-      saveState();
-      render();
+      saveState(); render();
       alert("✅ Backup restore થયું!");
     }catch(err){ alert("❌ ખોટી file"); }
   };
   r.readAsText(file);
 }
 
-/* ================= EVENT LISTENERS ================= */
 document.addEventListener('click',e=>{
   const t=e.target;
   if(t.matches('#nav button')){ state.tab=Number(t.dataset.tab); render(); return; }
@@ -727,7 +652,6 @@ document.addEventListener('click',e=>{
   if(t.id==='btnExport'){ exportBackup(); return; }
   if(t.id==='btnImport'){ document.getElementById('fileImport').click(); return; }
 });
-
 document.addEventListener('input',e=>{
   const t=e.target;
   if(t.matches('input[data-inv]')){
@@ -738,18 +662,15 @@ document.addEventListener('input',e=>{
   if(t.id==='modalInput'){ state.modalVal=t.value; }
   if(t.id==='fileImport' && t.files && t.files[0]){ importBackup(t.files[0]); t.value=""; }
 });
-
 document.addEventListener('change',e=>{
   if(e.target.matches('input[data-inv]')){ render(); }
 });
-
 document.addEventListener('keydown',e=>{
   if(!state.modal) return;
   if(e.key==='Enter'){ e.preventDefault(); saveModal(); }
   if(e.key==='Escape'){ closeModal(); }
 });
 
-/* ================= INIT ================= */
 render();
 </script>
 </body>

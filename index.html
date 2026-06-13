@@ -80,8 +80,13 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
 .btn-import{background:#0891b2}
 .badge{padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block}
 .footer{text-align:center;padding:12px;color:#64748b;font-size:11px}
+.sync-status {text-align:center; padding:5px; font-size:12px; font-weight:bold; color:#1b8f57; background:#e8f5e9;}
+.setup-box {max-width:400px; margin:50px auto; padding:20px; background:#fff; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.1); border:1px solid #d1dce8; text-align:center;}
+.setup-box h2 {color:#1a3c5e; margin-bottom:15px; font-size:18px;}
+.setup-box input {width:100%; padding:10px; font-size:16px; text-align:center; border:2px solid #cbd5e1; border-radius:8px; margin-bottom:15px; font-family:inherit; font-weight:700;}
+.setup-box button {background:#2563a8; color:#fff; border:none; padding:10px 20px; font-size:14px; font-weight:700; border-radius:8px; cursor:pointer; width:100%; font-family:inherit;}
 @media print{
-  .header,.actions,.nav,.report-tabs,.cal-head button{display:none !important}
+  .header,.actions,.nav,.report-tabs,.cal-head button,.sync-status{display:none !important}
   body{background:#fff}
   .card{box-shadow:none;border:1px solid #000}
   th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -100,18 +105,22 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
 </head>
 <body>
 <div class="header">
-  <h1>🌾 My Daily Report - ઈન્વેન્ટરી & ભોજન વ્યવસ્થા</h1>
-  <div class="nav" id="nav">
+  <h1>🌾 My Daily Report - ઈન્વેન્ટરી & ભોજન વ્યવstwa</h1>
+  <div class="nav" id="nav" style="display:none;">
     <button data-tab="0" class="active">📦 ઈન્વેન્ટરી</button>
     <button data-tab="1">📅 કેલેન્ડર</button>
     <button data-tab="2">📊 માસિક</button>
     <button data-tab="3">📋 રિપોર્ટ</button>
   </div>
 </div>
+<div id="syncStatus" class="sync-status" style="display:none;">☁️ ક્લાઉડ સાથે સિંક થયેલ છે</div>
 <div id="app"></div>
-<div class="footer">My Daily Report © 2025 | Data: localStorage</div>
+<div class="footer">My Daily Report © 2026 | Cloud: Google Drive 5TB</div>
 
 <script>
+// 🚨 દેવેન્દ્રભાઈ, તમારી ઓરિજિનલ લિંક અહીં સેટઅપ થઈ ગઈ છે! 🚨
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxfhayjvSFnJBDWL-wI8m-4z6zs28wU_NauFCBqFzbP5CFWnav1dss1bXbubxrSGSa1/exec";
+
 const ITEMS=[
   {id:"ghau",name:"ઘઉં",emoji:"🌾",bg:"#fff3cd",color:"#856404"},
   {id:"chokha",name:"ચોખા",emoji:"🍚",bg:"#d1e7dd",color:"#0a3622"},
@@ -125,7 +134,59 @@ const DAYS_TBL=["રવિ","સોમ","મંગળ","બુધ","ગુરુ
 const DAYS_FULL=["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","ગુરુવાર","શુક્રવાર","શનિવાર"];
 const MONTHS_FULL=["જાન્યુઆરી","ફેબ્રુઆરી","માર્ચ","એપ્રિલ","મે","જૂન","જુલાઈ","ઓગસ્ટ","સપ્ટેમ્બર","ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર"];
 const DEFAULT_INV={ghau:{o:500,r:200},chokha:{o:300,r:100},tel:{o:50,r:20},chana:{o:80,r:30},dal:{o:80,r:30},chanadal:{o:80,r:30}};
-const STORAGE_KEY="mdr_react_v4";
+
+let centerCode = localStorage.getItem("anganwadi_center_code") || "";
+let state = {
+  inv: JSON.parse(JSON.stringify(DEFAULT_INV)),
+  ben: {},
+  tab: 0, calY: new Date().getFullYear(), calM: new Date().getMonth(),
+  modal: null, modalVal: "", rptTab: "daily"
+};
+
+function setStatus(msg, color="#1b8f57") {
+  const s = document.getElementById("syncStatus");
+  if(s) { s.style.display = "block"; s.innerText = msg; s.style.background = color === "#1b8f57" ? "#e8f5e9" : "#ffebee"; s.style.color = color; }
+}
+
+// ક્લાઉડ પરથી ડેટા લોડ કરવો
+async function loadCloudData() {
+  if(!centerCode) return;
+  setStatus("⏳ ક્લાઉડ પરથી ડેટા લોડ થઈ રહ્યો છે...", "#e67e22");
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?centerCode=${encodeURIComponent(centerCode)}`);
+    const data = await res.json();
+    if (data && data.status !== "new_user" && data.status !== "error") {
+      if(data.inv) state.inv = data.inv;
+      if(data.ben) state.ben = data.ben;
+      setStatus(`☁️ કેન્દ્ર: ${centerCode} — ક્લાઉડ ડેટા એક્ટિવ`);
+    } else {
+      setStatus(`🆕 નવું કેન્દ્ર: ${centerCode} — નવો ડેટાબેઝ સેટ રેડી`);
+    }
+    document.getElementById("nav").style.display = "flex";
+    render();
+  } catch(e) {
+    setStatus("❌ ક્લાઉડ કનેક્શન નિષ્ફળ! લોકલ મોડ ચાલુ.", "#cc3d3d");
+    document.getElementById("nav").style.display = "flex";
+    render();
+  }
+}
+
+// ક્લાઉડ પર ડેટા સેવ કરવો
+async function saveState() {
+  if(!centerCode) return;
+  setStatus("⏳ ક્લાઉડ પર સેવ થઈ રહ્યું છે...", "#e67e22");
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ centerCode: centerCode, data: { inv: state.inv, ben: state.ben } })
+    });
+    setStatus(`✅ ક્લાઉડ પર સુરક્ષિત સેવ થયું! (કેન્દ્ર: ${centerCode})`);
+  } catch(e) {
+    setStatus("⚠️ ક્લાઉડ સેવ નિષ્ફળ! કોડ ચેક કરો.", "#cc3d3d");
+  }
+}
 
 function calcUsage(dow,n){
   n=Number(n)||0;
@@ -182,25 +243,17 @@ function calcMonthUsage(y,m,ben){
   return total;
 }
 
-function loadState(){
-  try{ const s=localStorage.getItem(STORAGE_KEY); if(s) return JSON.parse(s); }catch(e){}
-  return null;
-}
-function saveState(){
-  try{ localStorage.setItem(STORAGE_KEY,JSON.stringify({inv:state.inv,ben:state.ben})); }
-  catch(e){ alert("⚠️ Save નિષ્ફળ!"); }
-}
-
-const saved=loadState();
-const now=new Date();
-const state={
-  inv:saved?.inv ? {...JSON.parse(JSON.stringify(DEFAULT_INV)),...saved.inv} : JSON.parse(JSON.stringify(DEFAULT_INV)),
-  ben:saved?.ben||{},
-  tab:0, calY:now.getFullYear(), calM:now.getMonth(),
-  modal:null, modalVal:"", rptTab:"daily"
-};
-
 function fmt(n,d=0){if(n==null||isNaN(n))return"0";return Number(n).toFixed(d)}
+
+function renderSetupPage(){
+  return `
+    <div class="setup-box">
+      <h2>🏢 આંગણવાડી કેન્દ્ર લોગિન</h2>
+      <p style="font-size:13px; color:#64748b; margin-bottom:15px;">તમારો ડેટા અલગ રાખવા માટે કેન્દ્રનો કોડ અથવા મોબાઈલ નંબર નાખો.</p>
+      <input type="text" id="centerCodeInput" placeholder="દા.ત. AW-101 અથવા નંબર" value="${centerCode}">
+      <button id="btnSubmitSetup">એપ શરૂ કરો ➔</button>
+    </div>`;
+}
 
 function renderInventoryPage(curMU){
   let cards="";
@@ -224,7 +277,7 @@ function renderInventoryPage(curMU){
   return `
     <div class="container">
       <div class="card">
-        <div class="section-head">📦 ઈન્વેન્ટરી (${MONTHS_FULL[state.calM]} ${state.calY})</div>
+        <div class="section-head">📦 ઈન્વેન્ટરી (${MONTHS_FULL[state.calM]} ${state.calY}) <span style="font-size:11px; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:8px;">કોડ: ${centerCode}</span></div>
         <div class="section-body"><div class="inv-grid">${cards}</div></div>
       </div>
     </div>`;
@@ -352,7 +405,6 @@ function renderReportPage(){
       </tr>`;
   });
 
-  // ----- MONTHLY DATE-WISE TABLE - બધા દિવસો બતાવો (રવિવાર + ખાલી દિવસો સહિત) -----
   const runningBal={};
   ITEMS.forEach(it=>{ runningBal[it.id]=state.inv[it.id].o + state.inv[it.id].r; });
   const totals={n:0};
@@ -382,7 +434,6 @@ function renderReportPage(){
         <td style="font-weight:700;color:${t?'#e67e22':'#cbd5e1'}">${t||"—"}</td>
         <td style="font-weight:700;color:#1b8f57">${fmt(runningBal[it.id],3)}</td>`;
     });
-    // બધા દિવસોની row બતાવો
     dateRows+=`<tr class="${isSun?'sun-row':''}">
       <td class="sticky-c1"><b>${d}</b></td>
       <td class="sticky-c2">${DAYS_TBL[dow]}</td>
@@ -442,7 +493,7 @@ function renderReportPage(){
         <div class="table-wrap">
           <table style="min-width:720px">
             <thead><tr>
-              <th style="text-align:left">ઇન્વેન્ટરી નામ</th>
+              <th style="text-align:left">ઇન્વેન્ટري નામ</th>
               <th>લાભાર્થી સંખ્યા</th>
               <th>કુલ ઊઘડતી સિલક (kg)</th>
               <th>સવારની વપરાશ (g)</th>
@@ -521,10 +572,13 @@ function renderReportPage(){
       </div>
       ${state.rptTab==='daily'?dailyHtml:monthlyHtml}
       <div class="card">
-        <div class="section-body" style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn-export" style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#7c3aed" id="btnExport">💾 Backup Export</button>
-          <button class="btn-import" style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#0891b2" id="btnImport">📂 Backup Import</button>
-          <input type="file" id="fileImport" accept=".json" style="display:none">
+        <div class="section-body" style="display:flex;gap:8px;flex-wrap:wrap; justify-content: space-between; align-items:center;">
+          <div>
+            <button class="btn-export" style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#7c3aed" id="btnExport">💾 Backup Export</button>
+            <button class="btn-import" style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#0891b2" id="btnImport">📂 Backup Import</button>
+            <input type="file" id="fileImport" accept=".json" style="display:none">
+          </div>
+          <button id="btnLogout" style="padding:8px 14px; background:#cc3d3d; color:#fff; border:none; border-radius:6px; font-weight:700; cursor:pointer;">🚪 કેન્દ્ર બદલો (Logout)</button>
         </div>
       </div>
     </div>`;
@@ -550,10 +604,19 @@ function renderModal(){
 }
 
 function render(){
+  const app=document.getElementById('app');
+  
+  if(!centerCode) {
+    document.getElementById("nav").style.display = "none";
+    document.getElementById("syncStatus").style.display = "none";
+    app.innerHTML = renderSetupPage();
+    return;
+  }
+
   document.querySelectorAll('#nav button').forEach(b=>{
     b.classList.toggle('active', Number(b.dataset.tab)===state.tab);
   });
-  const app=document.getElementById('app');
+  
   const curMU=calcMonthUsage(state.calY,state.calM,state.ben);
   let html="";
   if(state.tab===0) html=renderInventoryPage(curMU);
@@ -593,7 +656,7 @@ function shareReport(){
   const todayK=dkf(today.getFullYear(),today.getMonth(),today.getDate());
   const todayN=Number(state.ben[todayK]||0);
   const todayU=calcUsage(today.getDay(),todayN);
-  let txt=`🌾 My Daily Report\n📅 ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()} (${DAYS_FULL[today.getDay()]})\n👥 લાભાર્થી: ${todayN}\n\n`;
+  let txt=`🌾 My Daily Report (કેન્દ્ર: ${centerCode})\n📅 ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()} (${DAYS_FULL[today.getDay()]})\n👥 લાભાર્થી: ${todayN}\n\n`;
   ITEMS.forEach(it=>{
     const iv=state.inv[it.id];
     txt+=`${it.emoji} ${it.name}: સવાર ${morU(it.id,todayU)}g | બપોર ${aftU(it.id,todayU)}g | કુલ ${todayU[it.id]}g | બંધ ${fmt(iv.o+iv.r-todayU[it.id]/1000,3)}kg\n`;
@@ -603,7 +666,7 @@ function shareReport(){
 }
 function shareMonthly(){
   const curMU=calcMonthUsage(state.calY,state.calM,state.ben);
-  let txt=`📊 માસિક રિપોર્ટ - ${MONTHS_FULL[state.calM]} ${state.calY}\n👥 કુલ લાભાર્થી: ${curMU.totalN} | દિવસ: ${curMU.days}\n\n`;
+  let txt=`📊 માસિક રિપોર્ટ (કેન્દ્ર: ${centerCode}) - ${MONTHS_FULL[state.calM]} ${state.calY}\n👥 કુલ લાભાર્થી: ${curMU.totalN} | દિવસ: ${curMU.days}\n\n`;
   ITEMS.forEach(it=>{
     const iv=state.inv[it.id];
     txt+=`${it.emoji} ${it.name}: સવાર લા.${curMU[it.id+"nM"]||0} | બપોર લા.${curMU[it.id+"nA"]||0} | કુલ ${fmt(curMU[it.id])}g | બંધ ${fmt(iv.o+iv.r-curMU[it.id]/1000,3)}kg\n`;
@@ -617,7 +680,7 @@ function exportBackup(){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download=`mydailyreport-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.download=`mydailyreport-${centerCode}-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -629,7 +692,7 @@ function importBackup(file){
       if(data.inv) state.inv=data.inv;
       if(data.ben) state.ben=data.ben;
       saveState(); render();
-      alert("✅ Backup restore થયું!");
+      alert("✅ Backup restore થયું અને ક્લાઉડ પર સિંક થયું!");
     }catch(err){ alert("❌ ખોટી file"); }
   };
   r.readAsText(file);
@@ -637,6 +700,27 @@ function importBackup(file){
 
 document.addEventListener('click',e=>{
   const t=e.target;
+  
+  if(t.id === 'btnSubmitSetup') {
+    const val = document.getElementById("centerCodeInput").value.trim();
+    if(val === "") { alert("⚠️ કૃપા કરીને કેન્દ્ર કોડ અથવા મોબાઈલ નંબર નાખો!"); return; }
+    centerCode = val;
+    localStorage.setItem("anganwadi_center_code", centerCode);
+    loadCloudData();
+    return;
+  }
+  
+  if(t.id === 'btnLogout') {
+    if(confirm("શું તમે કેન્દ્રમાંથી લોગઆઉટ કરવા માંગો છો?")) {
+      localStorage.removeItem("anganwadi_center_code");
+      centerCode = "";
+      state.inv = JSON.parse(JSON.stringify(DEFAULT_INV));
+      state.ben = {};
+      render();
+    }
+    return;
+  }
+
   if(t.matches('#nav button')){ state.tab=Number(t.dataset.tab); render(); return; }
   if(t.id==='prevM'){ prevMonth(); return; }
   if(t.id==='nextM'){ nextMonth(); return; }
@@ -652,6 +736,7 @@ document.addEventListener('click',e=>{
   if(t.id==='btnExport'){ exportBackup(); return; }
   if(t.id==='btnImport'){ document.getElementById('fileImport').click(); return; }
 });
+
 document.addEventListener('input',e=>{
   const t=e.target;
   if(t.matches('input[data-inv]')){
@@ -671,7 +756,11 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){ closeModal(); }
 });
 
-render();
+if(centerCode) {
+  loadCloudData();
+} else {
+  render();
+}
 </script>
 </body>
 </html>

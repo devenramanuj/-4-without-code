@@ -119,9 +119,7 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
 
 <script>
 // 🚨 દેવેન્દ્રભાઈની ઓફિશિયલ છેલ્લી ફિક્સ કરેલી વેબ એપ લિંક 🚨
-const APPS_SCRIPT_URL = "// 🚀 આ લાઇન પ્રોપર ચેક કરીને અપડેટ કરી દો
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbztaDndDVEoAz7FVF1cDZxEjLyzo3tYda9va1Lqwz4dg03fge-bYPFOcMWpq4_MCRHR/exec";
-";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwq9PZHuOECFhpV-UeQvfvHnHvN__C3uwL-BZyQNAS5O_gSI6mku0PY8WebUj7vKSht/exec";
 
 const ITEMS=[
   {id:"ghau",name:"ઘઉં",emoji:"🌾",bg:"#fff3cd",color:"#856404"},
@@ -165,14 +163,15 @@ function loadCloudData() {
       setStatus(`🆕 નવું કેન્દ્ર: ${centerCode} — નવો ડેટાબેઝ સેટ રેડી`);
     }
     delete window[callbackName];
-    document.getElementById("jsonp_script_load")?.remove();
+    const scriptEl = document.getElementById("jsonp_script_load");
+    if(scriptEl) scriptEl.remove();
     document.getElementById("nav").style.display = "flex";
     render();
   };
 
   const script = document.createElement("script");
   script.id = "jsonp_script_load";
-  script.src = `${APPS_SCRIPT_URL}?action=load&centerCode=${encodeURIComponent(centerCode)}&callback=${callbackName}`;
+  script.src = APPS_SCRIPT_URL + "?action=load&centerCode=" + encodeURIComponent(centerCode) + "&callback=" + callbackName;
   script.onerror = function() {
     const localBackup = localStorage.getItem("mdr_backup_" + centerCode);
     if(localBackup){
@@ -205,12 +204,13 @@ function saveState() {
       setStatus(`❌ સેવિંગ એરર: ${result?.message || 'Unknown'}`, "#cc3d3d");
     }
     delete window[callbackName];
-    document.getElementById("jsonp_script_save")?.remove();
+    const scriptEl = document.getElementById("jsonp_script_save");
+    if(scriptEl) scriptEl.remove();
   };
 
   const script = document.createElement("script");
   script.id = "jsonp_script_save";
-  script.src = `${APPS_SCRIPT_URL}?action=save&centerCode=${encodeURIComponent(centerCode)}&jsonData=${stringData}&callback=${callbackName}`;
+  script.src = APPS_SCRIPT_URL + "?action=save&centerCode=" + encodeURIComponent(centerCode) + "&jsonData=" + stringData + "&callback=" + callbackName;
   script.onerror = function() {
     setStatus("⚠️ નેટવર્ક વ્યસ્ત છે. ડેટા લોકલ ડિવાઇસમાં સુરક્ષિત છે.", "#e67e22");
   };
@@ -243,7 +243,7 @@ function dayHint(d){
   if(d===2||d===5)return"ઘઉં+ચણા+તેલ";
   return"ચોખા+ચણાદાળ+તેલ";
 }
-function dkf(y,m,d){return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;}
+function dkf(y,m,d){return y + "-" + String(m+1).padStart(2,"0") + "-" + String(d).padStart(2,"0");}
 
 function calcMonthUsage(y,m,ben){
   const total={totalN:0,days:0};
@@ -275,13 +275,7 @@ function calcMonthUsage(y,m,ben){
 function fmt(n,d=0){if(n==null||isNaN(n))return"0";return Number(n).toFixed(d)}
 
 function renderSetupPage(){
-  return `
-    <div class="setup-box">
-      <h2>🏢 આંગણવાડી કેન્દ્ર લોગિન</h2>
-      <p style="font-size:13px; color:#64748b; margin-bottom:15px;">તમારો ડેટા અલગ રાખવા માટે કેન્દ્રનો કોડ અથવા મોબાઈલ નંબર નાખો.</p>
-      <input type="text" id="centerCodeInput" placeholder="દા.ત. AW-101 અથવા નંબર" value="${centerCode}">
-      <button id="btnSubmitSetup">એપ શરૂ કરો ➔</button>
-    </div>`;
+  return '<div class="setup-box"><h2>🏢 આંગણવાડી કેન્દ્ર લોગિન</h2><p style="font-size:13px; color:#64748b; margin-bottom:15px;">તમારો ડેટા અલગ રાખવા માટે કેન્દ્રનો કોડ અથવા મોબાઈલ નંબર નાખો.</p><input type="text" id="centerCodeInput" placeholder="દા.ત. AW-101 અથવા નંબર" value="' + centerCode + '"><button id="btnSubmitSetup">એપ શરૂ કરો ➔</button></div>';
 }
 
 function renderInventoryPage(curMU){
@@ -291,25 +285,9 @@ function renderInventoryPage(curMU){
     const opening=iv.o+iv.r;
     const used=(curMU[it.id]||0)/1000;
     const closing=opening-used;
-    cards+=`
-      <div class="inv-card">
-        <div class="inv-title" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</div>
-        <div class="inv-row"><label>ઊઘડતી (kg):</label><input type="number" step="0.001" data-inv="${it.id}" data-field="o" value="${iv.o}"></div>
-        <div class="inv-row"><label>આવક (kg):</label><input type="number" step="0.001" data-inv="${it.id}" data-field="r" value="${iv.r}"></div>
-        <div class="inv-stat">
-          કુલ ઊઘડતી: <b>${fmt(opening,3)}</b> kg<br>
-          વપરાશ: <b style="color:#e67e22">${fmt(used,3)}</b> kg<br>
-          બંધ સિલક: <b style="color:#1b8f57">${fmt(closing,3)}</b> kg
-        </div>
-      </div>`;
+    cards+='<div class="inv-card"><div class="inv-title" style="background:'+it.bg+';color:'+it.color+'">'+it.emoji+' '+it.name+'</div><div class="inv-row"><label>ઊઘડતી (kg):</label><input type="number" step="0.001" data-inv="' + it.id + '" data-field="o" value="' + iv.o + '"></div><div class="inv-row"><label>આવક (kg):</label><input type="number" step="0.001" data-inv="' + it.id + '" data-field="r" value="' + iv.r + '"></div><div class="inv-stat">કુલ ઊઘડતી: <b>'+fmt(opening,3)+'</b> kg<br>વપરાશ: <b style="color:#e67e22">'+fmt(used,3)+'</b> kg<br>બંધ સિલક: <b style="color:#1b8f57">'+fmt(closing,3)+'</b> kg</div></div>';
   });
-  return `
-    <div class="container">
-      <div class="card">
-        <div class="section-head">📦 ઈન્વેન્ટરી (${MONTHS_FULL[state.calM]} ${state.calY}) <span style="font-size:11px; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:8px;">કોડ: ${centerCode}</span></div>
-        <div class="section-body"><div class="inv-grid">${cards}</div></div>
-      </div>
-    </div>`;
+  return '<div class="container"><div class="card"><div class="section-head">📦 ઈન્વેન્ટરી (' + MONTHS_FULL[state.calM] + ' ' + state.calY + ') <span style="font-size:11px; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:8px;">કોડ: ' + centerCode + '</span></div><div class="section-body"><div class="inv-grid">' + cards + '</div></div></div></div>';
 }
 
 function renderCalendarPage(){
@@ -318,7 +296,7 @@ function renderCalendarPage(){
   const dim=new Date(y,m+1,0).getDate();
   const today=new Date();
   let cells="";
-  for(let i=0;i<first;i++) cells+=`<div class="cal-cell empty"></div>`;
+  for(let i=0;i<first;i++) cells+='<div class="cal-cell empty"></div>';
   let monthN=0, monthD=0;
   for(let d=1;d<=dim;d++){
     const k=dkf(y,m,d);
@@ -326,31 +304,11 @@ function renderCalendarPage(){
     const dow=new Date(y,m,d).getDay();
     const isToday=(d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear());
     if(n>0){monthN+=n;monthD++;}
-    cells+=`
-      <div class="cal-cell ${dow===0?'sunday':''} ${isToday?'today':''}" data-day="${d}">
-        <div class="d">${d}</div>
-        <div class="n ${n===0?'zero':''}">${n>0?n:'—'}</div>
-      </div>`;
+    cells+='<div class="cal-cell ' + (dow===0?'sunday':'') + ' ' + (isToday?'today':'') + '" data-day="' + d + '"><div class="d">' + d + '</div><div class="n ' + (n===0?'zero':'') + '">' + (n>0?n:'—') + '</div></div>';
   }
   let heads="";
-  DAYS_SHORT.forEach((d,i)=>{ heads+=`<div class="cal-day-head ${i===0?'sun':''}">${d}</div>`; });
-  return `
-    <div class="container">
-      <div class="card">
-        <div class="section-head">📅 કેલેન્ડર</div>
-        <div class="cal-head">
-          <button id="prevM">‹</button>
-          <h3>${MONTHS_FULL[m]} ${y}</h3>
-          <button id="nextM">›</button>
-        </div>
-        <div class="cal-grid">${heads}${cells}</div>
-        <div class="cal-totals">
-          <div>કુલ દિવસ<b>${monthD}</b></div>
-          <div>કુલ લાભાર્થી<b>${monthN}</b></div>
-          <div>સરેરાશ/દિવસ<b>${monthD?fmt(monthN/monthD,1):0}</b></div>
-        </div>
-      </div>
-    </div>`;
+  DAYS_SHORT.forEach((d,i)=>{ heads+='<div class="cal-day-head ' + (i===0?'sun':'') + '">' + d + '</div>'; });
+  return '<div class="container"><div class="card"><div class="section-head">📅 કેલેન્ડર</div><div class="cal-head"><button id="prevM">‹</button><h3>' + MONTHS_FULL[m] + ' ' + y + '</h3><button id="nextM">›</button></div><div class="cal-grid">' + heads + cells + '</div><div class="cal-totals"><div>કુલ દિવસ<b>' + monthD + '</b></div><div>કુલ લાભાર્થી<b>' + monthN + '</b></div><div>સરેરાશ/દિવસ<b>' + (monthD?fmt(monthN/monthD,1):0) + '</b></div></div></div></div>';
 }
 
 function renderMonthlyPage(curMU){
@@ -362,49 +320,9 @@ function renderMonthlyPage(curMU){
     const aft=(curMU[it.id+"A"]||0);
     const tot=(curMU[it.id]||0);
     const closing=opening-tot/1000;
-    rows+=`
-      <tr>
-        <td style="text-align:left"><span class="badge" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</span></td>
-        <td><b>${curMU[it.id+"nM"]||0}</b></td>
-        <td><b>${curMU[it.id+"nA"]||0}</b></td>
-        <td style="color:#2980b9;font-weight:700">${fmt(opening,3)}</td>
-        <td>${fmt(mor)}</td>
-        <td>${fmt(aft)}</td>
-        <td style="color:#e67e22;font-weight:700">${fmt(tot)}</td>
-        <td style="color:#1b8f57;font-weight:700">${fmt(closing,3)}</td>
-      </tr>`;
+    rows+='<tr><td style="text-align:left"><span class="badge" style="background:'+it.bg+';color:'+it.color+'">'+it.emoji+' '+it.name+'</span></td><td><b>'+(curMU[it.id+"nM"]||0)+'</b></td><td><b>'+(curMU[it.id+"nA"]||0)+'</b></td><td style="color:#2980b9;font-weight:700">'+fmt(opening,3)+'</td><td>'+fmt(mor)+'</td><td>'+fmt(aft)+'</td><td style="color:#e67e22;font-weight:700">'+fmt(tot)+'</td><td style="color:#1b8f57;font-weight:700">'+fmt(closing,3)+'</td></tr>';
   });
-  return `
-    <div class="container">
-      <div class="card">
-        <div class="section-head">📊 માસિક સારાંશ - ${MONTHS_FULL[state.calM]} ${state.calY}</div>
-        <div class="cal-head">
-          <button id="prevM">‹</button>
-          <h3>${MONTHS_FULL[state.calM]} ${state.calY}</h3>
-          <button id="nextM">›</button>
-        </div>
-        <div class="cal-totals">
-          <div>કુલ દિવસ<b>${curMU.days}</b></div>
-          <div>કુલ લાભાર્થી<b>${curMU.totalN}</b></div>
-          <div>સરેરાશ/દિવસ<b>${curMU.days?fmt(curMU.totalN/curMU.days,1):0}</b></div>
-        </div>
-        <div class="table-wrap">
-          <table style="min-width:800px">
-            <thead><tr>
-              <th style="text-align:left">ઇન્વેન્ટરી</th>
-              <th>સવાર લાભાર્થી</th>
-              <th>બપોર લાભાર્થી</th>
-              <th>કુલ ઊઘડતી (kg)</th>
-              <th>સવાર વપરાશ (g)</th>
-              <th>બપોર વપરાશ (g)</th>
-              <th>કુલ વપરાશ (g)</th>
-              <th>બંધ સિલક (kg)</th>
-            </tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
-      </div>
-    </div>`;
+  return '<div class="container"><div class="card"><div class="section-head">📊 માસિક સારાંશ - ' + MONTHS_FULL[state.calM] + ' ' + state.calY + '</div><div class="cal-head"><button id="prevM">‹</button><h3>' + MONTHS_FULL[state.calM] + ' ' + state.calY + '</h3><button id="nextM">›</button></div><div class="cal-totals"><div>કુલ દિવસ<b>' + curMU.days + '</b></div><div>કુલ લાભાર્થી<b>' + curMU.totalN + '</b></div><div>સરેરાશ/દિવસ<b>' + (curMU.days?fmt(curMU.totalN/curMU.days,1):0) + '</b></div></div><div class="table-wrap"><table style="min-width:800px"><thead><tr><th style="text-align:left">ઇન્વેન્ટરી</th><th>સવાર લાભાર્થી</th><th>બપોર લાભાર્થી</th><th>કુલ ઊઘડતી (kg)</th><th>સવાર વપરાશ (g)</th><th>બપોર વપરાશ (g)</th><th>કુલ વપરાશ (g)</th><th>બંધ સિલક (kg)</th></tr></thead><tbody>' + rows + '</tbody></table></div></div></div>';
 }
 
 function renderReportPage(){
@@ -422,16 +340,7 @@ function renderReportPage(){
     const aft=aftU(it.id,todayU);
     const tot=todayU[it.id]||0;
     const closing=opening - tot/1000;
-    dailyRows+=`
-      <tr>
-        <td style="text-align:left"><span class="badge" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</span></td>
-        <td style="color:#2563a8;font-weight:700">${todayN}</td>
-        <td style="color:#2980b9;font-weight:700">${fmt(opening,3)}</td>
-        <td>${mor||"—"}</td>
-        <td>${aft||"—"}</td>
-        <td style="color:#e67e22;font-weight:700">${tot||"—"}</td>
-        <td style="color:#1b8f57;font-weight:700">${fmt(closing,3)}</td>
-      </tr>`;
+    dailyRows+='<tr><td style="text-align:left"><span class="badge" style="background:'+it.bg+';color:'+it.color+'">'+it.emoji+' '+it.name+'</span></td><td style="color:#2563a8;font-weight:700">'+todayN+'</td><td style="color:#2980b9;font-weight:700">'+fmt(opening,3)+'</td><td>'+(mor||"—")+'</td><td>'+(aft||"—")+'</td><td style="color:#e67e22;font-weight:700">'+(tot||"—")+'</td><td style="color:#1b8f57;font-weight:700">'+fmt(closing,3)+'</td></tr>';
   });
 
   const runningBal={};
@@ -457,39 +366,21 @@ function renderReportPage(){
       totals[it.id+"M"]+=mg;
       totals[it.id+"A"]+=ag;
       totals[it.id]+=t;
-      cols+=`
-        <td>${mg||"—"}</td>
-        <td>${ag||"—"}</td>
-        <td style="font-weight:700;color:${t?'#e67e22':'#cbd5e1'}">${t||"—"}</td>
-        <td style="font-weight:700;color:#1b8f57">${fmt(runningBal[it.id],3)}</td>`;
+      cols+='<td>'+(mg||"—")+'</td><td>'+(ag||"—")+'</td><td style="font-weight:700;color:'+(t?'#e67e22':'#cbd5e1')+'">'+(t||"—")+'</td><td style="font-weight:700;color:#1b8f57">'+fmt(runningBal[it.id],3)+'</td>';
     });
-    dateRows+=`<tr class="${isSun?'sun-row':''}">
-      <td class="sticky-c1"><b>${d}</b></td>
-      <td class="sticky-c2">${DAYS_TBL[dow]}</td>
-      <td style="${n>0?'color:#2563a8;font-weight:700':'color:#cbd5e1'}">${n||"—"}</td>
-      ${cols}
-    </tr>`;
+    dateRows+='<tr class="'+(isSun?'sun-row':'')+'"><td class="sticky-c1"><b>'+d+'</b></td><td class="sticky-c2">'+DAYS_TBL[dow]+'</td><td style="'+(n>0?'color:#2563a8;font-weight:700':'color:#cbd5e1')+'">'+(n||"—")+'</td>'+cols+'</tr>';
   }
 
   let totalCols="";
   ITEMS.forEach(it=>{
-    totalCols+=`
-      <td>${fmt(totals[it.id+"M"])}</td>
-      <td>${fmt(totals[it.id+"A"])}</td>
-      <td>${fmt(totals[it.id])}</td>
-      <td>${fmt(runningBal[it.id],3)}</td>`;
+    totalCols+='<td>'+fmt(totals[it.id+"M"])+'</td><td>'+fmt(totals[it.id+"A"])+'</td><td>'+fmt(totals[it.id])+'</td><td>'+fmt(runningBal[it.id],3)+'</td>';
   });
-  const totalRow=`
-    <tr class="total-row">
-      <td class="sticky-c1" colspan="2"><b>કુલ ટોટલ</b></td>
-      <td>${totals.n}</td>
-      ${totalCols}
-    </tr>`;
+  const totalRow='<tr class="total-row"><td class="sticky-c1" colspan="2"><b>કુલ ટોટલ</b></td><td>'+totals.n+'</td>'+totalCols+'</tr>';
 
   let invHeads="";
-  ITEMS.forEach(it=>{ invHeads+=`<th colspan="4" style="background:${it.color}">${it.emoji} ${it.name}</th>`; });
+  ITEMS.forEach(it=>{ invHeads+='<th colspan="4" style="background:'+it.color+'">'+it.emoji+' '+it.name+'</th>'; });
   let subHeads="";
-  ITEMS.forEach(()=>{ subHeads+=`<th>સવાર(g)</th><th>બપોર(g)</th><th>કુલ(g)</th><th>બંધ સિલક(kg)</th>`; });
+  ITEMS.forEach(()=>{ subHeads+='<th>સવાર(g)</th><th>બપોર(g)</th><th>કુલ(g)</th><th>બંધ સિલક(kg)</th>'; });
 
   let summaryRows="";
   ITEMS.forEach(it=>{
@@ -501,139 +392,26 @@ function renderReportPage(){
     const aft=curMU[it.id+"A"]||0;
     const tot=curMU[it.id]||0;
     const closing=opening - tot/1000;
-    summaryRows+=`
-      <tr>
-        <td style="text-align:left"><span class="badge" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</span></td>
-        <td><b style="color:#2563a8">${morN}</b></td>
-        <td><b style="color:#7c3aed">${aftN}</b></td>
-        <td style="color:#2980b9;font-weight:700">${fmt(opening,3)}</td>
-        <td>${fmt(mor)}</td>
-        <td>${fmt(aft)}</td>
-        <td style="color:#e67e22;font-weight:700">${fmt(tot)}</td>
-        <td style="color:#1b8f57;font-weight:700">${fmt(closing,3)}</td>
-      </tr>`;
+    summaryRows+='<tr><td style="text-align:left"><span class="badge" style="background:'+it.bg+';color:'+it.color+'">'+it.emoji+' '+it.name+'</span></td><td><b style="color:#2563a8">'+morN+'</b></td><td><b style="color:#7c3aed">'+aftN+'</b></td><td style="color:#2980b9;font-weight:700">'+fmt(opening,3)+'</td><td>'+fmt(mor)+'</td><td>'+fmt(aft)+'</td><td style="color:#e67e22;font-weight:700">'+fmt(tot)+'</td><td style="color:#1b8f57;font-weight:700">'+fmt(closing,3)+'</td></tr>';
   });
 
-  const dailyHtml=`
-    <div class="card">
-      <div class="section-head">📅 દૈનિક રિપોર્ટ — ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()}</div>
-      <div class="section-body">
-        <p style="font-size:12px;color:#64748b;margin-bottom:8px">આજનું ભોજન: <b>${dayHint(today.getDay())}</b> | લાભાર્થી: <b style="color:#2563a8">${todayN}</b></p>
-        <div class="table-wrap">
-          <table style="min-width:720px">
-            <thead><tr>
-              <th style="text-align:left">ઇન્વેન્ટરી નામ</th>
-              <th>લાભાર્થી સંખ્યા</th>
-              <th>કુલ ઊઘડતી સિલક (kg)</th>
-              <th>સવારની વપરાશ (g)</th>
-              <th>બપોરની વપરાશ (g)</th>
-              <th>કુલ વપરાશ (g)</th>
-              <th>બંધ સિલક (kg)</th>
-            </tr></thead>
-            <tbody>${dailyRows}</tbody>
-          </table>
-        </div>
-      </div>
-      <div class="actions">
-        <button class="btn-print" id="btnPrint">🖨️ પ્રિન્ટ</button>
-        <button class="btn-share" id="btnShare">📤 શેર</button>
-      </div>
-    </div>`;
+  const dailyHtml='<div class="card"><div class="section-head">📅 દૈનિક રિપોર્ટ — ' + today.getDate() + ' ' + MONTHS_FULL[today.getMonth()] + ' ' + today.getFullYear() + '</div><div class="section-body"><p style="font-size:12px;color:#64748b;margin-bottom:8px">આજનું ભોજન: <b>' + dayHint(today.getDay()) + '</b> | લાભાર્થી: <b style="color:#2563a8">' + todayN + '</b></p><div class="table-wrap"><table style="min-width:720px"><thead><tr><th style="text-align:left">ઇન્વેન્ટરી નામ</th><th>લાભાર્થી સંખ્યા</th><th>કુલ ઊઘડતી સિલક (kg)</th><th>સવારની વપરાશ (g)</th><th>બપોરની વપરાશ (g)</th><th>કુલ વપરાશ (g)</th><th>બંધ સિલક (kg)</th></tr></thead><tbody>' + dailyRows + '</tbody></table></div></div><div class="actions"><button class="btn-print" id="btnPrint">🖨️ પ્રિન્ટ</button><button class="btn-share" id="btnShare">📤 શેર</button></div></div>';
 
-  const monthlyHtml=`
-    <div class="card">
-      <div class="section-head">📊 માસિક રિપોર્ટ — ${MONTHS_FULL[state.calM]} ${state.calY}</div>
-      <div class="cal-head">
-        <button id="prevM">‹</button>
-        <h3>${MONTHS_FULL[state.calM]} ${state.calY}</h3>
-        <button id="nextM">›</button>
-      </div>
-      <div class="section-body">
-        <h4 style="color:#1a3c5e;margin-bottom:8px;font-size:14px">📅 તારીખવાર વિગત</h4>
-        <div class="table-wrap" style="max-height:550px;overflow:auto">
-          <table style="min-width:1400px">
-            <thead>
-              <tr>
-                <th class="sticky-c1" rowspan="2">તારીખ</th>
-                <th class="sticky-c2" rowspan="2">વાર</th>
-                <th rowspan="2">લાભાર્થી</th>
-                ${invHeads}
-              </tr>
-              <tr>${subHeads}</tr>
-            </thead>
-            <tbody>
-              ${dateRows}
-              ${totalRow}
-            </tbody>
-          </table>
-        </div>
+  const monthlyHtml='<div class="card"><div class="section-head">📊 માસિક રિપોર્ટ — ' + MONTHS_FULL[state.calM] + ' ' + state.calY + '</div><div class="cal-head"><button id="prevM">‹</button><h3>' + MONTHS_FULL[state.calM] + ' ' + state.calY + '</h3><button id="nextM">›</button></div><div class="section-body"><h4 style="color:#1a3c5e;margin-bottom:8px;font-size:14px">📅 તારીખવાર વિગત</h4><div class="table-wrap" style="max-height:550px;overflow:auto"><table style="min-width:1400px"><thead><tr><th class="sticky-c1" rowspan="2">તારીખ</th><th class="sticky-c2" rowspan="2">વાર</th><th rowspan="2">લાભાર્થી</th>' + invHeads + '</tr><tr>' + subHeads + '</tr></thead><tbody>' + dateRows + totalRow + '</tbody></table></div><h4 style="color:#1a3c5e;margin:18px 0 8px;font-size:14px">📦 ઈન્વેન્ટરી પ્રમાણે માસિક સારાંશ</h4><div class="table-wrap"><table style="min-width:820px"><thead><tr><th style="text-align:left">ઇન્વેન્ટરી નામ</th><th>સવાર લાભાર્થી</th><th>બપોર લાભાર્થી</th><th>કુલ ઊઘડતી (kg)</th><th>સવાર કુલ (g)</th><th>બપોર કુલ (g)</th><th>કુલ વપરાશ (g)</th><th>માસાંતે બચત (kg)</th></tr></thead><tbody>' + summaryRows + '</tbody></table></div></div><div class="actions"><button class="btn-print" id="btnPrint">🖨️ પ્રિન્ટ</button><button class="btn-share" id="btnShareM">📤 શેર</button></div></div>';
 
-        <h4 style="color:#1a3c5e;margin:18px 0 8px;font-size:14px">📦 ઈન્વેન્ટરી પ્રમાણે માસિક સારાંશ</h4>
-        <div class="table-wrap">
-          <table style="min-width:820px">
-            <thead><tr>
-              <th style="text-align:left">ઇન્વેન્ટરી નામ</th>
-              <th>સવાર લાભાર્થી</th>
-              <th>બપોર લાભાર્થી</th>
-              <th>કુલ ઊઘડતી (kg)</th>
-              <th>સવાર કુલ (g)</th>
-              <th>બપોર કુલ (g)</th>
-              <th>કુલ વપરાશ (g)</th>
-              <th>માસાંતે બચત (kg)</th>
-            </tr></thead>
-            <tbody>${summaryRows}</tbody>
-          </table>
-        </div>
-      </div>
-      <div class="actions">
-        <button class="btn-print" id="btnPrint">🖨️ પ્રિન્ટ</button>
-        <button class="btn-share" id="btnShareM">📤 શેર</button>
-      </div>
-    </div>`;
-
-  return `
-    <div class="container">
-      <div class="card">
-        <div class="report-tabs">
-          <button data-rpt="daily" class="${state.rptTab==='daily'?'active':''}">📅 દૈનિક</button>
-          <button data-rpt="monthly" class="${state.rptTab==='monthly'?'active':''}">📊 માસિક</button>
-        </div>
-      </div>
-      ${state.rptTab==='daily'?dailyHtml:monthlyHtml}
-      <div class="card">
-        <div class="section-body" style="display:flex;gap:8px;flex-wrap:wrap; justify-content: space-between; align-items:center;">
-          <div>
-            <button class="btn-export" style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#7c3aed" id="btnExport">💾 Backup Export</button>
-            <button class="btn-import" style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#0891b2" id="btnImport">📂 Backup Import</button>
-            <input type="file" id="fileImport" accept=".json" style="display:none">
-          </div>
-          <button id="btnLogout" style="padding:8px 14px; background:#cc3d3d; color:#fff; border:none; border-radius:6px; font-weight:700; cursor:pointer;">🚪 કેન્દ્ર બદલો (Logout)</button>
-        </div>
-      </div>
-    </div>`;
+  return '<div class="container"><div class="card"><div class="report-tabs"><button data-rpt="daily" class="' + (state.rptTab==='daily'?'active':'') + '">📅 દૈનિક</button><button data-rpt="monthly" class="' + (state.rptTab==='monthly'?'active':'') + '">📊 માસિક</button></div></div>' + (state.rptTab==='daily'?dailyHtml:monthlyHtml) + '<div class="card"><div class="section-body" style="display:flex;gap:8px;flex-wrap:wrap; justify-content: space-between; align-items:center;"><div><button class="btn-export" style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#7c3aed" id="btnExport">💾 Backup Export</button> <button class="btn-import" style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#0891b2" id="btnImport">📂 Backup Import</button><input type="file" id="fileImport" accept=".json" style="display:none"></div><button id="btnLogout" style="padding:8px 14px; background:#cc3d3d; color:#fff; border:none; border-radius:6px; font-weight:700; cursor:pointer;">🚪 કેન્દ્ર બદલો (Logout)</button></div></div></div>';
 }
 
 function renderModal(){
   if(!state.modal) return "";
   const {y,m,d}=state.modal;
   const dow=new Date(y,m,d).getDay();
-  return `
-    <div class="modal-bg" id="modalBg">
-      <div class="modal">
-        <h3>📅 ${d} ${MONTHS_FULL[m]} ${y}</h3>
-        <p>${DAYS_FULL[dow]} | ${dayHint(dow)}</p>
-        <input type="number" id="modalInput" min="0" placeholder="લાભાર્થી સંખ્યા" value="${state.modalVal}" autofocus>
-        <div class="modal-btns">
-          <button class="btn-cancel" id="modalCancel">રદ</button>
-          <button class="btn-clear" id="modalClear">સાફ</button>
-          <button class="btn-save" id="modalSave">સાચવો</button>
-        </div>
-      </div>
-    </div>`;
+  return '<div class="modal-bg" id="modalBg"><div class="modal"><h3>📅 ' + d + ' ' + MONTHS_FULL[m] + ' ' + y + '</h3><p>' + DAYS_FULL[dow] + ' | ' + dayHint(dow) + '</p><input type="number" id="modalInput" min="0" placeholder="લાભાર્થી સંખ્યા" value="' + state.modalVal + '" autofocus><div class="modal-btns"><button class="btn-cancel" id="modalCancel">રદ</button> <button class="btn-clear" id="modalClear">સાફ</button> <button class="btn-save" id="modalSave">સાચવો</button></div></div></div>';
 }
 
 function render(){
   const app=document.getElementById('app');
+  if(!app) return;
   
   if(!centerCode) {
     document.getElementById("nav").style.display = "none";
@@ -685,20 +463,20 @@ function shareReport(){
   const todayK=dkf(today.getFullYear(),today.getMonth(),today.getDate());
   const todayN=Number(state.ben[todayK]||0);
   const todayU=calcUsage(today.getDay(),todayN);
-  let txt= `🌾 My Daily Report (કેન્દ્ર: ${centerCode})\n📅 ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()}\n👥 લાભાર્થી: ${todayN}\n\n`;
+  let txt= "🌾 My Daily Report (કેન્દ્ર: " + centerCode + ")\n📅 " + today.getDate() + " " + MONTHS_FULL[today.getMonth()] + " " + today.getFullYear() + "\n👥 લાભાર્થી: " + todayN + "\n\n";
   ITEMS.forEach(it=>{
     const iv=state.inv[it.id];
-    txt+=`${it.emoji} ${it.name}: સવાર ${morU(it.id,todayU)}g | બપોર ${aftU(it.id,todayU)}g | કુલ ${todayU[it.id]}g | બંધ ${fmt(iv.o+iv.r-todayU[it.id]/1000,3)}kg\n`;
+    txt+=it.emoji + " " + it.name + ": સવાર " + morU(it.id,todayU) + "g | બપોર " + aftU(it.id,todayU) + "g | કુલ " + todayU[it.id] + "g | બંધ " + fmt(iv.o+iv.r-todayU[it.id]/1000,3) + "kg\n";
   });
   if(navigator.share){ navigator.share({title:"My Daily Report",text:txt}).catch(()=>{}); }
   else{ navigator.clipboard.writeText(txt).then(()=>alert("✅ Clipboard માં copy થયું")); }
 }
 function shareMonthly(){
   const curMU=calcMonthUsage(state.calY,state.calM,state.ben);
-  let txt=`📊 માસિક રિપોર્ટ (કેન્દ્ર: ${centerCode}) - ${MONTHS_FULL[state.calM]} ${state.calY}\n👥 કુલ લાભાર્થી: ${curMU.totalN} | દિવસ: ${curMU.days}\n\n`;
+  let txt="📊 માસિક રિપોર્ટ (કેન્દ્ર: " + centerCode + ") - " + MONTHS_FULL[state.calM] + " " + state.calY + "\n👥 કુલ લાભાર્થી: " + curMU.totalN + " | દિવસ: " + curMU.days + "\n\n";
   ITEMS.forEach(it=>{
     const iv=state.inv[it.id];
-    txt+=`${it.emoji} ${it.name}: સવાર લા.${curMU[it.id+"nM"]||0} | બપોર લા.${curMU[it.id+"nA"]||0} | કુલ ${fmt(curMU[it.id])}g | બંધ ${fmt(iv.o+iv.r-curMU[it.id]/1000,3)}kg\n`;
+    txt+=it.emoji + " " + it.name + ": સવાર લા." + (curMU[it.id+"nM"]||0) + " | બપોર લા." + (curMU[it.id+"nA"]||0) + " | કુલ " + fmt(curMU[it.id]) + "g | બંધ " + fmt(iv.o+iv.r-curMU[it.id]/1000,3) + "kg\n";
   });
   if(navigator.share){ navigator.share({title:"માસિક રિપોર્ટ",text:txt}).catch(()=>{}); }
   else{ navigator.clipboard.writeText(txt).then(()=>alert("✅ Clipboard માં copy થયું")); }
@@ -709,7 +487,7 @@ function exportBackup(){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download=`mydailyreport-${centerCode}-${new Date().toISOString().slice(0,10)}.json`;
+  a.download="mydailyreport-" + centerCode + "-" + new Date().toISOString().slice(0,10) + ".json";
   a.click();
   URL.revokeObjectURL(url);
 }

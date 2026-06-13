@@ -118,8 +118,8 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
 <div class="footer">My Daily Report © 2026 | Cloud: Google Drive 5TB</div>
 
 <script>
-// 🚨 દેવેન્દ્રભાઈ, તમારી એકદમ નવી સુધારેલી લિંક અહીં કનેક્ટ કરી દીધી છે! 🚨
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPC9KOv405883SXpO5sTD13WgYpYDC9qxaYd6o2OQnd692NKysJTKFe9P_5sTz596_/exec";
+// 🚨 દેવેન્દ્રભાઈની ઓફિશિયલ છેલ્લી ફિક્સ કરેલી વેબ એપ લિંક 🚨
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwq9PZHuOECFhpV-UeQvfvHnHvN__C3uwL-BZyQNAS5O_gSI6mku0PY8WebUj7vKSht/exec";
 
 const ITEMS=[
   {id:"ghau",name:"ઘઉં",emoji:"🌾",bg:"#fff3cd",color:"#856404"},
@@ -129,7 +129,7 @@ const ITEMS=[
   {id:"dal",name:"દાળ",emoji:"🥣",bg:"#fce4ec",color:"#880e4f"},
   {id:"chanadal",name:"ચણાદાળ",emoji:"🫛",bg:"#e0f2fe",color:"#01579b"}
 ];
-const DAYS_SHORT=["ર","સો","મં","બુ","ગુ","শુ","શ"];
+const DAYS_SHORT=["ર","સો","મં","બુ","ગુ","શુ","શ"];
 const DAYS_TBL=["રવિ","સોમ","મંગળ","બુધ","ગુરુ","શુક્ર","શનિ"];
 const DAYS_FULL=["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","ગુરુવાર","શુક્રવાર","શનિવાર"];
 const MONTHS_FULL=["જાન્યુઆરી","ફેબ્રુઆરી","માર્ચ","એપ્રિલ","મે","જૂન","જુલાઈ","ઓગસ્ટ","સપ્ટેમ્બર","ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર"];
@@ -148,13 +148,13 @@ function setStatus(msg, color="#1b8f57") {
   if(s) { s.style.display = "block"; s.innerText = msg; s.style.background = color === "#1b8f57" ? "#e8f5e9" : "#ffebee"; s.style.color = color; }
 }
 
-// ક્લાઉડ પરથી ડેટા લોડ કરવો
-async function loadCloudData() {
+// ૧. પાકો ક્લાઉડ ડેટા લોડર (JSONP બાયપાસ ટેકનિક)
+function loadCloudData() {
   if(!centerCode) return;
   setStatus("⏳ ક્લાઉડ પરથી ડેટા લોડ થઈ રહ્યો છે...", "#e67e22");
-  try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?centerCode=${encodeURIComponent(centerCode)}`);
-    const data = await res.json();
+
+  const callbackName = "jsonp_load_" + Math.round(Math.random() * 1000000);
+  window[callbackName] = function(data) {
     if (data && data.status !== "new_user" && data.status !== "error") {
       if(data.inv) state.inv = data.inv;
       if(data.ben) state.ben = data.ben;
@@ -162,41 +162,57 @@ async function loadCloudData() {
     } else {
       setStatus(`🆕 નવું કેન્દ્ર: ${centerCode} — નવો ડેટાબેઝ સેટ રેડી`);
     }
+    delete window[callbackName];
+    document.getElementById("jsonp_script_load")?.remove();
     document.getElementById("nav").style.display = "flex";
     render();
-  } catch(e) {
-    // ક્લાઉડ જો ફેલ થાય તો લોકલ ડેટા લોડ કરવો
+  };
+
+  const script = document.createElement("script");
+  script.id = "jsonp_script_load";
+  script.src = `${APPS_SCRIPT_URL}?action=load&centerCode=${encodeURIComponent(centerCode)}&callback=${callbackName}`;
+  script.onerror = function() {
     const localBackup = localStorage.getItem("mdr_backup_" + centerCode);
     if(localBackup){
       const parsed = JSON.parse(localBackup);
       state.inv = parsed.inv || state.inv;
       state.ben = parsed.ben || state.ben;
     }
-    setStatus("⚠️ ક્લાઉડ લોડિંગ સ્કીપ. લોકલ ડેટા એક્ટિવ છે.", "#cc3d3d");
+    setStatus("⚠️ ક્લાઉડ ઓફલાઇન. લોકલ બેકઅપ ડેટા એક્ટિવ છે.", "#cc3d3d");
     document.getElementById("nav").style.display = "flex";
     render();
-  }
+  };
+  document.body.appendChild(script);
 }
 
-// ક્લાઉડ અને લોકલમાં ડબલ સેવ સિક્યોરિટી લોક
-async function saveState() {
+// ૨. પાકો ક્લાઉડ ડેટા સેવર (JSONP ડાયરેક્ટ ફોલ્ડર રાઇટર)
+function saveState() {
   if(!centerCode) return;
-  setStatus("⏳ ಕ್લાઉડ પર સેવ થઈ રહ્યું છે...", "#e67e22");
+  setStatus("⏳ ક્લાઉડ પર સેવ થઈ રહ્યું છે...", "#e67e22");
   
-  // ફ્રન્ટએન્ડ બેકઅપ હંમેશાં લોક રાખીએ જેથી રીફ્રેશથી ગાયબ ન થાય
-  localStorage.setItem("mdr_backup_" + centerCode, JSON.stringify({ inv: state.inv, ben: state.ben }));
+  const payloadData = { inv: state.inv, ben: state.ben };
+  localStorage.setItem("mdr_backup_" + centerCode, JSON.stringify(payloadData));
 
-  try {
-    // ગુગલ એપ્સ સ્ક્રિપ્ટ પર પાકો ડેટા મોકલવો (no-cors વગર)
-    await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify({ centerCode: centerCode, data: { inv: state.inv, ben: state.ben } })
-    });
-    setStatus(`✅ ક્લાઉડ પર સુરક્ષિત સેવ થયું! (કેન્દ્ર: ${centerCode})`);
-  } catch(e) {
-    // સર્વર જો રિસ્પોન્સ ન આપે તો પણ બેકઅપ મોડમાં સફળ બતાવશે
-    setStatus(`✅ સિંકિંગ મોડ એક્ટિવ! (કેન્દ્ર: ${centerCode})`);
-  }
+  const stringData = encodeURIComponent(JSON.stringify(payloadData));
+  const callbackName = "jsonp_save_" + Math.round(Math.random() * 1000000);
+  
+  window[callbackName] = function(result) {
+    if(result && result.status === "success") {
+      setStatus(`✅ ક્લાઉડ ફોલ્ડરમાં ફાઈલ સેવ થઈ ગઈ! (કેન્દ્ર: ${centerCode})`);
+    } else {
+      setStatus(`❌ સેવિંગ એરર: ${result?.message || 'Unknown'}`, "#cc3d3d");
+    }
+    delete window[callbackName];
+    document.getElementById("jsonp_script_save")?.remove();
+  };
+
+  const script = document.createElement("script");
+  script.id = "jsonp_script_save";
+  script.src = `${APPS_SCRIPT_URL}?action=save&centerCode=${encodeURIComponent(centerCode)}&jsonData=${stringData}&callback=${callbackName}`;
+  script.onerror = function() {
+    setStatus("⚠️ નેટવર્ક વ્યસ્ત છે. ડેટા લોકલ ડિવાઇસમાં સુરક્ષિત છે.", "#e67e22");
+  };
+  document.body.appendChild(script);
 }
 
 function calcUsage(dow,n){
@@ -498,7 +514,7 @@ function renderReportPage(){
 
   const dailyHtml=`
     <div class="card">
-      <div class="section-head">📅 દૈનિક રિપોર્ટ — ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()} (${DAYS_FULL[today.getDay()]})</div>
+      <div class="section-head">📅 દૈનિક રિપોર્ટ — ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()}</div>
       <div class="section-body">
         <p style="font-size:12px;color:#64748b;margin-bottom:8px">આજનું ભોજન: <b>${dayHint(today.getDay())}</b> | લાભાર્થી: <b style="color:#2563a8">${todayN}</b></p>
         <div class="table-wrap">
@@ -531,7 +547,7 @@ function renderReportPage(){
         <button id="nextM">›</button>
       </div>
       <div class="section-body">
-        <h4 style="color:#1a3c5e;margin-bottom:8px;font-size:14px">📅 તારીખવાર વિગત (બધા દિવસો, રવિવાર લાલ રંગે)</h4>
+        <h4 style="color:#1a3c5e;margin-bottom:8px;font-size:14px">📅 તારીખવાર વિગત</h4>
         <div class="table-wrap" style="max-height:550px;overflow:auto">
           <table style="min-width:1400px">
             <thead>
@@ -667,7 +683,7 @@ function shareReport(){
   const todayK=dkf(today.getFullYear(),today.getMonth(),today.getDate());
   const todayN=Number(state.ben[todayK]||0);
   const todayU=calcUsage(today.getDay(),todayN);
-  let txt= `🌾 My Daily Report (કેન્દ્ર: ${centerCode})\n📅 ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()} (${DAYS_FULL[today.getDay()]})\n👥 લાભાર્થી: ${todayN}\n\n`;
+  let txt= `🌾 My Daily Report (કેન્દ્ર: ${centerCode})\n📅 ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()}\n👥 લાભાર્થી: ${todayN}\n\n`;
   ITEMS.forEach(it=>{
     const iv=state.inv[it.id];
     txt+=`${it.emoji} ${it.name}: સવાર ${morU(it.id,todayU)}g | બપોર ${aftU(it.id,todayU)}g | કુલ ${todayU[it.id]}g | બંધ ${fmt(iv.o+iv.r-todayU[it.id]/1000,3)}kg\n`;

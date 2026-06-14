@@ -178,11 +178,13 @@ async function saveState() {
   try {
     const response = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
-      mode: "no-cors", // ક્રોસ-ઓરિજિન હેન્ડલ કરવા માટે
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ centerCode: centerCode, data: { inv: state.inv, ben: state.ben } })
+      headers: { "Content-Type": "text/plain" },  // ← આ વાપરો
+      body: JSON.stringify({ centerCode, data: { inv: state.inv, ben: state.ben } })
     });
-    setStatus(`✅ ક્લાઉડ પર સુરક્ષિત સેવ થયું! (કેન્દ્ર: ${centerCode})`);
+    const result = await response.json();
+    if(result.status === "ok") {
+      setStatus(`✅ ક્લાઉડ પર સુરક્ષિત સેવ થયું! (કેન્દ્ર: ${centerCode})`);
+    }
   } catch(e) {
     setStatus("⚠️ ક્લાઉડ સેવ નિષ્ફળ! કોડ ચેક કરો.", "#cc3d3d");
   }

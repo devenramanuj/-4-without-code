@@ -87,6 +87,33 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
 .setup-box button{background:#2563a8;color:#fff;border:none;padding:10px 20px;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;width:100%;font-family:inherit;}
 /* નિયમ chart */
 .rule-chip{display:inline-block;background:#eef5fb;border:1px solid #bfd7f5;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;color:#1a3c5e;margin:2px}
+/* Admin / Log */
+.admin-gate{display:flex;align-items:center;justify-content:center;padding:40px 16px}
+.admin-gate-box{text-align:center;max-width:280px;width:100%}
+.admin-gate-box h2{color:#5b21b6;font-size:16px;margin-bottom:6px}
+.admin-gate-box p{color:#64748b;font-size:12px;margin-bottom:14px}
+.admin-pwd-input{width:100%;padding:10px;border:2px solid #d1dce8;border-radius:8px;font-size:18px;text-align:center;font-family:inherit;letter-spacing:4px;margin-bottom:8px;transition:border-color .2s}
+.admin-pwd-input:focus{outline:none;border-color:#7c3aed}
+.admin-pwd-btn{width:100%;padding:10px;background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer}
+.admin-err{color:#cc3d3d;font-size:12px;min-height:16px;margin-bottom:10px}
+.log-filter{display:flex;gap:8px;flex-wrap:wrap;padding:10px;background:#f8fafc;border-bottom:1px solid #d1dce8;align-items:center}
+.log-filter input,.log-filter select{padding:6px 10px;border:1px solid #d1dce8;border-radius:6px;font-family:inherit;font-size:12px;background:#fff;flex:1;min-width:80px}
+.log-filter button{padding:6px 12px;border:none;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;color:#fff;background:#2563a8;white-space:nowrap}
+.log-filter button.btn-refresh{background:#1b8f57}
+.log-table-wrap{overflow-x:auto;max-height:480px;overflow-y:auto}
+.log-table{width:100%;border-collapse:collapse;font-size:11px}
+.log-table th{background:#1a3c5e;color:#fff;padding:8px 6px;text-align:left;position:sticky;top:0;z-index:2;white-space:nowrap}
+.log-table td{padding:7px 6px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+.log-table tr:hover td{background:#f0f7ff}
+.log-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.log-NEW{background:#dcfce7;color:#166534}
+.log-SAVE{background:#dbeafe;color:#1e40af}
+.log-LOGIN{background:#fef9c3;color:#713f12}
+.log-LOGOUT{background:#fee2e2;color:#991b1b}
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;padding:10px}
+.stat-card{background:#f8fafc;border:1px solid #d1dce8;border-radius:8px;padding:10px;text-align:center}
+.stat-card .s-num{font-size:22px;font-weight:800;color:#5b21b6}
+.stat-card .s-lbl{font-size:11px;color:#64748b;margin-top:2px}
 @media print{
   .header,.actions,.nav,.report-tabs,.cal-head button,.sync-status{display:none !important}
   body{background:#fff}
@@ -113,6 +140,7 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
     <button data-tab="1">📅 કેલેન્ડર</button>
     <button data-tab="2">📊 માસિક</button>
     <button data-tab="3">📋 રિપોર્ટ</button>
+    <button data-tab="4">🛡️ Admin</button>
   </div>
 </div>
 <div id="syncStatus" class="sync-status" style="display:none;">☁️ ક્લાઉડ સાથે સિંક થયેલ છે</div>
@@ -122,6 +150,7 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
 <script>
 // 🚨 અહીં તમારી GOOGLE APPS SCRIPT WEB APP URL પેસ્ટ કરો 🚨
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8lLnl2FsKhLzFvUWk2IX55EHZjHEdRSTzjr8-HW6lE_sBwzV98J88zSugprmf9TO9hQ/exec";
+const ADMIN_PASSWORD = "dev@admin"; // ← Admin password અહીં બદલો
 
 const ITEMS=[
   {id:"ghau",    name:"ઘઉં",     emoji:"🌾", bg:"#fff3cd", color:"#856404"},
@@ -142,7 +171,8 @@ let state = {
   inv: JSON.parse(JSON.stringify(DEFAULT_INV)),
   ben: {},
   tab:0, calY:new Date().getFullYear(), calM:new Date().getMonth(),
-  modal:null, modalVal:"", rptTab:"daily"
+  modal:null, modalVal:"", rptTab:"daily",
+  adminUnlocked:false, logData:[], logFilter:{center:"",action:"",date:""}
 };
 
 function setStatus(msg, color="#1b8f57"){
@@ -162,6 +192,7 @@ async function loadCloudData(){
       setStatus(`☁️ કેન્દ્ર: ${centerCode} — ક્લાઉડ ડેટા એક્ટિવ`);
     } else {
       setStatus(`🆕 નવું કેન્દ્ર: ${centerCode} — નવો ડેટાબેઝ સેટ રેડી`);
+      sendLog('NEW', `નવી આંગણવાડી register: ${centerCode}`);
     }
     document.getElementById("nav").style.display="flex";
     render();
@@ -182,7 +213,7 @@ async function saveState(){
       body:JSON.stringify({centerCode,data:{inv:state.inv,ben:state.ben}})
     });
     const result=await response.json();
-    if(result.status==="ok") setStatus(`✅ ક્લાઉડ પર સુરક્ષિત સેવ થયું! (કેન્દ્ર: ${centerCode})`);
+    if(result.status==="ok"){ setStatus(`✅ ક્લાઉડ પર સુરક્ષિત સેવ થયું! (કેન્દ્ર: ${centerCode})`); sendLog('SAVE',`ડેટા સેવ — ${centerCode}`); }
   }catch(e){
     setStatus("⚠️ ક્લાઉડ સેવ નિષ્ફળ! કોડ ચેક કરો.","#cc3d3d");
   }
@@ -202,6 +233,44 @@ async function saveState(){
      શુ  (5) → ઘઉં 100g + ચણા 30g
      શ   (6) → ચોખા 50g + ચણાદાળ 30g
 ================================================================ */
+
+/* ── Log event ── */
+async function sendLog(action, details){
+  if(!APPS_SCRIPT_URL || !centerCode) return;
+  try{
+    await fetch(APPS_SCRIPT_URL, {
+      method:"POST",
+      headers:{"Content-Type":"text/plain"},
+      body:JSON.stringify({
+        action:"LOG",
+        centerCode: centerCode,
+        logAction: action,
+        logDetails: details,
+        timestamp: new Date().toISOString()
+      })
+    });
+  }catch(e){ console.warn("Log send failed",e); }
+}
+
+/* ── Fetch logs (admin only) ── */
+async function fetchLogs(){
+  setStatus("⏳ Logs લોડ થઈ રહ્યા છે...","#e67e22");
+  try{
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=getLogs`);
+    const data = await res.json();
+    if(data.logs){
+      state.logData = data.logs;
+      setStatus(`✅ ${data.logs.length} log entries મળ્યા`);
+    } else {
+      state.logData = [];
+      setStatus("⚠️ Logs ઉપલબ્ધ નથી — Apps Script અપડેટ કરો","#e67e22");
+    }
+  }catch(e){
+    state.logData = [];
+    setStatus("❌ Log fetch નિષ્ફળ","#cc3d3d");
+  }
+  render();
+}
 function calcUsage(dow,n){
   n=Number(n)||0;
   const u={};
@@ -662,6 +731,126 @@ function renderReportPage(){
     </div>`;
 }
 
+
+/* ── ADMIN LOG PAGE ── */
+function renderAdminPage(){
+  if(!state.adminUnlocked){
+    return `
+    <div class="container">
+      <div class="card">
+        <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">🛡️ Admin Panel</div>
+        <div class="admin-gate">
+          <div class="admin-gate-box">
+            <div style="font-size:48px;margin-bottom:10px">🛡️</div>
+            <h2>Admin Access</h2>
+            <p>Admin password દાખલ કરો</p>
+            <input id="adminPwdInput" type="password" class="admin-pwd-input" placeholder="• • • •" maxlength="30">
+            <div id="adminPwdErr" class="admin-err"></div>
+            <button class="admin-pwd-btn" id="adminPwdBtn">🔓 Admin Unlock</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const logs = state.logData || [];
+
+  // Apply filters
+  const fc = state.logFilter.center.toLowerCase();
+  const fa = state.logFilter.action;
+  const fd = state.logFilter.date;
+  const filtered = logs.filter(l=>{
+    if(fc && !String(l.centerCode||"").toLowerCase().includes(fc)) return false;
+    if(fa && l.action !== fa) return false;
+    if(fd && !String(l.timestamp||"").startsWith(fd)) return false;
+    return true;
+  });
+
+  // Stats
+  const uniqueCenters = [...new Set(logs.map(l=>l.centerCode).filter(Boolean))];
+  const newCount  = logs.filter(l=>l.action==="NEW").length;
+  const saveCount = logs.filter(l=>l.action==="SAVE").length;
+  const today = new Date().toISOString().slice(0,10);
+  const todayCount = logs.filter(l=>String(l.timestamp||"").startsWith(today)).length;
+
+  const statsHtml = `
+    <div class="stat-cards">
+      <div class="stat-card"><div class="s-num">${uniqueCenters.length}</div><div class="s-lbl">🏢 કુલ આંગણવાડી</div></div>
+      <div class="stat-card"><div class="s-num">${newCount}</div><div class="s-lbl">🆕 નવી નોંધણી</div></div>
+      <div class="stat-card"><div class="s-num">${saveCount}</div><div class="s-lbl">💾 Data Save</div></div>
+      <div class="stat-card"><div class="s-num">${todayCount}</div><div class="s-lbl">📅 આજ ની Activity</div></div>
+      <div class="stat-card"><div class="s-num">${logs.length}</div><div class="s-lbl">📋 કુલ Logs</div></div>
+    </div>`;
+
+  // Center list
+  const centerListHtml = uniqueCenters.length > 0 ? `
+    <div style="padding:10px 12px;background:#f0fdf4;border-top:1px solid #d1dce8">
+      <b style="font-size:12px;color:#166534">🏢 Registered Centers (${uniqueCenters.length}):</b><br>
+      <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">
+        ${uniqueCenters.map(c=>`<span style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700">${c}</span>`).join("")}
+      </div>
+    </div>` : "";
+
+  // Action options
+  const actions = [...new Set(logs.map(l=>l.action).filter(Boolean))];
+  const actionOpts = actions.map(a=>`<option value="${a}" ${state.logFilter.action===a?"selected":""}>${a}</option>`).join("");
+
+  // Table rows
+  const tableRows = filtered.length > 0 ? filtered.slice().reverse().map(l=>{
+    const ts = l.timestamp ? new Date(l.timestamp).toLocaleString('gu-IN',{timeZone:'Asia/Kolkata'}) : "—";
+    const badgeCls = `log-${l.action||"SAVE"}`;
+    return `<tr>
+      <td>${ts}</td>
+      <td><b>${l.centerCode||"—"}</b></td>
+      <td><span class="log-badge ${badgeCls}">${l.action||"—"}</span></td>
+      <td>${l.details||"—"}</td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="4" style="padding:20px;color:#94a3b8;text-align:center">— કોઈ log નથી —</td></tr>`;
+
+  return `
+    <div class="container">
+      <div class="card">
+        <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">
+          🛡️ Admin Panel — Log Viewer
+          <button id="btnAdminLock" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.35);padding:4px 10px;border-radius:6px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">🔒 Lock</button>
+        </div>
+
+        ${statsHtml}
+        ${centerListHtml}
+
+        <div class="log-filter">
+          <input id="filterCenter" type="text" placeholder="🔍 Center Code" value="${state.logFilter.center}">
+          <select id="filterAction">
+            <option value="">બધા Actions</option>
+            ${actionOpts}
+          </select>
+          <input id="filterDate" type="date" value="${state.logFilter.date}" title="Date filter">
+          <button id="btnApplyFilter">Filter</button>
+          <button class="btn-refresh" id="btnRefreshLogs">🔄 Refresh</button>
+        </div>
+
+        <div class="log-table-wrap">
+          <table class="log-table">
+            <thead><tr>
+              <th>📅 સમય</th>
+              <th>🏢 Center Code</th>
+              <th>⚡ Action</th>
+              <th>📝 વિગત</th>
+            </tr></thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </div>
+        <div style="padding:8px 12px;font-size:11px;color:#64748b;background:#f8fafc;border-top:1px solid #d1dce8">
+          ${filtered.length} / ${logs.length} entries &nbsp;|&nbsp;
+          <span class="log-badge log-NEW">NEW</span> = નવી આંગણ. &nbsp;
+          <span class="log-badge log-SAVE">SAVE</span> = ડેટા save &nbsp;
+          <span class="log-badge log-LOGIN">LOGIN</span> = Login &nbsp;
+          <span class="log-badge log-LOGOUT">LOGOUT</span> = Logout
+        </div>
+      </div>
+    </div>`;
+}
+
 /* ── MODAL ── */
 function renderModal(){
   if(!state.modal) return "";
@@ -700,6 +889,7 @@ function render(){
   else if(state.tab===1) html=renderCalendarPage();
   else if(state.tab===2) html=renderMonthlyPage(curMU);
   else if(state.tab===3) html=renderReportPage();
+  else if(state.tab===4) html=renderAdminPage();
   html+=renderModal();
   app.innerHTML=html;
   if(state.modal){
@@ -781,10 +971,34 @@ document.addEventListener('click',e=>{
     if(val===""){alert("⚠️ કેન્દ્ર કોડ નાખો!");return;}
     centerCode=val;
     localStorage.setItem("anganwadi_center_code",centerCode);
+    sendLog('LOGIN',`Login — ${centerCode}`);
     loadCloudData(); return;
+  }
+
+  // Admin events
+  if(t.id==='adminPwdBtn'){
+    const inp=document.getElementById("adminPwdInput");
+    const err=document.getElementById("adminPwdErr");
+    if(inp&&inp.value===ADMIN_PASSWORD){
+      state.adminUnlocked=true;
+      fetchLogs();
+    } else {
+      if(err) err.textContent="❌ ખોટો Admin password!";
+      if(inp){ inp.value=""; inp.focus(); }
+    }
+    return;
+  }
+  if(t.id==='btnAdminLock'){state.adminUnlocked=false;render();return;}
+  if(t.id==='btnRefreshLogs'){fetchLogs();return;}
+  if(t.id==='btnApplyFilter'){
+    state.logFilter.center=document.getElementById("filterCenter")?.value||"";
+    state.logFilter.action=document.getElementById("filterAction")?.value||"";
+    state.logFilter.date=document.getElementById("filterDate")?.value||"";
+    render(); return;
   }
   if(t.id==='btnLogout'){
     if(confirm("કેન્દ્રમાંથી logout કરવું છે?")){
+      sendLog('LOGOUT',`Logout — ${centerCode}`);
       localStorage.removeItem("anganwadi_center_code");
       centerCode="";
       state.inv=JSON.parse(JSON.stringify(DEFAULT_INV));

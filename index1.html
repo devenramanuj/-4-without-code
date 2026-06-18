@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Daily Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Gujarati',sans-serif;background:#f0f4f8;color:#1a2535;line-height:1.4}
+.container{max-width:1200px;margin:0 auto;padding:10px}
+.header{background:linear-gradient(135deg,#0f2442,#1a3c5e);color:#fff;padding:12px;position:sticky;top:0;z-index:100;box-shadow:0 3px 10px rgba(0,0,0,.3)}
+.header h1{font-size:18px;text-align:center;margin-bottom:8px}
+.nav{display:flex;gap:4px;justify-content:center;flex-wrap:wrap}
+.nav button{background:transparent;color:#cfd8e3;border:none;padding:8px 12px;font-size:13px;font-family:inherit;cursor:pointer;border-bottom:3px solid transparent;font-weight:600}
+.nav button.active{color:#f39c12;border-bottom-color:#f39c12}
+.card{background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);margin-bottom:12px;border:1px solid #d1dce8;overflow:hidden}
+.section-head{background:linear-gradient(135deg,#1a3c5e,#2563a8);color:#fff;padding:10px 14px;font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.section-body{padding:12px}
+.inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.inv-card{border:1px solid #d1dce8;border-radius:10px;padding:10px;background:#fafcff}
+.inv-title{font-weight:700;font-size:13px;margin-bottom:6px;padding:4px 8px;border-radius:14px;display:inline-block}
+.inv-row{display:flex;justify-content:space-between;align-items:center;margin:4px 0;font-size:12px}
+.inv-row label{color:#475569;font-weight:600}
+.inv-row input{width:75px;padding:4px 6px;border:1px solid #cbd5e1;border-radius:6px;font-family:inherit;text-align:right;font-size:12px}
+.inv-stat{font-size:11px;color:#64748b;margin-top:6px;padding-top:6px;border-top:1px dashed #d1dce8}
+.inv-stat b{color:#2563a8}
+.cal-head{display:flex;justify-content:space-between;align-items:center;padding:8px;gap:6px}
+.cal-head button{background:#2563a8;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700}
+.cal-head h3{font-size:15px;font-weight:700;color:#1a3c5e}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:8px}
+.cal-day-head{text-align:center;font-weight:700;font-size:12px;padding:6px 2px;background:#1a3c5e;color:#fff;border-radius:4px}
+.cal-day-head.sun{background:#cc3d3d}
+.cal-cell{aspect-ratio:1;border:1px solid #d1dce8;border-radius:6px;padding:3px;cursor:pointer;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;font-size:11px;transition:all .15s;min-height:48px;position:relative}
+.cal-cell:hover{background:#e0f2fe;border-color:#2563a8}
+.cal-cell.empty{background:transparent;border:none;cursor:default}
+.cal-cell.today{background:#fef3c7;border-color:#f59e0b;border-width:2px}
+.cal-cell .d{font-weight:700;font-size:12px;color:#1a3c5e}
+.cal-cell.sunday .d{color:#cc3d3d}
+.cal-cell .n{font-weight:800;font-size:14px;color:#1b8f57;margin-top:2px}
+.cal-cell .n.zero{color:#cbd5e1;font-size:10px}
+.cal-totals{display:flex;justify-content:space-around;background:#eef5fb;padding:8px;flex-wrap:wrap;gap:6px;border-top:1px solid #d1dce8}
+.cal-totals div{font-size:12px;text-align:center}
+.cal-totals b{color:#2563a8;display:block;font-size:14px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:500;padding:14px}
+.modal{background:#fff;border-radius:14px;padding:18px;max-width:340px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.modal h3{margin-bottom:10px;color:#1a3c5e;font-size:16px}
+.modal p{font-size:13px;color:#475569;margin-bottom:10px}
+.modal input{width:100%;padding:10px;border:2px solid #cbd5e1;border-radius:8px;font-family:inherit;font-size:18px;text-align:center;font-weight:700;margin-bottom:12px}
+.modal input:focus{outline:none;border-color:#2563a8}
+.modal-btns{display:flex;gap:8px}
+.modal-btns button{flex:1;padding:10px;border:none;border-radius:8px;font-family:inherit;font-weight:700;cursor:pointer;font-size:14px}
+.btn-save{background:#1b8f57;color:#fff}
+.btn-cancel{background:#e2e8f0;color:#475569}
+.btn-clear{background:#cc3d3d;color:#fff}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:11px}
+th{background:#1a3c5e;color:#fff;padding:8px 6px;text-align:center;border:1px solid rgba(255,255,255,.15);font-weight:700;font-size:11px;white-space:nowrap;position:sticky;top:0;z-index:2}
+td{padding:6px;text-align:center;border:1px solid #d1dce8;background:#fff;white-space:nowrap}
+tr:nth-child(even) td{background:#f8fafc}
+.sticky-c1{position:sticky;left:0;z-index:3;box-shadow:1px 0 0 #d1dce8;min-width:48px}
+.sticky-c2{position:sticky;left:48px;z-index:3;box-shadow:1px 0 0 #d1dce8;min-width:65px}
+th.sticky-c1,th.sticky-c2{z-index:5;background:#1a3c5e}
+td.sticky-c1,td.sticky-c2{background:#fff}
+tr:nth-child(even) td.sticky-c1,tr:nth-child(even) td.sticky-c2{background:#f8fafc}
+tr.sun-row td{background:#fff0f0 !important;color:#991b1b}
+tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;color:#991b1b;font-weight:700}
+.total-row td{background:#fef3c7 !important;font-weight:800;color:#92400e;border-top:2px solid #f59e0b}
+.total-row td.sticky-c1,.total-row td.sticky-c2{background:#fef3c7 !important;color:#92400e}
+.report-tabs{display:flex;gap:6px;padding:8px;background:#eef5fb;border-bottom:1px solid #d1dce8}
+.report-tabs button{flex:1;padding:8px;border:none;background:#fff;color:#475569;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer;font-size:13px;border:1px solid #d1dce8}
+.report-tabs button.active{background:#2563a8;color:#fff;border-color:#2563a8}
+.actions{display:flex;gap:6px;flex-wrap:wrap;padding:10px;background:#f8fafc;border-top:1px solid #d1dce8}
+.actions button{padding:7px 12px;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer;font-size:12px;color:#fff}
+.btn-print{background:#475569}
+.btn-share{background:#1b8f57}
+.btn-export{background:#7c3aed}
+.btn-import{background:#0891b2}
+.badge{padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block}
+.footer{text-align:center;padding:12px;color:#64748b;font-size:11px}
+.sync-status{text-align:center;padding:5px;font-size:12px;font-weight:bold;color:#1b8f57;background:#e8f5e9;}
+.setup-box{max-width:400px;margin:50px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1);border:1px solid #d1dce8;text-align:center;}
+.setup-box h2{color:#1a3c5e;margin-bottom:15px;font-size:18px;}
+.setup-box input{width:100%;padding:10px;font-size:16px;text-align:center;border:2px solid #cbd5e1;border-radius:8px;margin-bottom:15px;font-family:inherit;font-weight:700;}
+.setup-box button{background:#2563a8;color:#fff;border:none;padding:10px 20px;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;width:100%;font-family:inherit;}
+/* નિયમ chart */
+.rule-chip{display:inline-block;background:#eef5fb;border:1px solid #bfd7f5;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;color:#1a3c5e;margin:2px}
+/* Admin / Log */
+.admin-gate{display:flex;align-items:center;justify-content:center;padding:40px 16px}
+.admin-gate-box{text-align:center;max-width:280px;width:100%}
+.admin-gate-box h2{color:#5b21b6;font-size:16px;margin-bottom:6px}
+.admin-gate-box p{color:#64748b;font-size:12px;margin-bottom:14px}
+.admin-pwd-input{width:100%;padding:10px;border:2px solid #d1dce8;border-radius:8px;font-size:18px;text-align:center;font-family:inherit;letter-spacing:4px;margin-bottom:8px;transition:border-color .2s}
+.admin-pwd-input:focus{outline:none;border-color:#7c3aed}
+.admin-pwd-btn{width:100%;padding:10px;background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer}
+.admin-err{color:#cc3d3d;font-size:12px;min-height:16px;margin-bottom:10px}
+.log-filter{display:flex;gap:8px;flex-wrap:wrap;padding:10px;background:#f8fafc;border-bottom:1px solid #d1dce8;align-items:center}
+.log-filter input,.log-filter select{padding:6px 10px;border:1px solid #d1dce8;border-radius:6px;font-family:inherit;font-size:12px;background:#fff;flex:1;min-width:80px}
+.log-filter button{padding:6px 12px;border:none;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;color:#fff;background:#2563a8;white-space:nowrap}
+.log-filter button.btn-refresh{background:#1b8f57}
+.log-table-wrap{overflow-x:auto;max-height:480px;overflow-y:auto}
+.log-table{width:100%;border-collapse:collapse;font-size:11px}
+.log-table th{background:#1a3c5e;color:#fff;padding:8px 6px;text-align:left;position:sticky;top:0;z-index:2;white-space:nowrap}
+.log-table td{padding:7px 6px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+.log-table tr:hover td{background:#f0f7ff}
+.log-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.log-NEW{background:#dcfce7;color:#166534}
+.log-SAVE{background:#dbeafe;color:#1e40af}
+.log-LOGIN{background:#fef9c3;color:#713f12}
+.log-LOGOUT{background:#fee2e2;color:#991b1b}
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;padding:10px}
+.stat-card{background:#f8fafc;border:1px solid #d1dce8;border-radius:8px;padding:10px;text-align:center}
+.stat-card .s-num{font-size:22px;font-weight:800;color:#5b21b6}
+.stat-card .s-lbl{font-size:11px;color:#64748b;margin-top:2px}
+@media print{
+  .header,.actions,.nav,.report-tabs,.cal-head button,.sync-status{display:none !important}
+  body{background:#fff}
+  .card{box-shadow:none;border:1px solid #000}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  tr.sun-row td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media (max-width:600px){
+  .header h1{font-size:15px}
+  .nav button{padding:6px 8px;font-size:11px}
+  .inv-grid{grid-template-columns:repeat(2,1fr)}
+  .cal-cell{min-height:42px;font-size:10px}
+  .cal-cell .n{font-size:12px}
+  table{font-size:10px}
+  th,td{padding:5px 4px}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🌾 My Daily Report - ઈન્વેન્ટરી & ભોજન વ્યવસ્થા</h1>
+  <div class="nav" id="nav" style="display:none;">
+    <button data-tab="0" class="active">📦 ઈન્વેન્ટરી</button>
+    <button data-tab="1">📅 કેલેન્ડર</button>
+    <button data-tab="2">📊 માસિક</button>
+    <button data-tab="3">📋 રિપોર્ટ</button>
+    <button data-tab="4">🛡️ Admin</button>
+  </div>
+</div>
+<div id="syncStatus" class="sync-status" style="display:none;cursor:pointer" onclick="if(centerCode)loadCloudData()">☁️ ક્લાઉડ સાથે સિંક થયેલ છે &nbsp;🔄</div>
+<div id="app"></div>
+<div class="footer">My Daily Report © 2026 | Cloud: Google Drive | Devendra Ramanuj 9276505035</div>
+
+<script>
+// 🚨 અહીં તમારી GOOGLE APPS SCRIPT WEB APP URL પેસ્ટ કરો 🚨
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8lLnl2FsKhLzFvUWk2IX55EHZjHEdRSTzjr8-HW6lE_sBwzV98J88zSugprmf9TO9hQ/exec";
+const ADMIN_PASSWORD = "dev@admin"; // ← Admin password અહીં બદલો
+
+const ITEMS=[
+  {id:"ghau",    name:"ઘઉં",     emoji:"🌾", bg:"#fff3cd", color:"#856404"},
+  {id:"chokha",  name:"ચોખા",    emoji:"🍚", bg:"#d1e7dd", color:"#0a3622"},
+  {id:"tel",     name:"તેલ",     emoji:"🫙", bg:"#ffe0b2", color:"#e65100"},
+  {id:"chana",   name:"ચણા",     emoji:"🫘", bg:"#e8d5f5", color:"#5b21b6"},
+  {id:"dal",     name:"દાળ",     emoji:"🥣", bg:"#fce4ec", color:"#880e4f"},
+  {id:"chanadal",name:"ચણાદાળ", emoji:"🫛", bg:"#e0f2fe", color:"#01579b"}
+];
+const DAYS_SHORT=["ર","સો","મં","બુ","ગુ","શુ","શ"];
+const DAYS_TBL  =["રવિ","સોમ","મંગળ","બુધ","ગુ","શુ","શ"];
+const DAYS_FULL =["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","ગુરુવાર","શુક્રવાર","શનિવાર"];
+const MONTHS_FULL=["જાન્યુઆરી","ફેબ્રુઆરી","માર્ચ","એપ્રિલ","મે","જૂન","જુલાઈ","ઓગસ્ટ","સપ્ટેમ્બર","ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર"];
+const DEFAULT_INV={ghau:{o:500,r:200},chokha:{o:300,r:100},tel:{o:50,r:20},chana:{o:80,r:30},dal:{o:80,r:30},chanadal:{o:80,r:30}};
+
+let centerCode = localStorage.getItem("anganwadi_center_code") || "";
+let state = {
+  inv: JSON.parse(JSON.stringify(DEFAULT_INV)),
+  ben: {},
+  tab:0, calY:new Date().getFullYear(), calM:new Date().getMonth(),
+  modal:null, modalVal:"", rptTab:"daily",
+  adminUnlocked:false, logData:[], logFilter:{center:"",action:"",date:""}
+};
+
+function setStatus(msg, color="#1b8f57"){
+  const s=document.getElementById("syncStatus");
+  if(s){s.style.display="block";s.innerText=msg;s.style.background=color==="#1b8f57"?"#e8f5e9":"#ffebee";s.style.color=color;}
+}
+
+async function loadCloudData(){
+  if(!centerCode) return;
+  // URL check
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.trim()==="" || APPS_SCRIPT_URL.includes("YOUR_URL")){
+    setStatus("⚠️ Apps Script URL સેટ નથી — Offline mode","#e67e22");
+    loadLocalFallback(); return;
+  }
+  setStatus("⏳ ક્લાઉડ કનેક્ટ થઈ રહ્યું છે...","#e67e22");
+  try{
+    const controller = new AbortController();
+    const timeout = setTimeout(()=>controller.abort(), 10000); // 10 sec timeout
+    const res = await fetch(
+      `${APPS_SCRIPT_URL}?centerCode=${encodeURIComponent(centerCode)}`,
+      { signal: controller.signal }
+    );
+    clearTimeout(timeout);
+    if(!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+    const data = await res.json();
+    if(data && data.status!=="new_user" && data.status!=="error"){
+      if(data.inv) state.inv=data.inv;
+      if(data.ben) state.ben=data.ben;
+      // local backup
+      localStorage.setItem("mdr_offline_"+centerCode, JSON.stringify({inv:state.inv,ben:state.ben}));
+      setStatus(`☁️ કેન્દ્ર: ${centerCode} — ક્લાઉડ ડેટા એક્ટિવ`);
+    } else if(data.status==="new_user"){
+      setStatus(`🆕 નવું કેન્દ્ર: ${centerCode} — નવો ડેટા શરૂ`);
+      sendLog("NEW", `નવી આંગણવાડી: ${centerCode}`);
+    } else {
+      throw new Error(data.msg || "unknown error");
+    }
+    document.getElementById("nav").style.display="flex";
+    render();
+  } catch(e){
+    let errMsg = e.message || e.toString();
+    if(e.name==="AbortError") errMsg = "Timeout — 10 સેકન્ડ માં response નહીં";
+    // Try offline fallback
+    const offlineData = localStorage.getItem("mdr_offline_"+centerCode);
+    if(offlineData){
+      try{
+        const d = JSON.parse(offlineData);
+        if(d.inv) state.inv=d.inv;
+        if(d.ben) state.ben=d.ben;
+        setStatus(`⚠️ Offline mode — છેલ્લો local ડેટા વપરાય છે | Error: ${errMsg}`, "#e67e22");
+      }catch(_){
+        setStatus(`❌ Connection fail: ${errMsg}`, "#cc3d3d");
+      }
+    } else {
+      setStatus(`❌ Connection fail: ${errMsg} | Retry માટે 🔄 દબાવો`, "#cc3d3d");
+    }
+    document.getElementById("nav").style.display="flex";
+    render();
+  }
+}
+
+function loadLocalFallback(){
+  const offlineData = localStorage.getItem("mdr_offline_"+centerCode);
+  if(offlineData){
+    try{
+      const d=JSON.parse(offlineData);
+      if(d.inv) state.inv=d.inv;
+      if(d.ben) state.ben=d.ben;
+    }catch(_){}
+  }
+  document.getElementById("nav").style.display="flex";
+  render();
+}
+async function saveState(){
+  if(!centerCode) return;
+  // Always save locally first
+  localStorage.setItem("mdr_offline_"+centerCode, JSON.stringify({inv:state.inv,ben:state.ben}));
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.trim()===""){
+    setStatus("💾 Local save OK (Cloud URL નથી)","#e67e22"); return;
+  }
+  setStatus("⏳ ક્લાઉડ પર સેવ થઈ રહ્યું છે...","#e67e22");
+  try{
+    const controller = new AbortController();
+    const timeout = setTimeout(()=>controller.abort(), 10000);
+    const response = await fetch(APPS_SCRIPT_URL,{
+      method:"POST",
+      headers:{"Content-Type":"text/plain"},
+      body:JSON.stringify({centerCode, data:{inv:state.inv, ben:state.ben}}),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    const result = await response.json();
+    if(result.status==="ok"){
+      setStatus(`✅ Cloud + Local — બંને save! (${centerCode})`);
+      sendLog("SAVE", `ડેટા save — ${centerCode}`);
+    } else {
+      setStatus(`⚠️ Cloud error: ${result.msg||"unknown"} | Local save OK`,"#e67e22");
+    }
+  }catch(e){
+    const msg = e.name==="AbortError" ? "Timeout" : e.message;
+    setStatus(`⚠️ Cloud save fail: ${msg} | Local backup OK`,"#e67e22");
+  }
+}
+
+/* ── Log event — Apps Script ને log entry મોકલો ── */
+async function sendLog(action, details){
+  if(!APPS_SCRIPT_URL || !centerCode) return;
+  try{
+    await fetch(APPS_SCRIPT_URL, {
+      method:"POST",
+      headers:{"Content-Type":"text/plain"},
+      body:JSON.stringify({
+        action      : "LOG",
+        centerCode  : centerCode,
+        logAction   : action,
+        logDetails  : details,
+        timestamp   : new Date().toISOString()
+      })
+    });
+  }catch(e){ console.warn("Log send failed", e); }
+}
+
+/* ── Fetch logs — Admin panel માટે ── */
+async function fetchLogs(){
+  setStatus("⏳ Logs લોડ થઈ રહ્યા છે...","#e67e22");
+  try{
+    const res  = await fetch(`${APPS_SCRIPT_URL}?action=getLogs`);
+    const data = await res.json();
+    if(data.logs){
+      state.logData = data.logs;
+      setStatus(`✅ ${data.logs.length} log entries મળ્યા`);
+    } else {
+      state.logData = [];
+      setStatus("⚠️ Logs ઉપલબ્ધ નથી — Apps Script અપડેટ કરો","#e67e22");
+    }
+  }catch(e){
+    state.logData = [];
+    setStatus("❌ Log fetch નિષ્ફળ","#cc3d3d");
+  }
+  render();
+}
+
+/* ================================================================
+   USAGE RULES — અપડેટ કરેલ નિયમ
+   ─────────────────────────────────────────────────────────
+   સવાર:
+     ઘઉં  30g  — સોમ(1), બુધ(3), ગુ(4), શુ(5), શ(6)
+                 [મંગ(2) અને રવિ(0) — ઘઉં નહીં]
+     ચોખા 30g  — ફક્ત મંગળ(2)
+     તેલ   5g  — દરરોજ
+   ─────────────────────────────────────────────────────────
+   બપોર:
+     તેલ   8g  — દરરોજ
+     રવિ (0) → દાળ 30g
+     સોમ (1) → ઘઉં 50g + દાળ 30g
+     મંગ (2) → ઘઉં 50g + ચણા 30g
+     બુધ (3) → ચોખા 50g + ચણાદાળ 30g
+     ગુ  (4) → ચોખા 50g + દાળ 30g
+     શુ  (5) → ઘઉં 50g + ચણા 30g
+     શ   (6) → ચોખા 50g + ચણાદાળ 30g
+================================================================ */
+function calcUsage(dow,n){
+  n=Number(n)||0;
+  const u={};
+  ITEMS.forEach(it=>{
+    u[it.id]=0; u[it.id+"M"]=0; u[it.id+"A"]=0;
+    u[it.id+"nM"]=0; u[it.id+"nA"]=0;
+  });
+  if(n<=0) return u;
+
+  // ── સવાર ──
+  // ઘઉં: સોમ(1), બુધ(3), ગુ(4), શુ(5), શ(6) → 30g
+  if(dow===1||dow===3||dow===4||dow===5||dow===6){
+    u.ghauM=30*n; u.ghaunM=n;
+  }
+  // ચોખા: ફક્ત મંગળ(2) → 30g
+  if(dow===2){
+    u.chokhaM=30*n; u.chokhanM=n;
+  }
+  // તેલ: દરરોજ 5g
+  u.telM=5*n; u.telnM=n;
+
+  // ── બપોર ──
+  // તેલ: દરરોજ 8g
+  u.telA=8*n; u.telnA=n;
+
+  if(dow===0){                         // રવિ — ઘઉં નહીં
+    u.dalA=30*n;       u.dalnA=n;
+  } else if(dow===1){                  // સોમ — ઘઉં 50g + દાળ 30g
+    u.ghauA=50*n;      u.ghaunA=n;
+    u.dalA=30*n;       u.dalnA=n;
+  } else if(dow===2){                  // મંગ — ઘઉં 50g + ચણા 30g
+    u.ghauA=50*n;      u.ghaunA=n;
+    u.chanaA=30*n;     u.chananA=n;
+  } else if(dow===3){                  // બુધ — ચોખા 50g + ચણાદાળ 30g
+    u.chokhaA=50*n;    u.chokhanA=n;
+    u.chanadalA=30*n;  u.chanadalnA=n;
+  } else if(dow===4){                  // ગુ — ચોખા 50g + દાળ 30g
+    u.chokhaA=50*n;    u.chokhanA=n;
+    u.dalA=30*n;       u.dalnA=n;
+  } else if(dow===5){                  // શુ — ઘઉં 50g + ચણા 30g
+    u.ghauA=50*n;      u.ghaunA=n;
+    u.chanaA=30*n;     u.chananA=n;
+  } else if(dow===6){                  // શ — ચોખા 50g + ચણાદાળ 30g
+    u.chokhaA=50*n;    u.chokhanA=n;
+    u.chanadalA=30*n;  u.chanadalnA=n;
+  }
+
+  ITEMS.forEach(it=>{ u[it.id]=u[it.id+"M"]+u[it.id+"A"]; });
+  return u;
+}
+function morU(id,u){return u[id+"M"]||0}
+function aftU(id,u){return u[id+"A"]||0}
+
+function dayHint(d){
+  const hints={
+    0:"સ: — (ઘઉં નહીં) | બ: દાળ30g+તેલ",
+    1:"સ: ઘઉં30g+તેલ | બ: ઘઉં50g+દાળ30g+તેલ",
+    2:"સ: ચોખા30g+તેલ | બ: ઘઉં50g+ચણા30g+તેલ",
+    3:"સ: ઘઉં30g+તેલ | બ: ચોખા50g+ચણાદાળ30g+તેલ",
+    4:"સ: ઘઉં30g+તેલ | બ: ચોખા50g+દાળ30g+તેલ",
+    5:"સ: ઘઉં30g+તેલ | બ: ઘઉં50g+ચણા30g+તેલ",
+    6:"સ: ઘઉં30g+તેલ | બ: ચોખા50g+ચણાદાળ30g+તેલ"
+  };
+  return hints[d]||"";
+}
+
+function dkf(y,m,d){return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;}
+
+function calcMonthUsage(y,m,ben){
+  const total={totalN:0,days:0};
+  ITEMS.forEach(it=>{
+    total[it.id]=0; total[it.id+"M"]=0; total[it.id+"A"]=0;
+    total[it.id+"nM"]=0; total[it.id+"nA"]=0;
+  });
+  const dim=new Date(y,m+1,0).getDate();
+  for(let d=1;d<=dim;d++){
+    const k=dkf(y,m,d);
+    const n=Number(ben[k]||0);
+    if(n>0){
+      const dow=new Date(y,m,d).getDay();
+      const u=calcUsage(dow,n);
+      ITEMS.forEach(it=>{
+        total[it.id]    +=u[it.id];
+        total[it.id+"M"]+=u[it.id+"M"];
+        total[it.id+"A"]+=u[it.id+"A"];
+        total[it.id+"nM"]+=u[it.id+"nM"];
+        total[it.id+"nA"]+=u[it.id+"nA"];
+      });
+      total.totalN+=n;
+      total.days++;
+    }
+  }
+  return total;
+}
+
+function fmt(n,d=0){if(n==null||isNaN(n))return"0";return Number(n).toFixed(d)}
+
+/* ── SETUP PAGE ── */
+function renderSetupPage(){
+  return `
+    <div class="setup-box">
+      <h2>🏢 આંગણવાડી કેન્દ્ર લોગિન</h2>
+      <p style="font-size:13px;color:#64748b;margin-bottom:15px;">તમારો ડેટા અલગ રાખવા માટે કેન્દ્રનો કોડ અથવા મોબાઈલ નંબર નાખો.</p>
+      <input type="text" id="centerCodeInput" placeholder="દા.ત. AW-101 અથવા નંબર" value="${centerCode}">
+      <button id="btnSubmitSetup">એપ શરૂ કરો ➔</button>
+    </div>`;
+}
+
+/* ── INVENTORY PAGE ── */
+function renderInventoryPage(curMU){
+  let cards="";
+  ITEMS.forEach(it=>{
+    const iv=state.inv[it.id];
+    const opening=iv.o+iv.r;
+    const used=(curMU[it.id]||0)/1000;
+    const closing=opening-used;
+    cards+=`
+      <div class="inv-card">
+        <div class="inv-title" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</div>
+        <div class="inv-row"><label>ઊઘડતી (kg):</label><input type="number" step="0.001" data-inv="${it.id}" data-field="o" value="${iv.o}"></div>
+        <div class="inv-row"><label>આવક (kg):</label><input type="number" step="0.001" data-inv="${it.id}" data-field="r" value="${iv.r}"></div>
+        <div class="inv-stat">
+          કુલ ઊઘડતી: <b>${fmt(opening,3)}</b> kg<br>
+          વપરાશ: <b style="color:#e67e22">${fmt(used,3)}</b> kg<br>
+          બંધ સિલક: <b style="color:#1b8f57">${fmt(closing,3)}</b> kg
+        </div>
+      </div>`;
+  });
+  return `
+    <div class="container">
+      <div class="card">
+        <div class="section-head">
+          📦 ઈન્વેન્ટરી (${MONTHS_FULL[state.calM]} ${state.calY})
+          <span style="font-size:11px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:8px;">કોડ: ${centerCode}</span>
+        </div>
+        <div class="section-body"><div class="inv-grid">${cards}</div></div>
+      </div>
+
+      <div class="card">
+        <div class="section-head" style="font-size:12px">📋 ભોજન નિયમ (અપડેટ)</div>
+        <div class="section-body" style="font-size:11px;line-height:2">
+          <b>સવાર:</b> ઘઉં 30g (સોમ/બુધ/ગુ/શુ/શ) | ચોખા 30g (ફક્ત મંગળ) | તેલ 5g<br>
+          <b>સવાર (રવિ+મંગ):</b> ઘઉં નહીં<br>
+          <b>બપોર તેલ:</b> 8g (દરરોજ) +
+          <span class="rule-chip">રવિ: દાળ30</span>
+          <span class="rule-chip">સોમ: ઘઉં30સ+ઘઉં50બ+દાળ30</span>
+          <span class="rule-chip">મંગ: ચોખા30સ+ઘઉં50બ+ચણા30</span>
+          <span class="rule-chip">બુધ: ઘઉં30સ+ચોખા50બ+ચણાદાળ30</span>
+          <span class="rule-chip">ગુ: ઘઉં30સ+ચોખા50બ+દાળ30</span>
+          <span class="rule-chip">શુ: ઘઉં30સ+ઘઉં50બ+ચણા30</span>
+          <span class="rule-chip">શ: ઘઉં30સ+ચોખા50બ+ચણાદાળ30</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── CALENDAR PAGE ── */
+function renderCalendarPage(){
+  const y=state.calY, m=state.calM;
+  const first=new Date(y,m,1).getDay();
+  const dim=new Date(y,m+1,0).getDate();
+  const today=new Date();
+  let cells="";
+  for(let i=0;i<first;i++) cells+=`<div class="cal-cell empty"></div>`;
+  let monthN=0, monthD=0;
+  for(let d=1;d<=dim;d++){
+    const k=dkf(y,m,d);
+    const n=Number(state.ben[k]||0);
+    const dow=new Date(y,m,d).getDay();
+    const isToday=(d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear());
+    if(n>0){monthN+=n;monthD++;}
+    cells+=`
+      <div class="cal-cell ${dow===0?'sunday':''} ${isToday?'today':''}" data-day="${d}">
+        <div class="d">${d}</div>
+        <div class="n ${n===0?'zero':''}">${n>0?n:'—'}</div>
+      </div>`;
+  }
+  let heads="";
+  DAYS_SHORT.forEach((d,i)=>{ heads+=`<div class="cal-day-head ${i===0?'sun':''}">${d}</div>`; });
+  return `
+    <div class="container">
+      <div class="card">
+        <div class="section-head">📅 કેલેન્ડર</div>
+        <div class="cal-head">
+          <button id="prevM">‹</button>
+          <h3>${MONTHS_FULL[m]} ${y}</h3>
+          <button id="nextM">›</button>
+        </div>
+        <div class="cal-grid">${heads}${cells}</div>
+        <div class="cal-totals">
+          <div>કુલ દિવસ<b>${monthD}</b></div>
+          <div>કુલ લાભાર્થી<b>${monthN}</b></div>
+          <div>સરેરાશ/દિવસ<b>${monthD?fmt(monthN/monthD,1):0}</b></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── MONTHLY PAGE ── */
+function renderMonthlyPage(curMU){
+  let rows="";
+  ITEMS.forEach(it=>{
+    const iv=state.inv[it.id];
+    const opening=iv.o+iv.r;
+    const mor=(curMU[it.id+"M"]||0);
+    const aft=(curMU[it.id+"A"]||0);
+    const tot=(curMU[it.id]||0);
+    const closing=opening-tot/1000;
+    rows+=`
+      <tr>
+        <td style="text-align:left"><span class="badge" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</span></td>
+        <td><b>${curMU[it.id+"nM"]||0}</b></td>
+        <td><b>${curMU[it.id+"nA"]||0}</b></td>
+        <td style="color:#2980b9;font-weight:700">${fmt(opening,3)}</td>
+        <td>${fmt(mor)}</td>
+        <td>${fmt(aft)}</td>
+        <td style="color:#e67e22;font-weight:700">${fmt(tot)}</td>
+        <td style="color:#1b8f57;font-weight:700">${fmt(closing,3)}</td>
+      </tr>`;
+  });
+  return `
+    <div class="container">
+      <div class="card">
+        <div class="section-head">📊 માસિક સારાંશ - ${MONTHS_FULL[state.calM]} ${state.calY}</div>
+        <div class="cal-head">
+          <button id="prevM">‹</button>
+          <h3>${MONTHS_FULL[state.calM]} ${state.calY}</h3>
+          <button id="nextM">›</button>
+        </div>
+        <div class="cal-totals">
+          <div>કુલ દિવસ<b>${curMU.days}</b></div>
+          <div>કુલ લાભાર્થી<b>${curMU.totalN}</b></div>
+          <div>સરેરાશ/દિવસ<b>${curMU.days?fmt(curMU.totalN/curMU.days,1):0}</b></div>
+        </div>
+        <div class="table-wrap">
+          <table style="min-width:800px">
+            <thead><tr>
+              <th style="text-align:left">ઇન્વેન્ટરી</th>
+              <th>સવાર લાભાર્થી</th>
+              <th>બપોર લાભાર્થી</th>
+              <th>કુલ ઊઘડતી (kg)</th>
+              <th>સવાર વપરાશ (g)</th>
+              <th>બપોર વપરાશ (g)</th>
+              <th>કુલ વપરાશ (g)</th>
+              <th>બંધ સિલક (kg)</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── REPORT PAGE ── */
+function renderReportPage(){
+  const today=new Date();
+  const todayK=dkf(today.getFullYear(),today.getMonth(),today.getDate());
+  const todayN=Number(state.ben[todayK]||0);
+  const todayU=calcUsage(today.getDay(),todayN);
+  const curMU=calcMonthUsage(state.calY,state.calM,state.ben);
+
+  /* ── Daily ── */
+  let dailyRows="";
+  ITEMS.forEach(it=>{
+    const iv=state.inv[it.id];
+    const opening=iv.o+iv.r;
+    const mor=morU(it.id,todayU);
+    const aft=aftU(it.id,todayU);
+    const tot=todayU[it.id]||0;
+    const closing=opening-tot/1000;
+    dailyRows+=`
+      <tr>
+        <td style="text-align:left"><span class="badge" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</span></td>
+        <td style="color:#2563a8;font-weight:700">${todayN}</td>
+        <td style="color:#2980b9;font-weight:700">${fmt(opening,3)}</td>
+        <td>${mor||"—"}</td>
+        <td>${aft||"—"}</td>
+        <td style="color:#e67e22;font-weight:700">${tot||"—"}</td>
+        <td style="color:#1b8f57;font-weight:700">${fmt(closing,3)}</td>
+      </tr>`;
+  });
+
+  /* ── Monthly date-wise ── */
+  const runningBal={};
+  ITEMS.forEach(it=>{ runningBal[it.id]=state.inv[it.id].o+state.inv[it.id].r; });
+  const totals={n:0};
+  ITEMS.forEach(it=>{ totals[it.id+"M"]=0; totals[it.id+"A"]=0; totals[it.id]=0; });
+
+  let dateRows="";
+  const dim=new Date(state.calY,state.calM+1,0).getDate();
+  for(let d=1;d<=dim;d++){
+    const k=dkf(state.calY,state.calM,d);
+    const n=Number(state.ben[k]||0);
+    const dow=new Date(state.calY,state.calM,d).getDay();
+    const isSun=(dow===0);
+    const u=calcUsage(dow,n);
+    totals.n+=n;
+    let cols="";
+    ITEMS.forEach(it=>{
+      const mg=u[it.id+"M"]||0;
+      const ag=u[it.id+"A"]||0;
+      const t=u[it.id]||0;
+      runningBal[it.id]-=t/1000;
+      totals[it.id+"M"]+=mg;
+      totals[it.id+"A"]+=ag;
+      totals[it.id]+=t;
+      cols+=`
+        <td>${mg||"—"}</td>
+        <td>${ag||"—"}</td>
+        <td style="font-weight:700;color:${t?'#e67e22':'#cbd5e1'}">${t||"—"}</td>
+        <td style="font-weight:700;color:#1b8f57">${fmt(runningBal[it.id],3)}</td>`;
+    });
+    dateRows+=`<tr class="${isSun?'sun-row':''}">
+      <td class="sticky-c1"><b>${d}</b></td>
+      <td class="sticky-c2">${DAYS_TBL[dow]}</td>
+      <td style="${n>0?'color:#2563a8;font-weight:700':'color:#cbd5e1'}">${n||"—"}</td>
+      ${cols}
+    </tr>`;
+  }
+
+  let totalCols="";
+  ITEMS.forEach(it=>{
+    totalCols+=`
+      <td>${fmt(totals[it.id+"M"])}</td>
+      <td>${fmt(totals[it.id+"A"])}</td>
+      <td>${fmt(totals[it.id])}</td>
+      <td>${fmt(runningBal[it.id],3)}</td>`;
+  });
+  const totalRow=`
+    <tr class="total-row">
+      <td class="sticky-c1" colspan="2"><b>કુલ ટોટલ</b></td>
+      <td>${totals.n}</td>
+      ${totalCols}
+    </tr>`;
+
+  let invHeads="";
+  ITEMS.forEach(it=>{ invHeads+=`<th colspan="4" style="background:${it.color}">${it.emoji} ${it.name}</th>`; });
+  let subHeads="";
+  ITEMS.forEach(()=>{ subHeads+=`<th>સ.વ.(g)</th><th>બ.વ.(g)</th><th>કુલ(g)</th><th>સિલક(kg)</th>`; });
+
+  /* ── Summary ── */
+  let summaryRows="";
+  ITEMS.forEach(it=>{
+    const iv=state.inv[it.id];
+    const opening=iv.o+iv.r;
+    const morN=curMU[it.id+"nM"]||0;
+    const aftN=curMU[it.id+"nA"]||0;
+    const mor=curMU[it.id+"M"]||0;
+    const aft=curMU[it.id+"A"]||0;
+    const tot=curMU[it.id]||0;
+    const closing=opening-tot/1000;
+    summaryRows+=`
+      <tr>
+        <td style="text-align:left"><span class="badge" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</span></td>
+        <td><b style="color:#2563a8">${morN}</b></td>
+        <td><b style="color:#7c3aed">${aftN}</b></td>
+        <td style="color:#2980b9;font-weight:700">${fmt(opening,3)}</td>
+        <td>${fmt(mor)}</td>
+        <td>${fmt(aft)}</td>
+        <td style="color:#e67e22;font-weight:700">${fmt(tot)}</td>
+        <td style="color:#1b8f57;font-weight:700">${fmt(closing,3)}</td>
+      </tr>`;
+  });
+
+  const dailyHtml=`
+    <div class="card">
+      <div class="section-head">📅 દૈનિક રિપોર્ટ — ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()} (${DAYS_FULL[today.getDay()]})</div>
+      <div class="section-body">
+        <p style="font-size:12px;color:#64748b;margin-bottom:8px">
+          આજનું ભોજન: <b>${dayHint(today.getDay())}</b> | લાભાર્થી: <b style="color:#2563a8">${todayN}</b>
+        </p>
+        <div class="table-wrap">
+          <table style="min-width:720px">
+            <thead><tr>
+              <th style="text-align:left">ઇન્વેન્ટરી</th>
+              <th>લાભાર્થી</th>
+              <th>ઊઘડતી (kg)</th>
+              <th>સ. વપરાશ (g)</th>
+              <th>બ. વપરાશ (g)</th>
+              <th>કુલ (g)</th>
+              <th>બંધ સિલક (kg)</th>
+            </tr></thead>
+            <tbody>${dailyRows}</tbody>
+          </table>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-print" id="btnPrint">🖨️ પ્રિન્ટ</button>
+        <button class="btn-share" id="btnShare">📤 શેર</button>
+      </div>
+    </div>`;
+
+  const monthlyHtml=`
+    <div class="card">
+      <div class="section-head">📊 માસિક રિપોર્ટ — ${MONTHS_FULL[state.calM]} ${state.calY}</div>
+      <div class="cal-head">
+        <button id="prevM">‹</button>
+        <h3>${MONTHS_FULL[state.calM]} ${state.calY}</h3>
+        <button id="nextM">›</button>
+      </div>
+      <div class="section-body">
+        <h4 style="color:#1a3c5e;margin-bottom:8px;font-size:13px">📅 તારીખવાર વિગત (🟥 રવિવાર)</h4>
+        <div class="table-wrap" style="max-height:550px;overflow:auto">
+          <table style="min-width:1400px">
+            <thead>
+              <tr>
+                <th class="sticky-c1" rowspan="2">તારીખ</th>
+                <th class="sticky-c2" rowspan="2">વાર</th>
+                <th rowspan="2">લા.</th>
+                ${invHeads}
+              </tr>
+              <tr>${subHeads}</tr>
+            </thead>
+            <tbody>${dateRows}${totalRow}</tbody>
+          </table>
+        </div>
+
+        <h4 style="color:#1a3c5e;margin:18px 0 8px;font-size:13px">📦 ઈન્વેન્ટરી માસિક સારાંશ</h4>
+        <div class="table-wrap">
+          <table style="min-width:820px">
+            <thead><tr>
+              <th style="text-align:left">ઇન્વેન્ટરી</th>
+              <th>સ. લાભાર્થી</th>
+              <th>બ. લાભાર્થી</th>
+              <th>ઊઘડતી (kg)</th>
+              <th>સ. વپ. (g)</th>
+              <th>બ. વ. (g)</th>
+              <th>કુલ (g)</th>
+              <th>બચત (kg)</th>
+            </tr></thead>
+            <tbody>${summaryRows}</tbody>
+          </table>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-print" id="btnPrint">🖨️ પ્રિન્ટ</button>
+        <button class="btn-share" id="btnShareM">📤 શેર</button>
+      </div>
+    </div>`;
+
+  return `
+    <div class="container">
+      <div class="card">
+        <div class="report-tabs">
+          <button data-rpt="daily"   class="${state.rptTab==='daily'?'active':''}">📅 દૈનિક</button>
+          <button data-rpt="monthly" class="${state.rptTab==='monthly'?'active':''}">📊 માસિક</button>
+        </div>
+      </div>
+      ${state.rptTab==='daily'?dailyHtml:monthlyHtml}
+      <div class="card">
+        <div class="section-body" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center;">
+          <div>
+            <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#7c3aed" id="btnExport">💾 Export</button>
+            <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#0891b2" id="btnImport">📂 Import</button>
+            <input type="file" id="fileImport" accept=".json" style="display:none">
+          </div>
+          <button id="btnLogout" style="padding:8px 14px;background:#cc3d3d;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer;">🚪 કેન્દ્ર બદલો</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+
+/* ── ADMIN LOG PAGE ── */
+function renderAdminPage(){
+  if(!state.adminUnlocked){
+    return `
+    <div class="container">
+      <div class="card">
+        <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">🛡️ Admin Panel</div>
+        <div class="admin-gate">
+          <div class="admin-gate-box">
+            <div style="font-size:48px;margin-bottom:10px">🛡️</div>
+            <h2>Admin Access</h2>
+            <p>Admin password દાખલ કરો</p>
+            <input id="adminPwdInput" type="password" class="admin-pwd-input" placeholder="• • • •" maxlength="30">
+            <div id="adminPwdErr" class="admin-err"></div>
+            <button class="admin-pwd-btn" id="adminPwdBtn">🔓 Admin Unlock</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const logs = state.logData || [];
+
+  // Apply filters
+  const fc = state.logFilter.center.toLowerCase();
+  const fa = state.logFilter.action;
+  const fd = state.logFilter.date;
+  const filtered = logs.filter(l=>{
+    if(fc && !String(l.centerCode||"").toLowerCase().includes(fc)) return false;
+    if(fa && l.action !== fa) return false;
+    if(fd && !String(l.timestamp||"").startsWith(fd)) return false;
+    return true;
+  });
+
+  // Stats
+  const uniqueCenters = [...new Set(logs.map(l=>l.centerCode).filter(Boolean))];
+  const newCount  = logs.filter(l=>l.action==="NEW").length;
+  const saveCount = logs.filter(l=>l.action==="SAVE").length;
+  const today = new Date().toISOString().slice(0,10);
+  const todayCount = logs.filter(l=>String(l.timestamp||"").startsWith(today)).length;
+
+  const statsHtml = `
+    <div class="stat-cards">
+      <div class="stat-card"><div class="s-num">${uniqueCenters.length}</div><div class="s-lbl">🏢 કુલ આંગણવાડી</div></div>
+      <div class="stat-card"><div class="s-num">${newCount}</div><div class="s-lbl">🆕 નવી નોંધણી</div></div>
+      <div class="stat-card"><div class="s-num">${saveCount}</div><div class="s-lbl">💾 Data Save</div></div>
+      <div class="stat-card"><div class="s-num">${todayCount}</div><div class="s-lbl">📅 આજ ની Activity</div></div>
+      <div class="stat-card"><div class="s-num">${logs.length}</div><div class="s-lbl">📋 કુલ Logs</div></div>
+    </div>`;
+
+  // Center list
+  const centerListHtml = uniqueCenters.length > 0 ? `
+    <div style="padding:10px 12px;background:#f0fdf4;border-top:1px solid #d1dce8">
+      <b style="font-size:12px;color:#166534">🏢 Registered Centers (${uniqueCenters.length}):</b><br>
+      <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">
+        ${uniqueCenters.map(c=>`<span style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700">${c}</span>`).join("")}
+      </div>
+    </div>` : "";
+
+  // Action options
+  const actions = [...new Set(logs.map(l=>l.action).filter(Boolean))];
+  const actionOpts = actions.map(a=>`<option value="${a}" ${state.logFilter.action===a?"selected":""}>${a}</option>`).join("");
+
+  // Table rows
+  const tableRows = filtered.length > 0 ? filtered.slice().reverse().map(l=>{
+    const ts = l.timestamp ? new Date(l.timestamp).toLocaleString('gu-IN',{timeZone:'Asia/Kolkata'}) : "—";
+    const badgeCls = `log-${l.action||"SAVE"}`;
+    return `<tr>
+      <td>${ts}</td>
+      <td><b>${l.centerCode||"—"}</b></td>
+      <td><span class="log-badge ${badgeCls}">${l.action||"—"}</span></td>
+      <td>${l.details||"—"}</td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="4" style="padding:20px;color:#94a3b8;text-align:center">— કોઈ log નથી —</td></tr>`;
+
+  return `
+    <div class="container">
+      <div class="card">
+        <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">
+          🛡️ Admin Panel — Log Viewer
+          <button id="btnAdminLock" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.35);padding:4px 10px;border-radius:6px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">🔒 Lock</button>
+        </div>
+
+        ${statsHtml}
+        ${centerListHtml}
+
+        <div class="log-filter">
+          <input id="filterCenter" type="text" placeholder="🔍 Center Code" value="${state.logFilter.center}">
+          <select id="filterAction">
+            <option value="">બધા Actions</option>
+            ${actionOpts}
+          </select>
+          <input id="filterDate" type="date" value="${state.logFilter.date}" title="Date filter">
+          <button id="btnApplyFilter">Filter</button>
+          <button class="btn-refresh" id="btnRefreshLogs">🔄 Refresh</button>
+        </div>
+
+        <div class="log-table-wrap">
+          <table class="log-table">
+            <thead><tr>
+              <th>📅 સમય</th>
+              <th>🏢 Center Code</th>
+              <th>⚡ Action</th>
+              <th>📝 વિગત</th>
+            </tr></thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </div>
+        <div style="padding:8px 12px;font-size:11px;color:#64748b;background:#f8fafc;border-top:1px solid #d1dce8">
+          ${filtered.length} / ${logs.length} entries &nbsp;|&nbsp;
+          <span class="log-badge log-NEW">NEW</span> = નવી આંગણ. &nbsp;
+          <span class="log-badge log-SAVE">SAVE</span> = ડેટા save &nbsp;
+          <span class="log-badge log-LOGIN">LOGIN</span> = Login &nbsp;
+          <span class="log-badge log-LOGOUT">LOGOUT</span> = Logout
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── MODAL ── */
+function renderModal(){
+  if(!state.modal) return "";
+  const {y,m,d}=state.modal;
+  const dow=new Date(y,m,d).getDay();
+  return `
+    <div class="modal-bg" id="modalBg">
+      <div class="modal">
+        <h3>📅 ${d} ${MONTHS_FULL[m]} ${y}</h3>
+        <p>${DAYS_FULL[dow]}<br><span style="font-size:11px;color:#7c3aed">${dayHint(dow)}</span></p>
+        <input type="number" id="modalInput" min="0" placeholder="લાભાર્થી સંખ્યા" value="${state.modalVal}" autofocus>
+        <div class="modal-btns">
+          <button class="btn-cancel" id="modalCancel">રદ</button>
+          <button class="btn-clear"  id="modalClear">સાફ</button>
+          <button class="btn-save"   id="modalSave">સાચવો</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── RENDER ── */
+function render(){
+  const app=document.getElementById('app');
+  if(!centerCode){
+    document.getElementById("nav").style.display="none";
+    document.getElementById("syncStatus").style.display="none";
+    app.innerHTML=renderSetupPage();
+    return;
+  }
+  document.querySelectorAll('#nav button').forEach(b=>{
+    b.classList.toggle('active',Number(b.dataset.tab)===state.tab);
+  });
+  const curMU=calcMonthUsage(state.calY,state.calM,state.ben);
+  let html="";
+  if(state.tab===0) html=renderInventoryPage(curMU);
+  else if(state.tab===1) html=renderCalendarPage();
+  else if(state.tab===2) html=renderMonthlyPage(curMU);
+  else if(state.tab===3) html=renderReportPage();
+  else if(state.tab===4) html=renderAdminPage();
+  html+=renderModal();
+  app.innerHTML=html;
+  if(state.modal){
+    const inp=document.getElementById('modalInput');
+    if(inp){inp.focus();inp.select();}
+  }
+}
+
+function openModal(d){
+  const k=dkf(state.calY,state.calM,d);
+  state.modal={y:state.calY,m:state.calM,d};
+  state.modalVal=state.ben[k]||"";
+  render();
+}
+function closeModal(){state.modal=null;state.modalVal="";render();}
+function saveModal(){
+  const v=document.getElementById('modalInput').value.trim();
+  const k=dkf(state.modal.y,state.modal.m,state.modal.d);
+  if(v===""||Number(v)<=0){delete state.ben[k];}else{state.ben[k]=Number(v);}
+  saveState(); closeModal();
+}
+function clearModal(){
+  const k=dkf(state.modal.y,state.modal.m,state.modal.d);
+  delete state.ben[k]; saveState(); closeModal();
+}
+function prevMonth(){state.calM--;if(state.calM<0){state.calM=11;state.calY--;}render();}
+function nextMonth(){state.calM++;if(state.calM>11){state.calM=0;state.calY++;}render();}
+
+function shareReport(){
+  const today=new Date();
+  const todayK=dkf(today.getFullYear(),today.getMonth(),today.getDate());
+  const todayN=Number(state.ben[todayK]||0);
+  const todayU=calcUsage(today.getDay(),todayN);
+  let txt=`🌾 My Daily Report (કેન્દ્ર: ${centerCode})\n📅 ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()} (${DAYS_FULL[today.getDay()]})\n👥 લાભાર્થી: ${todayN}\n\n`;
+  ITEMS.forEach(it=>{
+    const iv=state.inv[it.id];
+    txt+=`${it.emoji} ${it.name}: સ.${morU(it.id,todayU)}g | બ.${aftU(it.id,todayU)}g | કુલ ${todayU[it.id]}g | બચત ${fmt(iv.o+iv.r-todayU[it.id]/1000,3)}kg\n`;
+  });
+  if(navigator.share){navigator.share({title:"My Daily Report",text:txt}).catch(()=>{});}
+  else{navigator.clipboard.writeText(txt).then(()=>alert("✅ Copy થયું"));}
+}
+function shareMonthly(){
+  const curMU=calcMonthUsage(state.calY,state.calM,state.ben);
+  let txt=`📊 માસિક (કેન્દ્ર: ${centerCode}) - ${MONTHS_FULL[state.calM]} ${state.calY}\n👥 કુલ: ${curMU.totalN} | દિવસ: ${curMU.days}\n\n`;
+  ITEMS.forEach(it=>{
+    const iv=state.inv[it.id];
+    txt+=`${it.emoji} ${it.name}: સ.લા.${curMU[it.id+"nM"]||0} | બ.લા.${curMU[it.id+"nA"]||0} | ${fmt(curMU[it.id])}g | બચત ${fmt(iv.o+iv.r-curMU[it.id]/1000,3)}kg\n`;
+  });
+  if(navigator.share){navigator.share({title:"માસિક",text:txt}).catch(()=>{});}
+  else{navigator.clipboard.writeText(txt).then(()=>alert("✅ Copy થયું"));}
+}
+function exportBackup(){
+  const blob=new Blob([JSON.stringify({inv:state.inv,ben:state.ben},null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`mydailyreport-${centerCode}-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+}
+function importBackup(file){
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data.inv) state.inv=data.inv;
+      if(data.ben) state.ben=data.ben;
+      saveState(); render();
+      alert("✅ Backup restore થયું!");
+    }catch(err){alert("❌ ખોટી file");}
+  };
+  r.readAsText(file);
+}
+
+/* ── EVENTS ── */
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.id==='btnSubmitSetup'){
+    const val=document.getElementById("centerCodeInput").value.trim();
+    if(val===""){alert("⚠️ કેન્દ્ર કોડ નાખો!");return;}
+    centerCode=val;
+    localStorage.setItem("anganwadi_center_code",centerCode);
+    sendLog('LOGIN',`Login — ${centerCode}`);
+    loadCloudData(); return;
+  }
+
+  // Admin events
+  if(t.id==='adminPwdBtn'){
+    const inp=document.getElementById("adminPwdInput");
+    const err=document.getElementById("adminPwdErr");
+    if(inp&&inp.value===ADMIN_PASSWORD){
+      state.adminUnlocked=true;
+      fetchLogs();
+    } else {
+      if(err) err.textContent="❌ ખોટો Admin password!";
+      if(inp){ inp.value=""; inp.focus(); }
+    }
+    return;
+  }
+  if(t.id==='btnAdminLock'){state.adminUnlocked=false;render();return;}
+  if(t.id==='btnRefreshLogs'){fetchLogs();return;}
+  if(t.id==='btnApplyFilter'){
+    state.logFilter.center=document.getElementById("filterCenter")?.value||"";
+    state.logFilter.action=document.getElementById("filterAction")?.value||"";
+    state.logFilter.date=document.getElementById("filterDate")?.value||"";
+    render(); return;
+  }
+  if(t.id==='btnLogout'){
+    if(confirm("કેન્દ્રમાંથી logout કરવું છે?")){
+      sendLog('LOGOUT',`Logout — ${centerCode}`);
+      localStorage.removeItem("anganwadi_center_code");
+      centerCode="";
+      state.inv=JSON.parse(JSON.stringify(DEFAULT_INV));
+      state.ben={};
+      render();
+    } return;
+  }
+  if(t.matches('#nav button')){state.tab=Number(t.dataset.tab);render();return;}
+  if(t.id==='prevM'){prevMonth();return;}
+  if(t.id==='nextM'){nextMonth();return;}
+  const cell=t.closest('.cal-cell');
+  if(cell&&cell.dataset.day){openModal(Number(cell.dataset.day));return;}
+  if(t.id==='modalCancel'){closeModal();return;}
+  if(t.id==='modalSave'){saveModal();return;}
+  if(t.id==='modalClear'){clearModal();return;}
+  if(t.matches('.report-tabs button')){state.rptTab=t.dataset.rpt;render();return;}
+  if(t.id==='btnPrint'){window.print();return;}
+  if(t.id==='btnShare'){shareReport();return;}
+  if(t.id==='btnShareM'){shareMonthly();return;}
+  if(t.id==='btnExport'){exportBackup();return;}
+  if(t.id==='btnImport'){document.getElementById('fileImport').click();return;}
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.matches('input[data-inv]')){
+    state.inv[t.dataset.inv][t.dataset.field]=parseFloat(t.value)||0;
+    saveState();
+  }
+  if(t.id==='modalInput'){state.modalVal=t.value;}
+  if(t.id==='fileImport'&&t.files&&t.files[0]){importBackup(t.files[0]);t.value="";}
+});
+document.addEventListener('change',e=>{
+  if(e.target.matches('input[data-inv]')){render();}
+});
+document.addEventListener('keydown',e=>{
+  if(!state.modal) return;
+  if(e.key==='Enter'){e.preventDefault();saveModal();}
+  if(e.key==='Escape'){closeModal();}
+});
+
+if(centerCode){loadCloudData();}else{render();}
+</script>
+</body>
+</html>

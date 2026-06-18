@@ -143,7 +143,7 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
     <button data-tab="4">🛡️ Admin</button>
   </div>
 </div>
-<div id="syncStatus" class="sync-status" style="display:none;">☁️ ક્લાઉડ સાથે સિંક થયેલ છે</div>
+<div id="syncStatus" class="sync-status" style="display:none;cursor:pointer" onclick="if(centerCode)loadCloudData()">☁️ ક્લાઉડ સાથે સિંક થયેલ છે &nbsp;🔄</div>
 <div id="app"></div>
 <div class="footer">My Daily Report © 2026 | Cloud: Google Drive | Devendra Ramanuj 9276505035</div>
 
@@ -181,60 +181,103 @@ function setStatus(msg, color="#1b8f57"){
 }
 
 async function loadCloudData(){
-  if(!centerCode||APPS_SCRIPT_URL.includes("અહીં_તમારી")) return;
-  setStatus("⏳ ક્લાઉડ પરથી ડેટા લોડ થઈ રહ્યો છે...","#e67e22");
+  if(!centerCode) return;
+  // URL check
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.trim()==="" || APPS_SCRIPT_URL.includes("YOUR_URL")){
+    setStatus("⚠️ Apps Script URL સેટ નથી — Offline mode","#e67e22");
+    loadLocalFallback(); return;
+  }
+  setStatus("⏳ ક્લાઉડ કનેક્ટ થઈ રહ્યું છે...","#e67e22");
   try{
-    const res=await fetch(`${APPS_SCRIPT_URL}?centerCode=${encodeURIComponent(centerCode)}`);
-    const data=await res.json();
-    if(data&&data.status!=="new_user"&&data.status!=="error"){
+    const controller = new AbortController();
+    const timeout = setTimeout(()=>controller.abort(), 10000); // 10 sec timeout
+    const res = await fetch(
+      `${APPS_SCRIPT_URL}?centerCode=${encodeURIComponent(centerCode)}`,
+      { signal: controller.signal }
+    );
+    clearTimeout(timeout);
+    if(!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+    const data = await res.json();
+    if(data && data.status!=="new_user" && data.status!=="error"){
       if(data.inv) state.inv=data.inv;
       if(data.ben) state.ben=data.ben;
+      // local backup
+      localStorage.setItem("mdr_offline_"+centerCode, JSON.stringify({inv:state.inv,ben:state.ben}));
       setStatus(`☁️ કેન્દ્ર: ${centerCode} — ક્લાઉડ ડેટા એક્ટિવ`);
+    } else if(data.status==="new_user"){
+      setStatus(`🆕 નવું કેન્દ્ર: ${centerCode} — નવો ડેટા શરૂ`);
+      sendLog("NEW", `નવી આંગણવાડી: ${centerCode}`);
     } else {
-      setStatus(`🆕 નવું કેન્દ્ર: ${centerCode} — નવો ડેટાબેઝ સેટ રેડી`);
-      sendLog('NEW', `નવી આંગણવાડી register: ${centerCode}`);
+      throw new Error(data.msg || "unknown error");
     }
     document.getElementById("nav").style.display="flex";
     render();
-  }catch(e){
-    setStatus("❌ ક્લાઉડ કનેક્શન નિષ્ફળ! લોકલ મોડ ચાલુ.","#cc3d3d");
+  } catch(e){
+    let errMsg = e.message || e.toString();
+    if(e.name==="AbortError") errMsg = "Timeout — 10 સેકન્ડ માં response નહીં";
+    // Try offline fallback
+    const offlineData = localStorage.getItem("mdr_offline_"+centerCode);
+    if(offlineData){
+      try{
+        const d = JSON.parse(offlineData);
+        if(d.inv) state.inv=d.inv;
+        if(d.ben) state.ben=d.ben;
+        setStatus(`⚠️ Offline mode — છેલ્લો local ડેટા વપરાય છે | Error: ${errMsg}`, "#e67e22");
+      }catch(_){
+        setStatus(`❌ Connection fail: ${errMsg}`, "#cc3d3d");
+      }
+    } else {
+      setStatus(`❌ Connection fail: ${errMsg} | Retry માટે 🔄 દબાવો`, "#cc3d3d");
+    }
     document.getElementById("nav").style.display="flex";
     render();
   }
 }
 
+function loadLocalFallback(){
+  const offlineData = localStorage.getItem("mdr_offline_"+centerCode);
+  if(offlineData){
+    try{
+      const d=JSON.parse(offlineData);
+      if(d.inv) state.inv=d.inv;
+      if(d.ben) state.ben=d.ben;
+    }catch(_){}
+  }
+  document.getElementById("nav").style.display="flex";
+  render();
+}
 async function saveState(){
   if(!centerCode) return;
+  // Always save locally first
+  localStorage.setItem("mdr_offline_"+centerCode, JSON.stringify({inv:state.inv,ben:state.ben}));
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.trim()===""){
+    setStatus("💾 Local save OK (Cloud URL નથી)","#e67e22"); return;
+  }
   setStatus("⏳ ક્લાઉડ પર સેવ થઈ રહ્યું છે...","#e67e22");
   try{
-    const response=await fetch(APPS_SCRIPT_URL,{
+    const controller = new AbortController();
+    const timeout = setTimeout(()=>controller.abort(), 10000);
+    const response = await fetch(APPS_SCRIPT_URL,{
       method:"POST",
       headers:{"Content-Type":"text/plain"},
-      body:JSON.stringify({centerCode,data:{inv:state.inv,ben:state.ben}})
+      body:JSON.stringify({centerCode, data:{inv:state.inv, ben:state.ben}}),
+      signal: controller.signal
     });
-    const result=await response.json();
-    if(result.status==="ok"){ setStatus(`✅ ક્લાઉડ પર સુરક્ષિત સેવ થયું! (કેન્દ્ર: ${centerCode})`); sendLog('SAVE',`ડેટા સેવ — ${centerCode}`); }
+    clearTimeout(timeout);
+    const result = await response.json();
+    if(result.status==="ok"){
+      setStatus(`✅ Cloud + Local — બંને save! (${centerCode})`);
+      sendLog("SAVE", `ડેટા save — ${centerCode}`);
+    } else {
+      setStatus(`⚠️ Cloud error: ${result.msg||"unknown"} | Local save OK`,"#e67e22");
+    }
   }catch(e){
-    setStatus("⚠️ ક્લાઉડ સેવ નિષ્ફળ! કોડ ચેક કરો.","#cc3d3d");
+    const msg = e.name==="AbortError" ? "Timeout" : e.message;
+    setStatus(`⚠️ Cloud save fail: ${msg} | Local backup OK`,"#e67e22");
   }
 }
 
-/* ================================================================
-   USAGE RULES — અપડેટ કરેલ નિયમ
-   સવાર (દરરોજ):   ઘઉં 100g + તેલ 5g
-   સવાર (ફક્ત મંગળ): ચોખા 30g વધારાના
-   બપોર (દરરોજ):   તેલ 8g
-   બપોર (વાર પ્રમાણે):
-     રવિ (0) → ઘઉં 100g + દાળ 30g
-     સોમ (1) → દાળ 30g
-     મંગ (2) → ઘઉં 100g + ચણા 30g
-     બુધ (3) → ચોખા 50g + ચણાદાળ 30g
-     ગુ  (4) → ચોખા 50g + દાળ 30g
-     શુ  (5) → ઘઉં 100g + ચણા 30g
-     શ   (6) → ચોખા 50g + ચણાદાળ 30g
-================================================================ */
-
-/* ── Log event ── */
+/* ── Log event — Apps Script ને log entry મોકલો ── */
 async function sendLog(action, details){
   if(!APPS_SCRIPT_URL || !centerCode) return;
   try{
@@ -242,21 +285,21 @@ async function sendLog(action, details){
       method:"POST",
       headers:{"Content-Type":"text/plain"},
       body:JSON.stringify({
-        action:"LOG",
-        centerCode: centerCode,
-        logAction: action,
-        logDetails: details,
-        timestamp: new Date().toISOString()
+        action      : "LOG",
+        centerCode  : centerCode,
+        logAction   : action,
+        logDetails  : details,
+        timestamp   : new Date().toISOString()
       })
     });
-  }catch(e){ console.warn("Log send failed",e); }
+  }catch(e){ console.warn("Log send failed", e); }
 }
 
-/* ── Fetch logs (admin only) ── */
+/* ── Fetch logs — Admin panel માટે ── */
 async function fetchLogs(){
   setStatus("⏳ Logs લોડ થઈ રહ્યા છે...","#e67e22");
   try{
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=getLogs`);
+    const res  = await fetch(`${APPS_SCRIPT_URL}?action=getLogs`);
     const data = await res.json();
     if(data.logs){
       state.logData = data.logs;
@@ -271,6 +314,23 @@ async function fetchLogs(){
   }
   render();
 }
+
+/* ================================================================
+   USAGE RULES — Final નિયમ
+   ──────────────────────────────────────────
+   સવાર (રવિ = 0 → કંઈ નહીં):
+     ઘઉં  30g — સોમ(1), બુધ(3), ગુ(4), શુ(5), શ(6)
+     ચોખા 30g — ફક્ત મંગળ(2)
+     તેલ   5g — સોમ(1) થી શ(6)
+   બપોર (રવિ = 0 → કંઈ નહીં):
+     ઘઉં  50g — સોમ(1), મંગ(2), શુ(5)
+     ચોખા 50g — બુધ(3), ગુ(4), શ(6)
+     ચણા  20g — મંગ(2), ગુ(4), શુ(5)
+     દાળ  20g — સોમ(1), બુધ(3)
+     ચણાદાળ 20g — ફક્ત શ(6)
+     તેલ   8g — સોમ(1) થી શ(6)
+   રવિ(0): સવાર + બપોર — બધું બંધ
+================================================================ */
 function calcUsage(dow,n){
   n=Number(n)||0;
   const u={};
@@ -280,61 +340,55 @@ function calcUsage(dow,n){
   });
   if(n<=0) return u;
 
-  // ── સવાર (દરરોજ) ──
-  u.ghauM=100*n;  u.ghaunM=n;
-  u.telM=5*n;     u.telnM=n;
-
-  // ── ચોખા સવારે — ફક્ત મંગળ ──
-  if(dow===2){
-    u.chokhaM=30*n; u.chokhanM=n;
+  // ── સવાર — રવિ(0) બંધ ──
+  if(dow!==0){
+    u.telM=5*n; u.telnM=n;                          // તેલ: સોમ-શ
+    if(dow===1||dow===3||dow===4||dow===5||dow===6){ // ઘઉં: સો,બુ,ગુ,શુ,શ
+      u.ghauM=30*n; u.ghaunM=n;
+    }
+    if(dow===2){                                     // ચોખા: ફક્ત મંગ
+      u.chokhaM=30*n; u.chokhanM=n;
+    }
   }
 
-  // ── બપોર (દરરોજ) ──
-  u.telA=8*n; u.telnA=n;
-
-  // ── બપોર (વાર પ્રમાણે) ──
-  if(dow===0){                        // રવિ
-    u.ghauA=100*n;    u.ghaunA=n;
-    u.dalA=30*n;      u.dalnA=n;
-  } else if(dow===1){                 // સોમ
-    u.dalA=30*n;      u.dalnA=n;
-  } else if(dow===2){                 // મંગ
-    u.ghauA=100*n;    u.ghaunA=n;
-    u.chanaA=30*n;    u.chananA=n;
-  } else if(dow===3){                 // બુધ
-    u.chokhaA=50*n;   u.chokhanA=n;
-    u.chanadalA=30*n; u.chanadalnA=n;
-  } else if(dow===4){                 // ગુ
-    u.chokhaA=50*n;   u.chokhanA=n;
-    u.dalA=30*n;      u.dalnA=n;
-  } else if(dow===5){                 // શુ
-    u.ghauA=100*n;    u.ghaunA=n;
-    u.chanaA=30*n;    u.chananA=n;
-  } else if(dow===6){                 // શ
-    u.chokhaA=50*n;   u.chokhanA=n;
-    u.chanadalA=30*n; u.chanadalnA=n;
+  // ── બપોર — રવિ(0) બંધ ──
+  if(dow!==0){
+    u.telA=8*n; u.telnA=n;                          // તેલ: સોમ-શ
+    if(dow===1||dow===2||dow===5){                   // ઘઉં: સો,મં,શુ
+      u.ghauA=50*n; u.ghaunA=n;
+    }
+    if(dow===3||dow===4||dow===6){                   // ચોખા: બુ,ગુ,શ
+      u.chokhaA=50*n; u.chokhanA=n;
+    }
+    if(dow===2||dow===4||dow===5){                   // ચણા: મં,ગુ,શુ
+      u.chanaA=20*n; u.chananA=n;
+    }
+    if(dow===1||dow===3){                            // દાળ: સો,બુ
+      u.dalA=20*n; u.dalnA=n;
+    }
+    if(dow===6){                                     // ચણાદાળ: ફક્ત શ
+      u.chanadalA=20*n; u.chanadalnA=n;
+    }
   }
 
   ITEMS.forEach(it=>{ u[it.id]=u[it.id+"M"]+u[it.id+"A"]; });
   return u;
 }
-
 function morU(id,u){return u[id+"M"]||0}
 function aftU(id,u){return u[id+"A"]||0}
 
 function dayHint(d){
-  const hints={
-    0:"ઘઉં+દાળ+તેલ (સ: ઘઉં | બ: ઘઉં+દાળ)",
-    1:"સ: ઘઉં | બ: દાળ+તેલ",
-    2:"સ: ઘઉં+ચોખા30g | બ: ઘઉં+ચણા+તેલ",
-    3:"સ: ઘઉં | બ: ચોખા50g+ચણાદાળ+તેલ",
-    4:"સ: ઘઉં | બ: ચોખા50g+દાળ+તેલ",
-    5:"સ: ઘઉં | બ: ઘઉં+ચણા+તેલ",
-    6:"સ: ઘઉં | બ: ચોખા50g+ચણાદાળ+તેલ"
-  };
-  return hints[d]||"";
+  const h=[
+    "🔴 રવિ — રજા (સ+બ બંધ)",
+    "સ:ઘઉ30+તે5 | બ:ઘઉ50+દા20+તે8",
+    "સ:ચો30+તે5 | બ:ઘઉ50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+દા20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ઘઉ50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+ચદ20+તે8"
+  ];
+  return h[d]||"";
 }
-
 function dkf(y,m,d){return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;}
 
 function calcMonthUsage(y,m,ben){
@@ -372,7 +426,7 @@ function renderSetupPage(){
     <div class="setup-box">
       <h2>🏢 આંગણવાડી કેન્દ્ર લોગિન</h2>
       <p style="font-size:13px;color:#64748b;margin-bottom:15px;">તમારો ડેટા અલગ રાખવા માટે કેન્દ્રનો કોડ અથવા મોબાઈલ નંબર નાખો.</p>
-      <input type="text" id="centerCodeInput" placeholder="દા.ત. મોબાઇલ નંબર" value="${centerCode}">
+      <input type="text" id="centerCodeInput" placeholder="દા.ત. AW-101 અથવા નંબર" value="${centerCode}">
       <button id="btnSubmitSetup">એપ શરૂ કરો ➔</button>
     </div>`;
 }
@@ -410,16 +464,16 @@ function renderInventoryPage(curMU){
       <div class="card">
         <div class="section-head" style="font-size:12px">📋 ભોજન નિયમ (અપડેટ)</div>
         <div class="section-body" style="font-size:11px;line-height:2">
-          <b>સવાર (દરરોજ):</b> ઘઉં 100g + તેલ 5g<br>
-          <b>સવાર (ફક્ત મંગળ):</b> + ચોખા 30g<br>
+          <b>સવાર:</b> ઘઉં 30g (સોમ/બુધ/ગુ/શુ/શ) | ચોખા 30g (ફક્ત મંગળ) | તેલ 5g<br>
+          <b>સવાર (રવિ+મંગ):</b> ઘઉં નહીં<br>
           <b>બપોર તેલ:</b> 8g (દરરોજ) +
-          <span class="rule-chip">રવિ: ઘઉં100+દાળ30</span>
-          <span class="rule-chip">સોમ: દાળ30</span>
-          <span class="rule-chip">મંગ: ઘઉં100+ચણા30</span>
-          <span class="rule-chip">બુધ: ચોખા50+ચણાદાળ30</span>
-          <span class="rule-chip">ગુ: ચોખા50+દાળ30</span>
-          <span class="rule-chip">શુ: ઘઉં100+ચણા30</span>
-          <span class="rule-chip">શ: ચોખા50+ચણાદાળ30</span>
+          <span class="rule-chip">🔴 રવિ: —</span>
+          <span class="rule-chip">સો: ઘઉ30+50 | દા20 | તે13</span>
+          <span class="rule-chip">મં: ચો30 | ઘઉ50 | ચ20 | તે13</span>
+          <span class="rule-chip">બુ: ઘઉ30 | ચો50 | દા20 | તે13</span>
+          <span class="rule-chip">ગુ: ઘઉ30 | ચો50 | ચ20 | તે13</span>
+          <span class="rule-chip">શુ: ઘઉ30+50 | ચ20 | તે13</span>
+          <span class="rule-chip">શ: ઘઉ30 | ચો50 | ચદ20 | તે13</span>
         </div>
       </div>
     </div>`;

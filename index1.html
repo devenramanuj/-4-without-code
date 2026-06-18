@@ -80,6 +80,11 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
 .btn-import{background:#0891b2}
 .badge{padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block}
 .footer{text-align:center;padding:12px;color:#64748b;font-size:11px}
+.logout-btn{background:rgba(204,61,61,.85);color:#fff;border:none;padding:5px 12px;
+  border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;
+  white-space:nowrap;transition:background .15s}
+.logout-btn:hover{background:#cc3d3d}
+.header-center-info{font-size:11px;color:#a0b4c8;text-align:center;margin-bottom:6px}
 .sync-status{text-align:center;padding:5px;font-size:12px;font-weight:bold;color:#1b8f57;background:#e8f5e9;}
 .setup-box{max-width:400px;margin:50px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1);border:1px solid #d1dce8;text-align:center;}
 .setup-box h2{color:#1a3c5e;margin-bottom:15px;font-size:18px;}
@@ -121,6 +126,9 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
   th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   tr.sun-row td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+.logout-btn{background:rgba(204,61,61,.85);color:#fff;border:none;padding:5px 12px;
+  border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.logout-btn:hover{background:#cc3d3d}
 @media (max-width:600px){
   .header h1{font-size:15px}
   .nav button{padding:6px 8px;font-size:11px}
@@ -134,7 +142,11 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
 </head>
 <body>
 <div class="header">
-  <h1>🌾 My Daily Report - ઈન્વેન્ટરી & ભોજન વ્યવસ્થા</h1>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+    <h1 style="font-size:16px;margin:0;flex:1;text-align:center">🌾 My Daily Report</h1>
+    <button class="logout-btn" id="btnLogoutHeader" style="display:none">🚪 Logout</button>
+  </div>
+  <div id="centerInfoBar" style="display:none;text-align:center;font-size:11px;color:#a0b4c8;margin-bottom:4px"></div>
   <div class="nav" id="nav" style="display:none;">
     <button data-tab="0" class="active">📦 ઈન્વેન્ટરી</button>
     <button data-tab="1">📅 કેલેન્ડર</button>
@@ -211,6 +223,7 @@ async function loadCloudData(){
       throw new Error(data.msg || "unknown error");
     }
     document.getElementById("nav").style.display="flex";
+    showHeaderInfo();
     render();
   } catch(e){
     let errMsg = e.message || e.toString();
@@ -230,6 +243,7 @@ async function loadCloudData(){
       setStatus(`❌ Connection fail: ${errMsg} | Retry માટે 🔄 દબાવો`, "#cc3d3d");
     }
     document.getElementById("nav").style.display="flex";
+    showHeaderInfo();
     render();
   }
 }
@@ -244,6 +258,7 @@ function loadLocalFallback(){
     }catch(_){}
   }
   document.getElementById("nav").style.display="flex";
+  showHeaderInfo();
   render();
 }
 async function saveState(){
@@ -275,6 +290,17 @@ async function saveState(){
     const msg = e.name==="AbortError" ? "Timeout" : e.message;
     setStatus(`⚠️ Cloud save fail: ${msg} | Local backup OK`,"#e67e22");
   }
+}
+
+/* ── Header info + logout button show ── */
+function showHeaderInfo(){
+  const bar = document.getElementById("centerInfoBar");
+  const btn = document.getElementById("btnLogoutHeader");
+  if(bar && centerCode){
+    bar.style.display = "block";
+    bar.innerHTML = `🏢 કेन्द्र: <b style="color:#f39c12">${centerCode}</b>`;
+  }
+  if(btn) btn.style.display = "block";
 }
 
 /* ── Log event — Apps Script ને log entry મોકલો ── */
@@ -316,23 +342,20 @@ async function fetchLogs(){
 }
 
 /* ================================================================
-   USAGE RULES — અપડેટ કરેલ નિયમ
-   ─────────────────────────────────────────────────────────
-   સવાર:
-     ઘઉં  30g  — સોમ(1), બુધ(3), ગુ(4), શુ(5), શ(6)
-                 [મંગ(2) અને રવિ(0) — ઘઉં નહીં]
-     ચોખા 30g  — ફક્ત મંગળ(2)
-     તેલ   5g  — દરરોજ
-   ─────────────────────────────────────────────────────────
-   બપોર:
-     તેલ   8g  — દરરોજ
-     રવિ (0) → દાળ 30g
-     સોમ (1) → ઘઉં 50g + દાળ 30g
-     મંગ (2) → ઘઉં 50g + ચણા 30g
-     બુધ (3) → ચોખા 50g + ચણાદાળ 30g
-     ગુ  (4) → ચોખા 50g + દાળ 30g
-     શુ  (5) → ઘઉં 50g + ચણા 30g
-     શ   (6) → ચોખા 50g + ચણાદાળ 30g
+   USAGE RULES — Final નિયમ
+   ──────────────────────────────────────────
+   સવાર (રવિ = 0 → કંઈ નહીં):
+     ઘઉં  30g — સોમ(1), બુધ(3), ગુ(4), શુ(5), શ(6)
+     ચોખા 30g — ફક્ત મંગળ(2)
+     તેલ   5g — સોમ(1) થી શ(6)
+   બપોર (રવિ = 0 → કંઈ નહીં):
+     ઘઉં  50g — સોમ(1), મંગ(2), શુ(5)
+     ચોખા 50g — બુધ(3), ગુ(4), શ(6)
+     ચણા  20g — મંગ(2), ગુ(4), શુ(5)
+     દાળ  20g — સોમ(1), બુધ(3)
+     ચણાદાળ 20g — ફક્ત શ(6)
+     તેલ   8g — સોમ(1) થી શ(6)
+   રવિ(0): સવાર + બપોર — બધું બંધ
 ================================================================ */
 function calcUsage(dow,n){
   n=Number(n)||0;
@@ -343,42 +366,35 @@ function calcUsage(dow,n){
   });
   if(n<=0) return u;
 
-  // ── સવાર ──
-  // ઘઉં: સોમ(1), બુધ(3), ગુ(4), શુ(5), શ(6) → 30g
-  if(dow===1||dow===3||dow===4||dow===5||dow===6){
-    u.ghauM=30*n; u.ghaunM=n;
+  // ── સવાર — રવિ(0) બંધ ──
+  if(dow!==0){
+    u.telM=5*n; u.telnM=n;                          // તેલ: સોમ-શ
+    if(dow===1||dow===3||dow===4||dow===5||dow===6){ // ઘઉં: સો,બુ,ગુ,શુ,શ
+      u.ghauM=30*n; u.ghaunM=n;
+    }
+    if(dow===2){                                     // ચોખા: ફક્ત મંગ
+      u.chokhaM=30*n; u.chokhanM=n;
+    }
   }
-  // ચોખા: ફક્ત મંગળ(2) → 30g
-  if(dow===2){
-    u.chokhaM=30*n; u.chokhanM=n;
-  }
-  // તેલ: દરરોજ 5g
-  u.telM=5*n; u.telnM=n;
 
-  // ── બપોર ──
-  // તેલ: દરરોજ 8g
-  u.telA=8*n; u.telnA=n;
-
-  if(dow===0){                         // રવિ — ઘઉં નહીં
-    u.dalA=30*n;       u.dalnA=n;
-  } else if(dow===1){                  // સોમ — ઘઉં 50g + દાળ 30g
-    u.ghauA=50*n;      u.ghaunA=n;
-    u.dalA=30*n;       u.dalnA=n;
-  } else if(dow===2){                  // મંગ — ઘઉં 50g + ચણા 30g
-    u.ghauA=50*n;      u.ghaunA=n;
-    u.chanaA=30*n;     u.chananA=n;
-  } else if(dow===3){                  // બુધ — ચોખા 50g + ચણાદાળ 30g
-    u.chokhaA=50*n;    u.chokhanA=n;
-    u.chanadalA=30*n;  u.chanadalnA=n;
-  } else if(dow===4){                  // ગુ — ચોખા 50g + દાળ 30g
-    u.chokhaA=50*n;    u.chokhanA=n;
-    u.dalA=30*n;       u.dalnA=n;
-  } else if(dow===5){                  // શુ — ઘઉં 50g + ચણા 30g
-    u.ghauA=50*n;      u.ghaunA=n;
-    u.chanaA=30*n;     u.chananA=n;
-  } else if(dow===6){                  // શ — ચોખા 50g + ચણાદાળ 30g
-    u.chokhaA=50*n;    u.chokhanA=n;
-    u.chanadalA=30*n;  u.chanadalnA=n;
+  // ── બપોર — રવિ(0) બંધ ──
+  if(dow!==0){
+    u.telA=8*n; u.telnA=n;                          // તેલ: સોમ-શ
+    if(dow===1||dow===2||dow===5){                   // ઘઉં: સો,મં,શુ
+      u.ghauA=50*n; u.ghaunA=n;
+    }
+    if(dow===3||dow===4||dow===6){                   // ચોખા: બુ,ગુ,શ
+      u.chokhaA=50*n; u.chokhanA=n;
+    }
+    if(dow===2||dow===4||dow===5){                   // ચણા: મં,ગુ,શુ
+      u.chanaA=20*n; u.chananA=n;
+    }
+    if(dow===1||dow===3){                            // દાળ: સો,બુ
+      u.dalA=20*n; u.dalnA=n;
+    }
+    if(dow===6){                                     // ચણાદાળ: ફક્ત શ
+      u.chanadalA=20*n; u.chanadalnA=n;
+    }
   }
 
   ITEMS.forEach(it=>{ u[it.id]=u[it.id+"M"]+u[it.id+"A"]; });
@@ -388,18 +404,17 @@ function morU(id,u){return u[id+"M"]||0}
 function aftU(id,u){return u[id+"A"]||0}
 
 function dayHint(d){
-  const hints={
-    0:"સ: — (ઘઉં નહીં) | બ: દાળ30g+તેલ",
-    1:"સ: ઘઉં30g+તેલ | બ: ઘઉં50g+દાળ30g+તેલ",
-    2:"સ: ચોખા30g+તેલ | બ: ઘઉં50g+ચણા30g+તેલ",
-    3:"સ: ઘઉં30g+તેલ | બ: ચોખા50g+ચણાદાળ30g+તેલ",
-    4:"સ: ઘઉં30g+તેલ | બ: ચોખા50g+દાળ30g+તેલ",
-    5:"સ: ઘઉં30g+તેલ | બ: ઘઉં50g+ચણા30g+તેલ",
-    6:"સ: ઘઉં30g+તેલ | બ: ચોખા50g+ચણાદાળ30g+તેલ"
-  };
-  return hints[d]||"";
+  const h=[
+    "🔴 રવિ — રજા (સ+બ બંધ)",
+    "સ:ઘઉ30+તે5 | બ:ઘઉ50+દા20+તે8",
+    "સ:ચો30+તે5 | બ:ઘઉ50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+દા20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ઘઉ50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+ચદ20+તે8"
+  ];
+  return h[d]||"";
 }
-
 function dkf(y,m,d){return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;}
 
 function calcMonthUsage(y,m,ben){
@@ -478,13 +493,13 @@ function renderInventoryPage(curMU){
           <b>સવાર:</b> ઘઉં 30g (સોમ/બુધ/ગુ/શુ/શ) | ચોખા 30g (ફક્ત મંગળ) | તેલ 5g<br>
           <b>સવાર (રવિ+મંગ):</b> ઘઉં નહીં<br>
           <b>બપોર તેલ:</b> 8g (દરરોજ) +
-          <span class="rule-chip">રવિ: દાળ30</span>
-          <span class="rule-chip">સોમ: ઘઉં30સ+ઘઉં50બ+દાળ30</span>
-          <span class="rule-chip">મંગ: ચોખા30સ+ઘઉં50બ+ચણા30</span>
-          <span class="rule-chip">બુધ: ઘઉં30સ+ચોખા50બ+ચણાદાળ30</span>
-          <span class="rule-chip">ગુ: ઘઉં30સ+ચોખા50બ+દાળ30</span>
-          <span class="rule-chip">શુ: ઘઉં30સ+ઘઉં50બ+ચણા30</span>
-          <span class="rule-chip">શ: ઘઉં30સ+ચોખા50બ+ચણાદાળ30</span>
+          <span class="rule-chip">🔴 રવિ: —</span>
+          <span class="rule-chip">સો: ઘઉ30+50 | દા20 | તે13</span>
+          <span class="rule-chip">મં: ચો30 | ઘઉ50 | ચ20 | તે13</span>
+          <span class="rule-chip">બુ: ઘઉ30 | ચો50 | દા20 | તે13</span>
+          <span class="rule-chip">ગુ: ઘઉ30 | ચો50 | ચ20 | તે13</span>
+          <span class="rule-chip">શુ: ઘઉ30+50 | ચ20 | તે13</span>
+          <span class="rule-chip">શ: ઘઉ30 | ચો50 | ચદ20 | તે13</span>
         </div>
       </div>
     </div>`;
@@ -1061,13 +1076,19 @@ document.addEventListener('click',e=>{
     state.logFilter.date=document.getElementById("filterDate")?.value||"";
     render(); return;
   }
-  if(t.id==='btnLogout'){
+  if(t.id==='btnLogoutHeader'||t.id==='btnLogout'){
     if(confirm("કેન્દ્રમાંથી logout કરવું છે?")){
       sendLog('LOGOUT',`Logout — ${centerCode}`);
       localStorage.removeItem("anganwadi_center_code");
       centerCode="";
       state.inv=JSON.parse(JSON.stringify(DEFAULT_INV));
       state.ben={};
+      // Header reset
+      const bar=document.getElementById("centerInfoBar");
+      const btn=document.getElementById("btnLogoutHeader");
+      if(bar){bar.style.display="none"; bar.innerHTML="";}
+      if(btn) btn.style.display="none";
+      document.getElementById("nav").style.display="none";
       render();
     } return;
   }

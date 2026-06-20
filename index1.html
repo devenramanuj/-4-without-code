@@ -715,12 +715,33 @@ document.addEventListener('click',e=>{
   if(t.id==='btnApplyFilter'){
     state.logFilter.center=document.getElementById("filterCenter")?.value||"";render();return;
   }
-  if(t.id==='btnLogout'){
-    if(confirm("Logout કરવું છે?")){
-      localStorage.removeItem("anganwadi_center_code");centerCode="";
-      state.inv=JSON.parse(JSON.stringify(DEFAULT_INV));state.ben={};render();
-    }return;
+    if(t.id==='btnLogout' || t.id==='btnLogoutHeader'){
+    if(confirm("કેન્દ્રમાંથી Logout કરવું છે?")){
+      // 1. લોગિન ડેટા સાફ કરો
+      localStorage.removeItem("anganwadi_center_code");
+      centerCode = "";
+      state.inv = JSON.parse(JSON.stringify(DEFAULT_INV));
+      state.ben = {};
+      state.tab = 0; // પહેલા ટેબ પર લાવો
+      state.adminUnlocked = false; // એડમિન લોક કરો
+
+      // 2. હેડર અને નેવિગેશન બાર છુપાવો
+      const bar = document.getElementById("centerInfoBar");
+      const btn = document.getElementById("btnLogoutHeader");
+      const nav = document.getElementById("nav");
+      const sync = document.getElementById("syncStatus");
+      
+      if(bar) { bar.style.display = "none"; bar.innerHTML = ""; }
+      if(btn) btn.style.display = "none";
+      if(nav) nav.style.display = "none";
+      if(sync) sync.style.display = "none";
+
+      // 3. એપને ફરીથી લોગિન પેજ પર રી-રેન્ડર કરો
+      render();
+    }
+    return;
   }
+
   if(t.matches('#nav button')){state.tab=Number(t.dataset.tab);render();return;}
   const cell=t.closest('.cal-cell');if(cell&&cell.dataset.day){openModal(Number(cell.dataset.day));return;}
   if(t.id==='modalCancel'){closeModal();return;}

@@ -194,7 +194,6 @@ function setStatus(msg, color="#1b8f57"){
 
 async function loadCloudData(){
   if(!centerCode) return;
-  // URL check
   if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.trim()==="" || APPS_SCRIPT_URL.includes("YOUR_URL")){
     setStatus("⚠️ Apps Script URL સેટ નથી — Offline mode","#e67e22");
     loadLocalFallback(); return;
@@ -202,10 +201,16 @@ async function loadCloudData(){
   setStatus("⏳ ક્લાઉડ કનેક્ટ થઈ રહ્યું છે...","#e67e22");
   try{
     const controller = new AbortController();
-    const timeout = setTimeout(()=>controller.abort(), 10000); // 10 sec timeout
+    const timeout = setTimeout(()=>controller.abort(), 20000); // ટાઈમઆઉટ વધારીને ૨૦ સેકન્ડ કર્યો
+    
+    // CORS અને કેશિંગ ઇસ્યુ ફિક્સ કરવા માટે ક્વેરીમાં ટાઈમસ્ટેમ્પ ઉમેર્યો
     const res = await fetch(
-      `${APPS_SCRIPT_URL}?centerCode=${encodeURIComponent(centerCode)}`,
-      { signal: controller.signal }
+      `${APPS_SCRIPT_URL}?centerCode=${encodeURIComponent(centerCode)}&_ts=${Date.now()}`,
+      { 
+        method: "GET",
+        mode: "cors", // બ્રાઉઝર બ્લોકિંગ અટકાવવા
+        signal: controller.signal 
+      }
     );
     clearTimeout(timeout);
     if(!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
@@ -213,7 +218,6 @@ async function loadCloudData(){
     if(data && data.status!=="new_user" && data.status!=="error"){
       if(data.inv) state.inv=data.inv;
       if(data.ben) state.ben=data.ben;
-      // local backup
       localStorage.setItem("mdr_offline_"+centerCode, JSON.stringify({inv:state.inv,ben:state.ben}));
       setStatus(`☁️ કેન્દ્ર: ${centerCode} — ક્લાઉડ ડેટા એક્ટિવ`);
     } else if(data.status==="new_user"){
@@ -227,15 +231,15 @@ async function loadCloudData(){
     render();
   } catch(e){
     let errMsg = e.message || e.toString();
-    if(e.name==="AbortError") errMsg = "Timeout — 10 સેકન્ડ માં response નહીં";
-    // Try offline fallback
+    if(e.name==="AbortError") errMsg = "Timeout — સર્વર તરફથી જવાબ નથી";
+    
     const offlineData = localStorage.getItem("mdr_offline_"+centerCode);
     if(offlineData){
       try{
         const d = JSON.parse(offlineData);
         if(d.inv) state.inv=d.inv;
         if(d.ben) state.ben=d.ben;
-        setStatus(`⚠️ Offline mode — છેલ્લો local ડેટા વપરાય છે | Error: ${errMsg}`, "#e67e22");
+        setStatus(`⚠️ Offline mode — છેલ્લો local ડેટા વપરાય છે`, "#e67e22");
       }catch(_){
         setStatus(`❌ Connection fail: ${errMsg}`, "#cc3d3d");
       }
@@ -263,7 +267,6 @@ function loadLocalFallback(){
 }
 async function saveState(){
   if(!centerCode) return;
-  // Always save locally first
   localStorage.setItem("mdr_offline_"+centerCode, JSON.stringify({inv:state.inv,ben:state.ben}));
   if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.trim()===""){
     setStatus("💾 Local save OK (Cloud URL નથી)","#e67e22"); return;
@@ -271,9 +274,10 @@ async function saveState(){
   setStatus("⏳ ક્લાઉડ પર સેવ થઈ રહ્યું છે...","#e67e22");
   try{
     const controller = new AbortController();
-    const timeout = setTimeout(()=>controller.abort(), 10000);
+    const timeout = setTimeout(()=>controller.abort(), 20000);
     const response = await fetch(APPS_SCRIPT_URL,{
       method:"POST",
+      mode: "cors", // CORS એક્ટિવ કર્યું
       headers:{"Content-Type":"text/plain"},
       body:JSON.stringify({centerCode, data:{inv:state.inv, ben:state.ben}}),
       signal: controller.signal

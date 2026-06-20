@@ -196,19 +196,8 @@ async function loadCloudData(){
   }
   setStatus("⏳ ક્લાઉડ કનેક્ટ થઈ રહ્યું છે...","#e67e22");
   try{
-    const controller = new AbortController();
-    const timeout = setTimeout(()=>controller.abort(), 20000); // 20 સેકન્ડ ટાઈમઆઉટ
-    
-    const res = await fetch(
-      `${APPS_SCRIPT_URL}?centerCode=${encodeURIComponent(centerCode)}&_ts=${Date.now()}`,
-      { 
-        method: "GET",
-        mode: "cors",
-        redirect: "follow", // ગૂગલના રીડાયરેક્શન માટે ખાસ
-        signal: controller.signal 
-      }
-    );
-    clearTimeout(timeout);
+    // કનેક્શન એકદમ સાદું રાખવા માટે સેટિંગ્સ બદલી
+    const res = await fetch(`${APPS_SCRIPT_URL}?centerCode=${encodeURIComponent(centerCode)}&_ts=${Date.now()}`);
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     
@@ -227,10 +216,57 @@ async function loadCloudData(){
     showHeaderInfo();
     render();
   } catch(e){
-    let errMsg = e.message || e.toString();
-    if(e.name==="AbortError") errMsg = "Timeout — સર્વર તરફથી જવાબ નથી";
-    loadLocalFallback(errMsg);
+    loadLocalFallback(e.message || e.toString());
   }
+}
+
+async function saveState(){
+  if(!centerCode) return;
+  localStorage.setItem("mdr_offline_"+centerCode, JSON.stringify({inv:state.inv,ben:state.ben}));
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.trim()===""){
+    setStatus("💾 Local save OK (Cloud URL નથી)","#e67e22"); return;
+  }
+  setStatus("⏳ ક્લાઉડ પર સેવ થઈ રહ્યું છે...","#e67e22");
+  try{
+    // Content-Type હટાવી દીધું જેથી બ્રાઉઝર પ્રી-ફ્લાઇટ (CORS) બ્લોક ન કરે
+    const response = await fetch(APPS_SCRIPT_URL,{
+      method:"POST",
+      body:JSON.stringify({centerCode, data:{inv:state.inv, ben:state.ben}})
+    });
+    const result = await response.json();
+    if(result.status==="ok"){
+      setStatus(`✅ Cloud + Local — બંને save! (${centerCode})`);
+      sendLog("SAVE", `ડેટા save — ${centerCode}`);
+    } else {
+      setStatus(`⚠️ Cloud error: ${result.msg||"unknown"} | Local save OK`,"#e67e22");
+    }
+  } catch(e){
+    setStatus(`⚠️ Cloud save fail: ${e.message} | Local backup OK`,"#e67e22");
+  }
+}
+
+async function fetchLogs(){
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.trim()===""){
+    setStatus("⚠️ Apps Script URL સેટ નથી","#e67e22"); return;
+  }
+  setStatus("⏳ Logs લોડ થઈ રહ્યા છે...","#e67e22");
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=getLogs&_ts=${Date.now()}`);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const fetchedLogs = data.logs || (Array.isArray(data) ? data : null);
+    if(fetchedLogs){
+      state.logData = fetchedLogs;
+      setStatus(`✅ ${fetchedLogs.length} log entries મળ્યા`);
+    } else {
+      state.logData = [];
+      setStatus("⚠️ Logs ઉપલબ્ધ નથી — Apps Script ચેક કરો","#e67e22");
+    }
+  } catch(e){
+    state.logData = [];
+    setStatus(`❌ Log fetch નિષ્ફળ: ${e.message}`, "#cc3d3d");
+  }
+  render();
 }
 
 function loadLocalFallback(errMsg=""){
@@ -261,17 +297,11 @@ async function saveState(){
   }
   setStatus("⏳ ક્લાઉડ પર સેવ થઈ રહ્યું છે...","#e67e22");
   try{
-    const controller = new AbortController();
-    const timeout = setTimeout(()=>controller.abort(), 20000);
+    // Content-Type હટાવી દીધું જેથી બ્રાઉઝર પ્રી-ફ્લાઇટ (CORS) બ્લોક ન કરે
     const response = await fetch(APPS_SCRIPT_URL,{
       method:"POST",
-      mode: "cors",
-      redirect: "follow",
-      headers:{"Content-Type":"text/plain"}, // JSON ના બદલે text/plain લોચો રોકે છે
-      body:JSON.stringify({centerCode, data:{inv:state.inv, ben:state.ben}}),
-      signal: controller.signal
+      body:JSON.stringify({centerCode, data:{inv:state.inv, ben:state.ben}})
     });
-    clearTimeout(timeout);
     const result = await response.json();
     if(result.status==="ok"){
       setStatus(`✅ Cloud + Local — બંને save! (${centerCode})`);
@@ -279,12 +309,34 @@ async function saveState(){
     } else {
       setStatus(`⚠️ Cloud error: ${result.msg||"unknown"} | Local save OK`,"#e67e22");
     }
-  }catch(e){
-    const msg = e.name==="AbortError" ? "Timeout" : e.message;
-    setStatus(`⚠️ Cloud save fail: ${msg} | Local backup OK`,"#e67e22");
+  } catch(e){
+    setStatus(`⚠️ Cloud save fail: ${e.message} | Local backup OK`,"#e67e22");
   }
 }
 
+async function fetchLogs(){
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.trim()===""){
+    setStatus("⚠️ Apps Script URL સેટ નથી","#e67e22"); return;
+  }
+  setStatus("⏳ Logs લોડ થઈ રહ્યા છે...","#e67e22");
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=getLogs&_ts=${Date.now()}`);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const fetchedLogs = data.logs || (Array.isArray(data) ? data : null);
+    if(fetchedLogs){
+      state.logData = fetchedLogs;
+      setStatus(`✅ ${fetchedLogs.length} log entries મળ્યા`);
+    } else {
+      state.logData = [];
+      setStatus("⚠️ Logs ઉપલબ્ધ નથી — Apps Script ચેક કરો","#e67e22");
+    }
+  } catch(e){
+    state.logData = [];
+    setStatus(`❌ Log fetch નિષ્ફળ: ${e.message}`, "#cc3d3d");
+  }
+  render();
+}
 function showHeaderInfo(){
   const bar = document.getElementById("centerInfoBar");
   const btn = document.getElementById("btnLogoutHeader");

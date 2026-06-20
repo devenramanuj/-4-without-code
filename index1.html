@@ -322,24 +322,37 @@ async function sendLog(action, details){
 }
 
 /* ── Fetch logs — Admin panel માટે ── */
+/* ── Fetch logs — Admin panel માટે ── */
 async function fetchLogs(){
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.trim()==="" || APPS_SCRIPT_URL.includes("YOUR_URL")){
+    setStatus("⚠️ Apps Script URL સેટ નથી — Logs લોડ ન થઈ શકે","#e67e22");
+    return;
+  }
   setStatus("⏳ Logs લોડ થઈ રહ્યા છે...","#e67e22");
   try{
-    const res  = await fetch(`${APPS_SCRIPT_URL}?action=getLogs`);
+    // ક્રોસ-ઓરિજિન અને કેશિંગના ઇસ્યુ નિવારવા માટે ટાઈમસ્ટેમ્પ ઉમેર્યો
+    const res  = await fetch(`${APPS_SCRIPT_URL}?action=getLogs&_ts=${Date.now()}`);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    if(data.logs){
-      state.logData = data.logs;
-      setStatus(`✅ ${data.logs.length} log entries મળ્યા`);
+    
+    // જો ડેટા ઓબ્જેક્ટમાં સીધો એરે હોય અથવા ડેટા પોતે જ એરે હોય તેને હેન્ડલ કરવા માટે:
+    const fetchedLogs = data.logs || (Array.isArray(data) ? data : null);
+    
+    if(fetchedLogs){
+      state.logData = fetchedLogs;
+      setStatus(`✅ ${fetchedLogs.length} log entries મળ્યા`);
     } else {
       state.logData = [];
-      setStatus("⚠️ Logs ઉપલબ્ધ નથી — Apps Script અપડેટ કરો","#e67e22");
+      setStatus("⚠️ Logs ઉપલબ્ધ નથી — Apps Script ચેક કરો","#e67e22");
     }
   }catch(e){
+    console.error("Log fetch error:", e);
     state.logData = [];
-    setStatus("❌ Log fetch નિષ્ફળ","#cc3d3d");
+    setStatus(`❌ Log fetch નિષ્ફળ: ${e.message}`, "#cc3d3d");
   }
   render();
 }
+
 
 /* ================================================================
    USAGE RULES — Final નિયમ

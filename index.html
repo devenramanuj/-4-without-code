@@ -6,10 +6,11 @@
 <title>My Daily Report</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap" rel="stylesheet"></noscript>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans Gujarati',sans-serif;background:#f0f4f8;color:#1a2535;line-height:1.4}
+body{font-family:'Noto Sans Gujarati',system-ui,sans-serif;background:#f0f4f8;color:#1a2535;line-height:1.4}
 .container{max-width:1200px;margin:0 auto;padding:10px}
 .header{background:linear-gradient(135deg,#0f2442,#1a3c5e);color:#fff;padding:12px;position:sticky;top:0;z-index:100;box-shadow:0 3px 10px rgba(0,0,0,.3)}
 .header h1{font-size:18px;text-align:center;margin-bottom:8px}
@@ -85,7 +86,10 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
   white-space:nowrap;transition:background .15s}
 .logout-btn:hover{background:#cc3d3d}
 .header-center-info{font-size:11px;color:#a0b4c8;text-align:center;margin-bottom:6px}
-.sync-status{text-align:center;padding:5px;font-size:12px;font-weight:bold;color:#1b8f57;background:#e8f5e9;}
+.sync-status{text-align:center;padding:4px 8px;font-size:11px;font-weight:600;
+  color:#1b8f57;background:#e8f5e9;transition:all .3s;cursor:pointer}
+.sync-status.syncing{color:#2563a8;background:#dbeafe}
+.sync-status.error{color:#cc3d3d;background:#fee2e2}
 .setup-box{max-width:400px;margin:50px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1);border:1px solid #d1dce8;text-align:center;}
 .setup-box h2{color:#1a3c5e;margin-bottom:15px;font-size:18px;}
 .setup-box input{width:100%;padding:10px;font-size:16px;text-align:center;border:2px solid #cbd5e1;border-radius:8px;margin-bottom:15px;font-family:inherit;font-weight:700;}
@@ -161,8 +165,8 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
 
 <script>
 // 🚨 અહીં તમારી GOOGLE APPS SCRIPT WEB APP URL પેસ્ટ કરો 🚨
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw50LCilmreN1FtjZw7BDXkHJ0-4qhUeAAOcTuhf8muvr29a-NV2Y0_9ZzaViv0CQbWow/exec";
-const ADMIN_PASSWORD = "Dev@1"; // ← Admin password અહીં બદલો
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8lLnl2FsKhLzFvUWk2IX55EHZjHEdRSTzjr8-HW6lE_sBwzV98J88zSugprmf9TO9hQ/exec";
+const ADMIN_PASSWORD = "dev@admin"; // ← Admin password અહીં બદલો
 
 const ITEMS=[
   {id:"ghau",    name:"ઘઉં",     emoji:"🌾", bg:"#fff3cd", color:"#856404"},
@@ -213,18 +217,17 @@ async function loadCloudData(){
     if(data && data.status!=="new_user" && data.status!=="error"){
       if(data.inv) state.inv=data.inv;
       if(data.ben) state.ben=data.ben;
-      // local backup
       localStorage.setItem("mdr_offline_"+centerCode, JSON.stringify({inv:state.inv,ben:state.ben}));
-      setStatus(`☁️ કેન્દ્ર: ${centerCode} — ક્લાઉડ ડેટા એક્ટિવ`);
+      setStatus(`☁️ Synced — ${centerCode}`);
+      render(); // data update સાથે refresh
     } else if(data.status==="new_user"){
-      setStatus(`🆕 નવું કેન્દ્ર: ${centerCode} — નવો ડેટા શરૂ`);
-      sendLog("NEW", `નવી આંગણવાડી: ${centerCode}`);
+      setStatus(`🆕 નવું કેન્દ્ર: ${centerCode}`);
+      sendLog("NEW", `નવી આંગણ: ${centerCode}`);
     } else {
       throw new Error(data.msg || "unknown error");
     }
     document.getElementById("nav").style.display="flex";
     showHeaderInfo();
-    render();
   } catch(e){
     let errMsg = e.message || e.toString();
     if(e.name==="AbortError") errMsg = "Timeout — 10 સેકન્ડ માં response નહીં";
@@ -249,6 +252,7 @@ async function loadCloudData(){
 }
 
 function loadLocalFallback(){
+  // Local data load કરો
   const offlineData = localStorage.getItem("mdr_offline_"+centerCode);
   if(offlineData){
     try{
@@ -257,6 +261,7 @@ function loadLocalFallback(){
       if(d.ben) state.ben=d.ben;
     }catch(_){}
   }
+  // Nav તરત show કરો
   document.getElementById("nav").style.display="flex";
   showHeaderInfo();
   render();
@@ -451,8 +456,8 @@ function renderSetupPage(){
   return `
     <div class="setup-box">
       <h2>🏢 આંગણવાડી કેન્દ્ર લોગિન</h2>
-      <p style="font-size:13px;color:#64748b;margin-bottom:15px;">તમારો ડેટા અલગ રાખવા માટે મોબાઈલ નંબર નાખો.</p>
-      <input type="text" id="centerCodeInput" placeholder="મોબાઈલ નંબર" value="${centerCode}">
+      <p style="font-size:13px;color:#64748b;margin-bottom:15px;">તમારો ડેટા અલગ રાખવા માટે કેન્દ્રનો કોડ અથવા મોબાઈલ નંબર નાખો.</p>
+      <input type="text" id="centerCodeInput" placeholder="દા.ત. AW-101 અથવા નંબર" value="${centerCode}">
       <button id="btnSubmitSetup">એપ શરૂ કરો ➔</button>
     </div>`;
 }
@@ -1125,7 +1130,14 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeModal();}
 });
 
-if(centerCode){loadCloudData();}else{render();}
+if(centerCode){
+  // તરત local data બતાવો — user ને wait ન કરવી પડે
+  loadLocalFallback();
+  // background માં cloud sync
+  setTimeout(()=>{ loadCloudData(); }, 100);
+}else{
+  render();
+}
 </script>
 </body>
 </html>

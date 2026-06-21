@@ -46,10 +46,10 @@ body{
 .cal-head{display:flex;justify-content:space-between;align-items:center;padding:8px;gap:6px}
 .cal-head button{background:#2563a8;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700}
 .cal-head h3{font-size:15px;font-weight:700;color:#1a3c5e}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:8px}
-.cal-day-head{text-align:center;font-weight:700;font-size:12px;padding:6px 2px;background:#1a3c5e;color:#fff;border-radius:4px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:4px;box-sizing:border-box;width:100%}
+.cal-day-head{text-align:center;font-weight:700;font-size:11px;padding:5px 1px;background:#1a3c5e;color:#fff;border-radius:4px;box-sizing:border-box;overflow:hidden}
 .cal-day-head.sun{background:#cc3d3d}
-.cal-cell{aspect-ratio:1;border:1px solid #d1dce8;border-radius:6px;padding:3px;cursor:pointer;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;font-size:11px;transition:all .15s;min-height:48px;position:relative}
+.cal-cell{aspect-ratio:1;border:1px solid #d1dce8;border-radius:6px;padding:2px;cursor:pointer;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;font-size:11px;transition:all .15s;min-height:44px;position:relative;box-sizing:border-box;overflow:hidden}
 .cal-cell:hover{background:#e0f2fe;border-color:#2563a8}
 .cal-cell.empty{background:transparent;border:none;cursor:default}
 .cal-cell.today{background:#fef3c7;border-color:#f59e0b;border-width:2px}
@@ -76,15 +76,18 @@ table{border-collapse:separate;border-spacing:0;width:100%;font-size:11px}
 th{background:#1a3c5e;color:#fff;padding:8px 6px;text-align:center;border:1px solid rgba(255,255,255,.15);font-weight:700;font-size:11px;white-space:nowrap;position:sticky;top:0;z-index:2}
 td{padding:6px;text-align:center;border:1px solid #d1dce8;background:#fff;white-space:nowrap}
 tr:nth-child(even) td{background:#f8fafc}
-.sticky-c1{position:sticky;left:0;z-index:3;box-shadow:1px 0 0 #d1dce8;min-width:48px}
-.sticky-c2{position:sticky;left:48px;z-index:3;box-shadow:1px 0 0 #d1dce8;min-width:65px}
-th.sticky-c1,th.sticky-c2{z-index:5;background:#1a3c5e}
-td.sticky-c1,td.sticky-c2{background:#fff}
-tr:nth-child(even) td.sticky-c1,tr:nth-child(even) td.sticky-c2{background:#f8fafc}
+/* ── Sticky columns: તા. | વ. | સં. ── */
+/* c1=તારીખ 32px | c2=વાર fit | c3=સં. 32px */
+.sticky-c1{position:sticky;left:0;z-index:3;box-shadow:none;width:32px;min-width:32px;max-width:32px}
+.sticky-c2{position:sticky;left:32px;z-index:3;white-space:nowrap;width:auto;padding-left:6px;padding-right:6px}
+.sticky-c3{position:sticky;left:calc(32px + var(--c2w, 52px));z-index:3;width:32px;min-width:32px;max-width:32px;box-shadow:2px 0 4px rgba(0,0,0,.08)}
+th.sticky-c1,th.sticky-c2,th.sticky-c3{z-index:5;background:#1a3c5e}
+td.sticky-c1,td.sticky-c2,td.sticky-c3{background:#fff}
+tr:nth-child(even) td.sticky-c1,tr:nth-child(even) td.sticky-c2,tr:nth-child(even) td.sticky-c3{background:#f8fafc}
 tr.sun-row td{background:#fff0f0 !important;color:#991b1b}
-tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;color:#991b1b;font-weight:700}
+tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{background:#fff0f0 !important;color:#991b1b;font-weight:700}
 .total-row td{background:#fef3c7 !important;font-weight:800;color:#92400e;border-top:2px solid #f59e0b}
-.total-row td.sticky-c1,.total-row td.sticky-c2{background:#fef3c7 !important;color:#92400e}
+.total-row td.sticky-c1,.total-row td.sticky-c2,.total-row td.sticky-c3{background:#fef3c7 !important;color:#92400e}
 .report-tabs{display:flex;gap:6px;padding:8px;background:#eef5fb;border-bottom:1px solid #d1dce8}
 .report-tabs button{flex:1;padding:8px;border:none;background:#fff;color:#475569;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer;font-size:13px;border:1px solid #d1dce8}
 .report-tabs button.active{background:#2563a8;color:#fff;border-color:#2563a8}
@@ -149,10 +152,10 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
 .zoom-btn{background:#2563a8;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:14px;font-weight:700;cursor:pointer;line-height:1;flex-shrink:0}
 .zoom-btn:active{background:#1a3c5e}
 .zoom-reset{background:#e2e8f0;color:#475569;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0}
-/* outer clip — never bleeds outside card */
+/* outer clip — scrollable container */
 .zoomable-outer{overflow:auto;-webkit-overflow-scrolling:touch;width:100%}
-/* inner wrapper — zoom transform applies here */
-.zoomable-inner{transform-origin:top left;transition:transform .15s ease;display:inline-block;min-width:100%}
+/* ✅ CSS zoom (not transform) — sticky position works correctly inside zoom */
+.zoomable-inner{display:block;min-width:100%;zoom:1}
 
 @media print{
   .header,.actions,.nav,.report-tabs,.cal-head button,.sync-status{display:none !important}
@@ -204,8 +207,8 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
 /* ============================================================
    CONFIG
 ============================================================ */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw50LCilmreN1FtjZw7BDXkHJ0-4qhUeAAOcTuhf8muvr29a-NV2Y0_9ZzaViv0CQbWow/exec";
-const ADMIN_PASSWORD = "Dev@1"; // ← Admin password અહીં બદલો
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFKmZ6vaXw40X54BwONQtSWSSfEUuz3c7HYJtEhYxGcvDR-Zaa6cufrwdALgFPn9GbVA/exec";
+const ADMIN_PASSWORD  = "Dev@1";
 
 /* ============================================================
    CONSTANTS  (frozen objects = faster property lookup)
@@ -542,8 +545,14 @@ function renderMonthlyPage(curMU){
       <div class="table-wrap">
         <table style="min-width:800px">
           <thead><tr>
-            <th style="text-align:left">ઇન્વ.</th><th>સ.લ.</th><th>બ.લ.</th>
-            <th>ઊઘ.(kg)</th><th>સ.(g)</th><th>બ.(g)</th><th>કુ.(g)</th><th>સિ.(kg)</th>
+            <th style="text-align:left">ઇન્વેન્ટરી</th>
+            <th>સવાર લાભ.</th>
+            <th>બપોર લાભ.</th>
+            <th>ઊઘડતી (kg)</th>
+            <th>સવાર વ. (g)</th>
+            <th>બપોર વ. (g)</th>
+            <th>કુલ વ. (g)</th>
+            <th>બંધ સિલક (kg)</th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
@@ -593,13 +602,13 @@ function renderReportPage(){
       totals[it.id+"M"]+=mg;totals[it.id+"A"]+=ag;totals[it.id]+=t;
       colsArr.push(`<td>${mg||"—"}</td><td>${ag||"—"}</td><td style="font-weight:700;color:${t?'#e67e22':'#cbd5e1'}">${t||"—"}</td><td style="font-weight:700;color:#1b8f57">${fmt(runBal[it.id],3)}</td>`);
     });
-    dateRowsArr.push(`<tr class="${dow===0?'sun-row':''}"><td class="sticky-c1"><b>${d}</b></td><td class="sticky-c2">${DAYS_TBL[dow]}</td><td style="${n>0?'color:#2563a8;font-weight:700':'color:#cbd5e1'}">${n||"—"}</td>${colsArr.join("")}</tr>`);
+    dateRowsArr.push(`<tr class="${dow===0?'sun-row':''}"><td class="sticky-c1"><b>${d}</b></td><td class="sticky-c2">${DAYS_TBL[dow]}</td><td class="sticky-c3" style="${n>0?'color:#2563a8;font-weight:700':'color:#cbd5e1'}">${n||"—"}</td>${colsArr.join("")}</tr>`);
   }
 
   const totalCols=ITEMS.map(it=>`<td>${fmt(totals[it.id+"M"])}</td><td>${fmt(totals[it.id+"A"])}</td><td>${fmt(totals[it.id])}</td><td>${fmt(runBal[it.id],3)}</td>`).join("");
-  const totalRow=`<tr class="total-row"><td class="sticky-c1" colspan="2"><b>ટોટલ</b></td><td>${totals.n}</td>${totalCols}</tr>`;
+  const totalRow=`<tr class="total-row"><td class="sticky-c1"><b>ટો.</b></td><td class="sticky-c2"></td><td class="sticky-c3">${totals.n}</td>${totalCols}</tr>`;
   const invHeads=ITEMS.map(it=>`<th colspan="4" style="background:${it.color}">${it.emoji} ${it.name}</th>`).join("");
-  const subHeads=ITEMS.map(()=>`<th>સ.(g)</th><th>બ.(g)</th><th>ક.(g)</th><th>સિ.(kg)</th>`).join("");
+  const subHeads=ITEMS.map(()=>`<th>સ. વ. (g)</th><th>બ. વ. (g)</th><th>કુલ (g)</th><th>સિલક (kg)</th>`).join("");
 
   const summaryRows=ITEMS.map(it=>{
     const iv=state.inv[it.id], opening=iv.o+iv.r;
@@ -630,7 +639,15 @@ function renderReportPage(){
       <div class="zoomable-outer" id="zoomOuter">
         <div class="zoomable-inner" id="zoomInner">
           <table style="min-width:720px">
-            <thead><tr><th style="text-align:left">ઇ.</th><th>લ.</th><th>ઊ.(kg)</th><th>સ.(g)</th><th>બ.(g)</th><th>ક.(g)</th><th>સ.(kg)</th></tr></thead>
+            <thead><tr>
+              <th style="text-align:left">ઇન્વેન્ટરી</th>
+              <th>લાભાર્થી</th>
+              <th>ઊઘડતી (kg)</th>
+              <th>સ. વપરાશ (g)</th>
+              <th>બ. વપરાશ (g)</th>
+              <th>કુલ (g)</th>
+              <th>બંધ સિલક (kg)</th>
+            </tr></thead>
             <tbody>${dailyRows}</tbody>
           </table>
         </div>
@@ -659,7 +676,7 @@ function renderReportPage(){
         <div class="zoomable-inner" id="zoomInner">
           <table style="min-width:1400px">
             <thead>
-              <tr><th class="sticky-c1" rowspan="2">તા.</th><th class="sticky-c2" rowspan="2">વ.</th><th rowspan="2">લ.</th>${invHeads}</tr>
+              <tr><th class="sticky-c1" rowspan="2">તારીખ</th><th class="sticky-c2" rowspan="2">વાર</th><th class="sticky-c3" rowspan="2">સં.</th>${invHeads}</tr>
               <tr>${subHeads}</tr>
             </thead>
             <tbody>${dateRowsArr.join("")}${totalRow}</tbody>
@@ -680,7 +697,16 @@ function renderReportPage(){
       <div class="zoomable-outer" id="zoom2Outer">
         <div class="zoomable-inner" id="zoom2Inner">
           <table style="min-width:820px">
-            <thead><tr><th style="text-align:left">ઇ.</th><th>સ.લ.</th><th>બ.લ.</th><th>ઊ.(kg)</th><th>સ.(g)</th><th>બ.(g)</th><th>ક.(g)</th><th>બ.(kg)</th></tr></thead>
+            <thead><tr>
+              <th style="text-align:left">ઇન્વેન્ટરી</th>
+              <th>સ. લાભ.</th>
+              <th>બ. લાભ.</th>
+              <th>ઊઘડતી (kg)</th>
+              <th>સ. વ. (g)</th>
+              <th>બ. વ. (g)</th>
+              <th>કુલ (g)</th>
+              <th>બંધ (kg)</th>
+            </tr></thead>
             <tbody>${summaryRows}</tbody>
           </table>
         </div>
@@ -883,16 +909,9 @@ function applyZoom(innerId, pctId, val){
   val = Math.max(25, Math.min(200, val));
   const inner = document.getElementById(innerId);
   const pct   = document.getElementById(pctId);
-  if(inner) inner.style.transform = `scale(${val/100})`;
-  if(pct)   pct.textContent = val + "%";
-  // outer height adjust so scrollable area matches scaled content
-  const outer = inner && inner.parentElement;
-  if(outer){
-    // let outer scroll naturally; inner scale shrinks/grows inline block
-    outer.style.height = val < 100
-      ? Math.round(inner.scrollHeight * val/100 + 20)+"px"
-      : "";
-  }
+  // ✅ CSS zoom — sticky position works correctly (transform breaks sticky)
+  if(inner) inner.style.zoom = (val/100);
+  if(pct)   pct.textContent  = val + "%";
   return val;
 }
 
@@ -942,6 +961,16 @@ function initReportZoom(){
   if(state.rptTab === 'daily'){
     initZoomSet("zoom", "zoomInner", "zoomPct", 100);
   } else {
+    // sticky-c3 left = c1.width + c2.width (measured after paint)
+    requestAnimationFrame(()=>{
+      const tbl = document.querySelector('#zoomInner table');
+      if(tbl){
+        const c1 = tbl.querySelector('th.sticky-c1');
+        const c2 = tbl.querySelector('th.sticky-c2');
+        const offset = Math.ceil((c1?c1.offsetWidth:32) + (c2?c2.offsetWidth:52));
+        tbl.querySelectorAll('.sticky-c3').forEach(el=>{ el.style.left = offset+'px'; });
+      }
+    });
     initZoomSet("zoom",  "zoomInner",  "zoomPct",  70);
     initZoomSet("zoom2", "zoom2Inner", "zoom2Pct", 100);
   }

@@ -141,6 +141,19 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
 /* ✅ FIX 7: content-visibility for off-screen tabs — big render boost */
 .tab-content{content-visibility:auto;contain-intrinsic-size:0 500px}
 
+/* ── REPORT ZOOM ── */
+.zoom-toolbar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f0f7ff;border-bottom:1px solid #d1dce8;flex-wrap:wrap}
+.zoom-toolbar label{font-size:12px;font-weight:700;color:#1a3c5e;white-space:nowrap}
+.zoom-slider{flex:1;min-width:100px;max-width:220px;accent-color:#2563a8;cursor:pointer;height:4px}
+.zoom-pct{font-size:12px;font-weight:800;color:#2563a8;min-width:38px;text-align:right}
+.zoom-btn{background:#2563a8;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:14px;font-weight:700;cursor:pointer;line-height:1;flex-shrink:0}
+.zoom-btn:active{background:#1a3c5e}
+.zoom-reset{background:#e2e8f0;color:#475569;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0}
+/* outer clip — never bleeds outside card */
+.zoomable-outer{overflow:auto;-webkit-overflow-scrolling:touch;width:100%}
+/* inner wrapper — zoom transform applies here */
+.zoomable-inner{transform-origin:top left;transition:transform .15s ease;display:inline-block;min-width:100%}
+
 @media print{
   .header,.actions,.nav,.report-tabs,.cal-head button,.sync-status{display:none !important}
   body{background:#fff}
@@ -193,6 +206,7 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2{background:#fff0f0 !important;co
 ============================================================ */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw50LCilmreN1FtjZw7BDXkHJ0-4qhUeAAOcTuhf8muvr29a-NV2Y0_9ZzaViv0CQbWow/exec";
 const ADMIN_PASSWORD = "Dev@1"; // ← Admin password અહીં બદલો
+
 /* ============================================================
    CONSTANTS  (frozen objects = faster property lookup)
 ============================================================ */
@@ -603,12 +617,24 @@ function renderReportPage(){
 
   const dailyHtml=`<div class="card">
     <div class="section-head">📅 દૈ. — ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()} (${DAYS_FULL[today.getDay()]})</div>
-    <div class="section-body">
-      <p style="font-size:12px;color:#64748b;margin-bottom:8px">ભોજن: <b>${dayHint(today.getDay())}</b> | લ.: <b style="color:#2563a8">${todayN}</b></p>
-      <div class="table-wrap"><table style="min-width:720px">
-        <thead><tr><th style="text-align:left">ઇ.</th><th>લ.</th><th>ઊ.(kg)</th><th>સ.(g)</th><th>બ.(g)</th><th>ક.(g)</th><th>સ.(kg)</th></tr></thead>
-        <tbody>${dailyRows}</tbody>
-      </table></div>
+    <div class="zoom-toolbar">
+      <label>🔍 Zoom:</label>
+      <button class="zoom-btn" id="zoomOut">−</button>
+      <input type="range" class="zoom-slider" id="zoomSlider" min="50" max="150" value="100" step="5">
+      <button class="zoom-btn" id="zoomIn">+</button>
+      <span class="zoom-pct" id="zoomPct">100%</span>
+      <button class="zoom-reset" id="zoomReset">Reset</button>
+    </div>
+    <div class="section-body" style="padding:8px">
+      <p style="font-size:12px;color:#64748b;margin-bottom:8px">ભોજน: <b>${dayHint(today.getDay())}</b> | લ.: <b style="color:#2563a8">${todayN}</b></p>
+      <div class="zoomable-outer" id="zoomOuter">
+        <div class="zoomable-inner" id="zoomInner">
+          <table style="min-width:720px">
+            <thead><tr><th style="text-align:left">ઇ.</th><th>લ.</th><th>ઊ.(kg)</th><th>સ.(g)</th><th>બ.(g)</th><th>ક.(g)</th><th>સ.(kg)</th></tr></thead>
+            <tbody>${dailyRows}</tbody>
+          </table>
+        </div>
+      </div>
     </div>
     <div class="actions"><button class="btn-print" id="btnPrint">🖨️ Print</button><button class="btn-share" id="btnShare">📤 Share</button></div>
   </div>`;
@@ -616,16 +642,49 @@ function renderReportPage(){
   const monthlyHtml=`<div class="card">
     <div class="section-head">📊 ${MONTHS_FULL[state.calM]} ${state.calY}</div>
     <div class="cal-head"><button id="prevM">‹</button><h3>${MONTHS_FULL[state.calM]} ${state.calY}</h3><button id="nextM">›</button></div>
-    <div class="section-body">
-      <div class="table-wrap" style="max-height:520px;overflow:auto"><table style="min-width:1400px">
-        <thead><tr><th class="sticky-c1" rowspan="2">તા.</th><th class="sticky-c2" rowspan="2">વ.</th><th rowspan="2">લ.</th>${invHeads}</tr><tr>${subHeads}</tr></thead>
-        <tbody>${dateRowsArr.join("")}${totalRow}</tbody>
-      </table></div>
-      <h4 style="color:#1a3c5e;margin:14px 0 8px;font-size:13px">📦 ઈ. સારાંશ</h4>
-      <div class="table-wrap"><table style="min-width:820px">
-        <thead><tr><th style="text-align:left">ઇ.</th><th>સ.લ.</th><th>બ.લ.</th><th>ઊ.(kg)</th><th>સ.(g)</th><th>બ.(g)</th><th>ક.(g)</th><th>બ.(kg)</th></tr></thead>
-        <tbody>${summaryRows}</tbody>
-      </table></div>
+
+    <!-- Zoom toolbar — માત્ર table zoom -->
+    <div class="zoom-toolbar">
+      <label>🔍 Zoom:</label>
+      <button class="zoom-btn" id="zoomOut">−</button>
+      <input type="range" class="zoom-slider" id="zoomSlider" min="30" max="120" value="70" step="5">
+      <button class="zoom-btn" id="zoomIn">+</button>
+      <span class="zoom-pct" id="zoomPct">70%</span>
+      <button class="zoom-reset" id="zoomReset">Reset</button>
+    </div>
+
+    <div class="section-body" style="padding:8px">
+      <!-- તારીખવાર big table — zoomable -->
+      <div class="zoomable-outer" id="zoomOuter" style="max-height:500px">
+        <div class="zoomable-inner" id="zoomInner">
+          <table style="min-width:1400px">
+            <thead>
+              <tr><th class="sticky-c1" rowspan="2">તા.</th><th class="sticky-c2" rowspan="2">વ.</th><th rowspan="2">લ.</th>${invHeads}</tr>
+              <tr>${subHeads}</tr>
+            </thead>
+            <tbody>${dateRowsArr.join("")}${totalRow}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Summary table — separate zoom -->
+      <h4 style="color:#1a3c5e;margin:14px 0 4px;font-size:13px">📦 ઈ. સારાંશ</h4>
+      <div class="zoom-toolbar" style="margin-bottom:4px">
+        <label>🔍 Zoom:</label>
+        <button class="zoom-btn" id="zoom2Out">−</button>
+        <input type="range" class="zoom-slider" id="zoom2Slider" min="50" max="150" value="100" step="5">
+        <button class="zoom-btn" id="zoom2In">+</button>
+        <span class="zoom-pct" id="zoom2Pct">100%</span>
+        <button class="zoom-reset" id="zoom2Reset">Reset</button>
+      </div>
+      <div class="zoomable-outer" id="zoom2Outer">
+        <div class="zoomable-inner" id="zoom2Inner">
+          <table style="min-width:820px">
+            <thead><tr><th style="text-align:left">ઇ.</th><th>સ.લ.</th><th>બ.લ.</th><th>ઊ.(kg)</th><th>સ.(g)</th><th>બ.(g)</th><th>ક.(g)</th><th>બ.(kg)</th></tr></thead>
+            <tbody>${summaryRows}</tbody>
+          </table>
+        </div>
+      </div>
     </div>
     <div class="actions"><button class="btn-print" id="btnPrint">🖨️ Print</button><button class="btn-share" id="btnShareM">📤 Share</button></div>
   </div>`;
@@ -757,6 +816,8 @@ function render(){
       const inp=document.getElementById('modalInput');
       if(inp){ inp.focus(); inp.select(); }
     }
+    // Report zoom init — after DOM is ready
+    if(state.tab === 3 && !state.modal) initReportZoom();
   });
 }
 
@@ -811,6 +872,79 @@ function importBackup(file){
     }catch(_){ alert("❌ ખोटी file"); }
   };
   r.readAsText(file);
+}
+
+/* ============================================================
+   ZOOM HELPERS
+   — applyZoom(innerId, pctId, val) : sets CSS transform + label
+   — initZoom(wrapperId)            : attach after render
+============================================================ */
+function applyZoom(innerId, pctId, val){
+  val = Math.max(25, Math.min(200, val));
+  const inner = document.getElementById(innerId);
+  const pct   = document.getElementById(pctId);
+  if(inner) inner.style.transform = `scale(${val/100})`;
+  if(pct)   pct.textContent = val + "%";
+  // outer height adjust so scrollable area matches scaled content
+  const outer = inner && inner.parentElement;
+  if(outer){
+    // let outer scroll naturally; inner scale shrinks/grows inline block
+    outer.style.height = val < 100
+      ? Math.round(inner.scrollHeight * val/100 + 20)+"px"
+      : "";
+  }
+  return val;
+}
+
+// Wire a zoom toolbar set (slider + +/- buttons + reset)
+function initZoomSet(prefix, innerId, pctId, defaultVal){
+  const slider  = document.getElementById(prefix+"Slider");
+  const btnOut  = document.getElementById(prefix+"Out");
+  const btnIn   = document.getElementById(prefix+"In");
+  const btnRst  = document.getElementById(prefix+"Reset");
+  if(!slider) return;
+  let cur = defaultVal || parseInt(slider.value) || 100;
+
+  const sync = v => {
+    cur = applyZoom(innerId, pctId, v);
+    slider.value = cur;
+  };
+
+  slider.addEventListener('input', () => sync(parseInt(slider.value)));
+  btnOut && btnOut.addEventListener('click', () => sync(cur - 10));
+  btnIn  && btnIn.addEventListener('click',  () => sync(cur + 10));
+  btnRst && btnRst.addEventListener('click', () => sync(defaultVal || 100));
+
+  // Touch pinch-to-zoom on the outer container
+  const outer = document.getElementById(innerId)?.parentElement;
+  if(outer){
+    let startDist = 0, startZoom = cur;
+    outer.addEventListener('touchstart', e=>{
+      if(e.touches.length===2){
+        startDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+        startZoom = cur;
+      }
+    },{passive:true});
+    outer.addEventListener('touchmove', e=>{
+      if(e.touches.length===2){
+        const dist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+        const ratio = dist / (startDist || 1);
+        sync(Math.round(startZoom * ratio));
+      }
+    },{passive:true});
+  }
+
+  sync(cur); // apply default
+}
+
+// Called after render whenever report tab is shown
+function initReportZoom(){
+  if(state.rptTab === 'daily'){
+    initZoomSet("zoom", "zoomInner", "zoomPct", 100);
+  } else {
+    initZoomSet("zoom",  "zoomInner",  "zoomPct",  70);
+    initZoomSet("zoom2", "zoom2Inner", "zoom2Pct", 100);
+  }
 }
 
 /* ============================================================

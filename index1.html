@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>My Daily Report</title>
-<!-- preloads -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap">
@@ -235,7 +234,7 @@ const ITEMS = Object.freeze([
 ]);
 const DAYS_SHORT  = ["ર","સો","મં","બુ","ગુ","શુ","શ"];
 const DAYS_TBL    = ["રવિ","સોમ","મંગળ","બુધ","ગુ","શુ","શ"];
-const DAYS_FULL   = ["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","გુરુવાર","શુક્રવાર","શનિવાર"];
+const DAYS_FULL   = ["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","ગુરુવાર","શુક્રવાર","શનિવાર"];
 const MONTHS_FULL = ["જાન્યુઆરી","ફેબ્રુઆરી","માર્ચ","એપ્રિલ","મે","જૂન","જુલાઈ","ઓગસ્ટ","સપ્ટેમ્બર","ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર"];
 const DEFAULT_INV = {ghau:{o:500,r:200},chokha:{o:300,r:100},tel:{o:50,r:20},chana:{o:80,r:30},dal:{o:80,r:30},chanadal:{o:80,r:30}};
 
@@ -428,7 +427,7 @@ function buildConsolidationHTML(){
     + "<span style='font-size:11px;color:#64748b'>" + con.centers.length + " centers</span>"
     + "</div>";
 
-  if(con.loading) return toolbar + "<div class='con-loading'>\u29D1 \u0AA1\u0AC7\u0A9F\u0ABE \u0AB2\u0ACB\u0AA1 \u0AA5\u0A88 \u0AB0\u0AB9\u0ACH\u0AAF\u0ACB \u0A9B\u0AC7...</div>";
+  if(con.loading) return toolbar + "<div class='con-loading'>\u29D1 \u0AA1\u0AC7\u0A9F\u0ABE \u0AB2\u0ACB\u0AA1 \u0AA5\u0A88 \u0AB0\u0AB9\u0ACD\u0AAF\u0ACB \u0A9B\u0AC7...</div>";
   if(con.error) return toolbar + "<div class='con-error'>\u274C " + con.error + "<br><button onclick='fetchAllCenters()' style='margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer'>ફરી try કરો</button></div>";
   if(!con.centers.length) return toolbar + "<div class='con-loading' style='color:#64748b'>\uD83D\uDCED \u0A95\u0ACB\u0A8ઇ center data \u0AA8\u0AA5\u0AC0<br><button onclick='fetchAllCenters()' style='margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer'>Load Centers</button></div>";
 
@@ -473,7 +472,7 @@ function buildConsolidationHTML(){
   const totalRow = "<tr class='con-total'><td class='con-c1'>\uD83D\uDD22 Grand Total (" + rows.length + " \u0A95\u0AC7\u0AA8\u0ACD\u0AA6\u0ACD\u0AB0)</td><td>" + grand.days + "</td><td>" + grand.totalN + "</td><td>\u2014</td>" + grandCols + "</tr>";
 
   const avgCols = ITEMS.map(it => "<td>" + fmt(grand[it.id+"M"]/n,0) + "</td>" + "<td>" + fmt(grand[it.id+"A"]/n,0) + "</td>" + "<td>" + fmt(grand[it.id]/n,0) + "</td>").join("");
-  const avgRow = "<tr class='con-avg'><td class='con-c1'>\uD83D\uDCCA \u0AB8\u0AB0\u0AC7\u0AB0\u0ABE\u0AB6 / center</td><td>" + fmt(grand.days/n,1) + "</td><td>" + fmt(grand.totalN/n,1) + "</td><td>\u2014</td>" + avgCols + "</tr>";
+  const avgRow = "<tr class='con-avg'><td class='con-c1'>\uD83D\uDCCA \u0AB8\u0AB0\u0AC7\u0ABરાશ / center</td><td>" + fmt(grand.days/n,1) + "</td><td>" + fmt(grand.totalN/n,1) + "</td><td>\u2014</td>" + avgCols + "</tr>";
 
   return toolbar
     + "<div class='con-table-wrap' style='max-height:520px'>"
@@ -507,7 +506,6 @@ function exportConsolidationCSV(){
 /* ============================================================
    USAGE RULES
 ============================================================ */
-// ✅ સુધારેલું: u.chokhanA નો ડુપ્લિકેટ લોચો ફિક્સ કર્યો!
 function calcUsage(dow, n){
   n = Number(n) || 0;
   const u = {};
@@ -522,7 +520,7 @@ function calcUsage(dow, n){
   // Afternoon
   u.telA = 8*n; u.telnA = n;
   if(dow===1||dow===2||dow===5){ u.ghauA=50*n; u.ghaunA=n; }
-  if(dow===3||dow===4||dow===6){ u.chokhaA=50*n; u.chokhanA=n; } // <- અહીં u.chokhanA બરાબર કરી દીધું!
+  if(dow===3||dow===4||dow===6){ u.chokhaA=50*n; u.chokhanA=n; }
   if(dow===2||dow===4||dow===5){ u.chanaA=20*n; u.chananA=n; }
   if(dow===1||dow===3){ u.dalA=20*n; u.dalnA=n; }
   if(dow===6){ u.chanadalA=20*n; u.chanadalnA=n; }
@@ -541,20 +539,24 @@ const dkf = (y,m,d) => `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart
 
 let _muCache = null, _muCacheKey = "";
 function calcMonthUsage(y,m,ben){
-  const key = `${y}-${m}-${JSON.stringify(ben)}`;
-  if(_muCache && _muCacheKey === key) return _muCache;
-  const total = {totalN:0,days:0};
-  ITEMS.forEach(it=>{ total[it.id]=0;total[it.id+"M"]=0;total[it.id+"A"]=0;total[it.id+"nM"]=0;total[it.id+"nA"]=0; });
-  const dim = new Date(y,m+1,0).getDate();
-  for(let d=1;d<=dim;d++){
-    const n = Number(ben[dkf(y,m,d)] || 0);
-    if(!n) continue;
-    const u = calcUsage(new Date(y,m,d).getDay(), n);
-    ITEMS.forEach(it=>{ total[it.id]+=u[it.id];total[it.id+"M"]+=u[it.id+"M"];total[it.id+"A"]+=u[it.id+"A"];total[it.id+"nM"]+=u[it.id+"nM"];total[it.id+"nA"]+=u[it.id+"nA"]; });
-    total.totalN += n; total.days++;
+  try {
+    const key = `${y}-${m}-${JSON.stringify(ben || {})}`;
+    if(_muCache && _muCacheKey === key) return _muCache;
+    const total = {totalN:0,days:0};
+    ITEMS.forEach(it=>{ total[it.id]=0;total[it.id+"M"]=0;total[it.id+"A"]=0;total[it.id+"nM"]=0;total[it.id+"nA"]=0; });
+    const dim = new Date(y,m+1,0).getDate();
+    for(let d=1;d<=dim;d++){
+      const n = Number((ben && ben[dkf(y,m,d)]) || 0);
+      if(!n) continue;
+      const u = calcUsage(new Date(y,m,d).getDay(), n);
+      ITEMS.forEach(it=>{ total[it.id]+=u[it.id];total[it.id+"M"]+=u[it.id+"M"];total[it.id+"A"]+=u[it.id+"A"];total[it.id+"nM"]+=u[it.id+"nM"];total[it.id+"nA"]+=u[it.id+"nA"]; });
+      total.totalN += n; total.days++;
+    }
+    _muCache = total; _muCacheKey = key;
+    return total;
+  } catch(e) {
+    return {totalN:0,days:0,ghau:0,chokha:0,tel:0,chana:0,dal:0,chanadal:0};
   }
-  _muCache = total; _muCacheKey = key;
-  return total;
 }
 function invalidateCache(){ _muCache = null; _muCacheKey = ""; }
 
@@ -574,9 +576,9 @@ function renderSetupPage(){
 
 function renderInventoryPage(curMU){
   const cards = ITEMS.map(it=>{
-    const iv = state.inv[it.id];
+    const iv = state.inv[it.id] || {o:0, r:0};
     const opening = iv.o + iv.r;
-    const used    = (curMU[it.id] || 0) / 1000;
+    const used    = ((curMU && curMU[it.id]) || 0) / 1000;
     const closing = opening - used;
     return `<div class="inv-card">
       <div class="inv-title" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</div>
@@ -647,12 +649,12 @@ function renderCalendarPage(){
 
 function renderMonthlyPage(curMU){
   const rows = ITEMS.map(it=>{
-    const iv=state.inv[it.id], opening=iv.o+iv.r;
-    const mor=curMU[it.id+"M"]||0, aft=curMU[it.id+"A"]||0, tot=curMU[it.id]||0;
+    const iv=state.inv[it.id] || {o:0,r:0}, opening=iv.o+iv.r;
+    const mor=(curMU && curMU[it.id+"M"])||0, aft=(curMU && curMU[it.id+"A"])||0, tot=(curMU && curMU[it.id])||0;
     return `<tr>
       <td style="text-align:left"><span class="badge" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</span></td>
-      <td><b>${curMU[it.id+"nM"]||0}</b></td>
-      <td><b>${curMU[it.id+"nA"]||0}</b></td>
+      <td><b>${(curMU && curMU[it.id+"nM"])||0}</b></td>
+      <td><b>${(curMU && curMU[it.id+"nA"])||0}</b></td>
       <td style="color:#2980b9;font-weight:700">${fmt(opening,3)}</td>
       <td>${fmt(mor)}</td><td>${fmt(aft)}</td>
       <td style="color:#e67e22;font-weight:700">${fmt(tot)}</td>
@@ -664,13 +666,13 @@ function renderMonthlyPage(curMU){
       <div class="section-head">📊 માસિક - ${MONTHS_FULL[state.calM]} ${state.calY}</div>
       <div class="cal-head"><button id="prevM">‹</button><h3>${MONTHS_FULL[state.calM]} ${state.calY}</h3><button id="nextM">›</button></div>
       <div class="cal-totals">
-        <div>કુલ દિ<b>${curMU.days}</b></div><div>કુલ લ.<b>${curMU.totalN}</b></div>
-        <div>સ./દ<b>${curMU.days?fmt(curMU.totalN/curMU.days,1):0}</b></div>
+        <div>કુલ દિ<b>${(curMU && curMU.days)||0}</b></div><div>કુલ લ.<b>${(curMU && curMU.totalN)||0}</b></div>
+        <div>સ./દ<b>${(curMU && curMU.days)?fmt(curMU.totalN/curMU.days,1):0}</b></div>
       </div>
       <div class="table-wrap">
         <table style="min-width:800px">
           <thead><tr>
-            <th style="text-align:left">ઇન્વેન્ટરી</th>
+            <th style="text-align:left">ઇન્વેન્ટري</th>
             <th>સવાર લાભ.</th>
             <th>બપોર લાભ.</th>
             <th>ઊઘડતી (kg)</th>
@@ -694,7 +696,7 @@ function renderReportPage(){
   const curMU=calcMonthUsage(state.calY,state.calM,state.ben);
 
   const dailyRows = ITEMS.map(it=>{
-    const iv=state.inv[it.id], opening=iv.o+iv.r;
+    const iv=state.inv[it.id] || {o:0,r:0}, opening=iv.o+iv.r;
     const mor=morU(it.id,todayU), aft=aftU(it.id,todayU), tot=todayU[it.id]||0;
     return `<tr>
       <td style="text-align:left"><span class="badge" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</span></td>
@@ -707,7 +709,7 @@ function renderReportPage(){
   }).join("");
 
   const runBal={};
-  ITEMS.forEach(it=>{ runBal[it.id]=state.inv[it.id].o+state.inv[it.id].r; });
+  ITEMS.forEach(it=>{ runBal[it.id]=(state.inv[it.id] && (state.inv[it.id].o+state.inv[it.id].r)) || 0; });
   const totals={n:0};
   ITEMS.forEach(it=>{ totals[it.id+"M"]=0;totals[it.id+"A"]=0;totals[it.id]=0; });
   const dim=new Date(state.calY,state.calM+1,0).getDate();
@@ -734,9 +736,9 @@ function renderReportPage(){
   const subHeads=ITEMS.map(()=>`<th>સ. વ. (g)</th><th>બ. વ. (g)</th><th>કુલ (g)</th><th>સિલક (kg)</th>`).join("");
 
   const summaryRows=ITEMS.map(it=>{
-    const iv=state.inv[it.id], opening=iv.o+iv.r;
-    const morN=curMU[it.id+"nM"]||0, aftN=curMU[it.id+"nA"]||0;
-    const mor=curMU[it.id+"M"]||0, aft=curMU[it.id+"A"]||0, tot=curMU[it.id]||0;
+    const iv=state.inv[it.id] || {o:0,r:0}, opening=iv.o+iv.r;
+    const morN=(curMU && curMU[it.id+"nM"])||0, aftN=(curMU && curMU[it.id+"nA"])||0;
+    const mor=(curMU && curMU[it.id+"M"])||0, aft=(curMU && curMU[it.id+"A"])||0, tot=(curMU && curMU[it.id])||0;
     return `<tr>
       <td style="text-align:left"><span class="badge" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</span></td>
       <td><b style="color:#2563a8">${morN}</b></td><td><b style="color:#7c3aed">${aftN}</b></td>
@@ -763,7 +765,7 @@ function renderReportPage(){
         <div class="zoomable-inner" id="zoomInner">
           <table style="min-width:720px">
             <thead><tr>
-              <th style="text-align:left">ઇન્વેન્ટري</th>
+              <th style="text-align:left">ઇન્વેન્ટરી</th>
               <th>લાભાર્થી</th>
               <th>ઊઘડતી (kg)</th>
               <th>સ. વપરાશ (g)</th>
@@ -818,7 +820,7 @@ function renderReportPage(){
         <div class="zoomable-inner" id="zoom2Inner">
           <table style="min-width:820px">
             <thead><tr>
-              <th style="text-align:left">ઇન્વેન્ટري</th>
+              <th style="text-align:left">ઇન્વેન્ટરી</th>
               <th>સ. લાભ.</th>
               <th>બ. લાભ.</th>
               <th>ઊઘડતી (kg)</th>
@@ -944,7 +946,7 @@ function renderModal(){
 }
 
 /* ============================================================
-   MAIN RENDER
+   MAIN RENDER — ✅ રોબસ્ટ અને સેફ્ટી કવર સાથેનું ફંક્શન
 ============================================================ */
 let _renderPending = false;
 function render(){
@@ -955,48 +957,54 @@ function render(){
     const app = document.getElementById('app');
     if(!app) return;
     
-    if(!centerCode){
-      document.getElementById("nav").style.display = "none";
-      document.getElementById("syncStatus").style.display = "none";
-      app.innerHTML = renderSetupPage();
-      return;
+    try {
+      // જો કેન્દ્ર કોડ ન હોય તો સીધું લોગિન પેજ
+      if(!centerCode){
+        document.getElementById("nav").style.display = "none";
+        document.getElementById("syncStatus").style.display = "none";
+        app.innerHTML = renderSetupPage();
+        return;
+      }
+      
+      document.querySelectorAll('#nav button').forEach(b=>{
+        if(b && b.dataset) b.classList.toggle('active', Number(b.dataset.tab) === state.tab);
+      });
+      
+      const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
+      let html="";
+      if(state.tab===0)      html=renderInventoryPage(curMU);
+      else if(state.tab===1) html=renderCalendarPage();
+      else if(state.tab===2) html=renderMonthlyPage(curMU);
+      else if(state.tab===3) html=renderReportPage();
+      else if(state.tab===4) html=renderAdminPage();
+      
+      html += renderModal();
+      app.innerHTML = html;
+      
+      if(state.modal){
+        const inp=document.getElementById('modalInput');
+        if(inp){ inp.focus(); inp.select(); }
+      }
+      if(state.tab === 3 && !state.modal) initReportZoom();
+    } catch(err) {
+      // જો ક્યાંય પણ લોજિક અટકે તો પણ રિકવરી મેસેજ અને લોગિન ઓપન રાખશે
+      app.innerHTML = `<div class='setup-box'><h2>⚠️ લોડિંગ એરર</h2><p style='color:#cc3d3d; font-size:12px;'>${err.message}</p><button onclick='localStorage.clear(); location.reload();' style='margin-top:10px; background:#cc3d3d; color:#fff; border:none; padding:8px; border-radius:6px; cursor:pointer;'>Reset Local Storage</button></div>`;
     }
-    
-    document.querySelectorAll('#nav button').forEach(b=>{
-      b.classList.toggle('active', Number(b.dataset.tab) === state.tab);
-    });
-    
-    const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
-    let html="";
-    if(state.tab===0)      html=renderInventoryPage(curMU);
-    else if(state.tab===1) html=renderCalendarPage();
-    else if(state.tab===2) html=renderMonthlyPage(curMU);
-    else if(state.tab===3) html=renderReportPage();
-    else if(state.tab===4) html=renderAdminPage();
-    
-    html += renderModal();
-    app.innerHTML = html;
-    
-    if(state.modal){
-      const inp=document.getElementById('modalInput');
-      if(inp){ inp.focus(); inp.select(); }
-    }
-    if(state.tab === 3 && !state.modal) initReportZoom();
   });
 }
 
 /* ============================================================
    MODAL HELPERS
 ============================================================ */
-function openModal(d){ const k=dkf(state.calY,state.calM,d); state.modal={y:state.calY,m:state.calM,d}; state.modalVal=state.ben[k]||""; render(); }
+function openModal(d){ const k=dkf(state.calY,state.calM,d); state.modal={y:state.calY,m:state.calM,d}; state.modalVal=(state.ben && state.ben[k])||""; render(); }
 function closeModal(){ state.modal=null; state.modalVal=""; render(); }
 function saveModal(){
   const v=document.getElementById('modalInput').value.trim();
   const k=dkf(state.modal.y,state.modal.m,state.modal.d);
-  if(v===""||Number(v)<=0){ delete state.ben[k]; } else { state.ben[k]=Number(v); }
+  if(v===""||Number(v)<=0){ if(state.ben) delete state.ben[k]; } else { if(!state.ben) state.ben={}; state.ben[k]=Number(v); }
   invalidateCache(); saveState(); closeModal();
 }
-function clearModal(){ const k=dkf(state.modal.y,state.modal.m,state.modal.d); delete state.ben[k]; invalidateCache(); saveState(); closeModal(); }
+function clearModal(){ const k=dkf(state.modal.y,state.modal.m,state.modal.d); if(state.ben) delete state.ben[k]; invalidateCache(); saveState(); closeModal(); }
 function prevMonth(){ state.calM--; if(state.calM<0){state.calM=11;state.calY--;} render(); }
 function nextMonth(){ state.calM++; if(state.calM>11){state.calM=0;state.calY++;} render(); }
 
@@ -1005,16 +1013,16 @@ function nextMonth(){ state.calM++; if(state.calM>11){state.calM=0;state.calY++;
 ============================================================ */
 function shareReport(){
   const today=new Date(), todayK=dkf(today.getFullYear(),today.getMonth(),today.getDate());
-  const todayN=Number(state.ben[todayK]||0), todayU=calcUsage(today.getDay(),todayN);
+  const todayN=Number((state.ben && state.ben[todayK])||0), todayU=calcUsage(today.getDay(),todayN);
   let txt=`🌾 My Daily Report (${centerCode})\n📅 ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()} (${DAYS_FULL[today.getDay()]})\n👥 લ.: ${todayN}\n\n`;
-  ITEMS.forEach(it=>{ const iv=state.inv[it.id]; txt+=`${it.emoji} ${it.name}: સ.${morU(it.id,todayU)}g|બ.${aftU(it.id,todayU)}g|ક.${todayU[it.id]}g|${fmt(iv.o+iv.r-todayU[it.id]/1000,3)}kg\n`; });
+  ITEMS.forEach(it=>{ const iv=state.inv[it.id] || {o:0,r:0}; txt+=`${it.emoji} ${it.name}: સ.${morU(it.id,todayU)}g|બ.${aftU(it.id,todayU)}g|ક.${todayU[it.id]}g|${fmt(iv.o+iv.r-todayU[it.id]/1000,3)}kg\n`; });
   if(navigator.share) navigator.share({title:"My Daily Report",text:txt}).catch(()=>{});
   else navigator.clipboard.writeText(txt).then(()=>alert("✅ Copy"));
 }
 function shareMonthly(){
   const curMU=calcMonthUsage(state.calY,state.calM,state.ben);
-  let txt=`📊 ${MONTHS_FULL[state.calM]} ${state.calY} (${centerCode})\n👥 ${curMU.totalN} | ${curMU.days} દ.\n\n`;
-  ITEMS.forEach(it=>{ const iv=state.inv[it.id]; txt+=`${it.emoji} ${it.name}: ${fmt(curMU[it.id])}g | ${fmt(iv.o+iv.r-curMU[it.id]/1000,3)}kg\n`; });
+  let txt=`📊 ${MONTHS_FULL[state.calM]} ${state.calY} (${centerCode})\n👥 ${(curMU && curMU.totalN)||0} | ${(curMU && curMU.days)||0} દ.\n\n`;
+  ITEMS.forEach(it=>{ const iv=state.inv[it.id] || {o:0,r:0}; txt+=`${it.emoji} ${it.name}: ${fmt(curMU && curMU[it.id])}g | ${fmt(iv.o+iv.r-((curMU && curMU[it.id])||0)/1000,3)}kg\n`; });
   if(navigator.share) navigator.share({title:"માસિક",text:txt}).catch(()=>{});
   else navigator.clipboard.writeText(txt).then(()=>alert("✅ Copy"));
 }
@@ -1111,6 +1119,7 @@ function initReportZoom(){
 ============================================================ */
 document.addEventListener('click', e=>{
   const t=e.target;
+  if(!t) return;
   if(t.id==='btnSubmitSetup'){
     const val=document.getElementById("centerCodeInput").value.trim();
     if(!val){alert("⚠️ Code!");return;}
@@ -1175,7 +1184,10 @@ document.addEventListener('click', e=>{
 
 document.addEventListener('input', e=>{
   const t=e.target;
+  if(!t) return;
   if(t.matches('input[data-inv]')){
+    if(!state.inv) state.inv = JSON.parse(JSON.stringify(DEFAULT_INV));
+    if(!state.inv[t.dataset.inv]) state.inv[t.dataset.inv] = {o:0, r:0};
     state.inv[t.dataset.inv][t.dataset.field] = parseFloat(t.value)||0;
     invalidateCache();
     scheduleSave();
@@ -1185,6 +1197,7 @@ document.addEventListener('input', e=>{
 });
 
 document.addEventListener('change', e=>{
+  if(!e.target) return;
   if(e.target.matches('input[data-inv]')) render();
   if(e.target.id==='conSelY'){ state.con.selY=parseInt(e.target.value); render(); }
   if(e.target.id==='conSelM'){ state.con.selM=parseInt(e.target.value); render(); }

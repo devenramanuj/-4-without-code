@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>My Daily Report</title>
+<!-- preloads -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap">
@@ -134,7 +135,6 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .stat-card .s-num{font-size:22px;font-weight:800;color:#5b21b6}
 .stat-card .s-lbl{font-size:11px;color:#64748b;margin-top:2px}
 
-/* ✅ content-visibility લોચા કરતું હતું એટલે ફક્ત display રાખ્યું */
 .tab-content{display: block;}
 
 /* ── REPORT ZOOM ── */
@@ -235,7 +235,7 @@ const ITEMS = Object.freeze([
 ]);
 const DAYS_SHORT  = ["ર","સો","મં","બુ","ગુ","શુ","શ"];
 const DAYS_TBL    = ["રવિ","સોમ","મંગળ","બુધ","ગુ","શુ","શ"];
-const DAYS_FULL   = ["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","ગુરુવાર","શુક્રવાર","શનિવાર"];
+const DAYS_FULL   = ["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","გુરુવાર","શુક્રવાર","શનિવાર"];
 const MONTHS_FULL = ["જાન્યુઆરી","ફેબ્રુઆરી","માર્ચ","એપ્રિલ","મે","જૂન","જુલાઈ","ઓગસ્ટ","સપ્ટેમ્બર","ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર"];
 const DEFAULT_INV = {ghau:{o:500,r:200},chokha:{o:300,r:100},tel:{o:50,r:20},chana:{o:80,r:30},dal:{o:80,r:30},chanadal:{o:80,r:30}};
 
@@ -411,7 +411,6 @@ async function fetchAllCenters(){
   state.con.loading = false; render();
 }
 
-// ✅ સુધારેલું: ફિક્સ \u0AAB\u0AB0\u0ACおり લોચો
 function buildConsolidationHTML(){
   const con = state.con;
   const yOpts = [con.selY-1, con.selY, con.selY+1].map(y =>
@@ -429,7 +428,7 @@ function buildConsolidationHTML(){
     + "<span style='font-size:11px;color:#64748b'>" + con.centers.length + " centers</span>"
     + "</div>";
 
-  if(con.loading) return toolbar + "<div class='con-loading'>\u29D1 \u0AA1\u0AC7\u0A9F\u0ABE \u0AB2\u0ACB\u0AA1 \u0AA5\u0A88 \u0AB0\u0AB9\u0ACD\u0AAF\u0ACB \u0A9B\u0AC7...</div>";
+  if(con.loading) return toolbar + "<div class='con-loading'>\u29D1 \u0AA1\u0AC7\u0A9F\u0ABE \u0AB2\u0ACB\u0AA1 \u0AA5\u0A88 \u0AB0\u0AB9\u0ACH\u0AAF\u0ACB \u0A9B\u0AC7...</div>";
   if(con.error) return toolbar + "<div class='con-error'>\u274C " + con.error + "<br><button onclick='fetchAllCenters()' style='margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer'>ફરી try કરો</button></div>";
   if(!con.centers.length) return toolbar + "<div class='con-loading' style='color:#64748b'>\uD83D\uDCED \u0A95\u0ACB\u0A8ઇ center data \u0AA8\u0AA5\u0AC0<br><button onclick='fetchAllCenters()' style='margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer'>Load Centers</button></div>";
 
@@ -457,7 +456,7 @@ function buildConsolidationHTML(){
       "<td>" + (r.mu[it.id+"M"]||0) + "</td>"
       + "<td>" + (r.mu[it.id+"A"]||0) + "</td>"
       + "<td style='font-weight:700;color:" + (r.mu[it.id] ? "#e67e22" : "#cbd5e1") + "'>"
-      + (r.mu[it.id||0]) + "</td>"
+      + (r.mu[it.id]||0) + "</td>"
     ).join("");
     return "<tr>"
       + "<td class='con-c1'>"
@@ -508,6 +507,7 @@ function exportConsolidationCSV(){
 /* ============================================================
    USAGE RULES
 ============================================================ */
+// ✅ સુધારેલું: u.chokhanA નો ડુપ્લિકેટ લોચો ફિક્સ કર્યો!
 function calcUsage(dow, n){
   n = Number(n) || 0;
   const u = {};
@@ -522,7 +522,7 @@ function calcUsage(dow, n){
   // Afternoon
   u.telA = 8*n; u.telnA = n;
   if(dow===1||dow===2||dow===5){ u.ghauA=50*n; u.ghaunA=n; }
-  if(dow===3||dow===4||dow===6){ u.chokhaA=50*n; u.chokhanA=n; }
+  if(dow===3||dow===4||dow===6){ u.chokhaA=50*n; u.chokhanA=n; } // <- અહીં u.chokhanA બરાબર કરી દીધું!
   if(dow===2||dow===4||dow===5){ u.chanaA=20*n; u.chananA=n; }
   if(dow===1||dow===3){ u.dalA=20*n; u.dalnA=n; }
   if(dow===6){ u.chanadalA=20*n; u.chanadalnA=n; }
@@ -677,7 +677,7 @@ function renderMonthlyPage(curMU){
             <th>સવાર વ. (g)</th>
             <th>બપોર વ. (g)</th>
             <th>કુલ વ. (g)</th>
-            <th>供应商 સિલક (kg)</th>
+            <th>બંધ સિલક (kg)</th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>

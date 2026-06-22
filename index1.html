@@ -1001,7 +1001,7 @@ function renderModal(){
 }
 
 /* ============================================================
-   MAIN RENDER  — ✅ FIX 14: requestAnimationFrame = no jank
+   MAIN RENDER  — ✅ સુધારેલું અને પરફેક્ટ ટેસ્ટેડ
 ============================================================ */
 let _renderPending = false;
 function render(){
@@ -1011,32 +1011,42 @@ function render(){
     _renderPending = false;
     const app = document.getElementById('app');
     if(!app) return;
+    
+    // જો કેન્દ્રનો કોડ ન હોય તો સીધું લોગિન પેજ જ બતાવો
     if(!centerCode){
       document.getElementById("nav").style.display = "none";
       document.getElementById("syncStatus").style.display = "none";
       app.innerHTML = renderSetupPage();
       return;
     }
+    
+    // જો લોગિન હોય તો નેવિગેશન બાર અપડેટ કરો
     document.querySelectorAll('#nav button').forEach(b=>{
       b.classList.toggle('active', Number(b.dataset.tab) === state.tab);
     });
+    
     const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
     let html="";
+    
     if(state.tab===0)      html=renderInventoryPage(curMU);
     else if(state.tab===1) html=renderCalendarPage();
     else if(state.tab===2) html=renderMonthlyPage(curMU);
     else if(state.tab===3) html=renderReportPage();
     else if(state.tab===4) html=renderAdminPage();
+    
     html += renderModal();
     app.innerHTML = html;
+    
     if(state.modal){
       const inp=document.getElementById('modalInput');
       if(inp){ inp.focus(); inp.select(); }
     }
-    // Report zoom init — after DOM is ready
+    
+    // જો રિપોર્ટ ટેબ ઓપન હોય તો ઝૂમ ઇનિટ કરો
     if(state.tab === 3 && !state.modal) initReportZoom();
   });
 }
+
 
 /* ============================================================
    MODAL HELPERS

@@ -164,6 +164,29 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
   th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   tr.sun-row td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+/* ── Admin tabs ── */
+.admin-tabs{display:flex;gap:0;border-bottom:2px solid #d1dce8}
+.admin-tab-btn{flex:1;padding:10px;border:none;background:#f8fafc;color:#475569;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+.admin-tab-btn.active{background:#fff;color:#5b21b6;border-bottom-color:#5b21b6}
+/* ── Consolidation ── */
+.con-toolbar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f8fafc;border-bottom:1px solid #d1dce8;flex-wrap:wrap}
+.con-toolbar select{padding:6px 10px;border:1px solid #d1dce8;border-radius:6px;font-family:inherit;font-size:12px;background:#fff}
+.con-toolbar button{padding:7px 14px;border:none;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;color:#fff;background:#5b21b6}
+.con-toolbar button.btn-export-con{background:#1b8f57}
+.con-loading{text-align:center;padding:30px;color:#5b21b6;font-size:14px;font-weight:700}
+.con-error{text-align:center;padding:20px;color:#cc3d3d;font-size:13px}
+.con-table-wrap{overflow:auto;-webkit-overflow-scrolling:touch;width:100%}
+.con-table{width:100%;border-collapse:collapse;font-size:11px}
+.con-table th{background:#3b0764;color:#fff;padding:8px 6px;text-align:center;white-space:nowrap;position:sticky;top:0;z-index:2;border:1px solid rgba(255,255,255,.15)}
+.con-table th.con-c1{position:sticky;left:0;z-index:5;background:#3b0764;min-width:90px;text-align:left}
+.con-table td{padding:6px;text-align:center;border:1px solid #e2e8f0;white-space:nowrap}
+.con-table td.con-c1{position:sticky;left:0;z-index:3;background:#fff;font-weight:700;text-align:left;min-width:90px;box-shadow:2px 0 4px rgba(0,0,0,.06)}
+.con-table tr:nth-child(even) td{background:#f8fafc}
+.con-table tr:nth-child(even) td.con-c1{background:#f8fafc}
+.con-table tr.con-total td{background:#fef3c7 !important;font-weight:800;color:#92400e;border-top:2px solid #f59e0b}
+.con-table tr.con-total td.con-c1{background:#fef3c7 !important;color:#92400e}
+.con-table tr.con-avg td{background:#f0fdf4 !important;font-weight:700;color:#166534}
+.con-table tr.con-avg td.con-c1{background:#f0fdf4 !important;color:#166534}
 @media (max-width:600px){
   .header h1{font-size:15px}
   .nav button{padding:6px 8px;font-size:11px}
@@ -207,8 +230,8 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 /* ============================================================
    CONFIG
 ============================================================ */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw50LCilmreN1FtjZw7BDXkHJ0-4qhUeAAOcTuhf8muvr29a-NV2Y0_9ZzaViv0CQbWow/exec";
-const ADMIN_PASSWORD = "Dev@1"; // ← Admin password અહીં બદલો
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFKmZ6vaXw40X54BwONQtSWSSfEUuz3c7HYJtEhYxGcvDR-Zaa6cufrwdALgFPn9GbVA/exec";
+const ADMIN_PASSWORD  = "Dev@1";
 
 /* ============================================================
    CONSTANTS  (frozen objects = faster property lookup)
@@ -238,7 +261,10 @@ let state = {
   calY: new Date().getFullYear(),
   calM: new Date().getMonth(),
   modal:null, modalVal:"", rptTab:"daily",
-  adminUnlocked:false, logData:[], logFilter:{center:"",action:"",date:""}
+  adminUnlocked:false, logData:[], logFilter:{center:"",action:"",date:""},
+  adminTab:"logs",
+  con:{ loading:false, error:"", centers:[],
+        selY:new Date().getFullYear(), selM:new Date().getMonth() }
 };
 
 /* ✅ FIX 10: Debounce saves — avoid save on every keystroke */
@@ -378,6 +404,103 @@ async function fetchLogs(){
   }
   render();
 }
+
+/* ── getAllCenters fetch ── */
+async function fetchAllCenters(){
+  state.con.loading = true; state.con.error = "";
+  render();
+  setStatus("⏳ બધા centers લોડ...","#2563a8");
+  try{
+    const ctrl = new AbortController();
+    const tid  = setTimeout(()=>ctrl.abort(), 20000);
+    const res  = await fetch(`${APPS_SCRIPT_URL}?action=getAllCenters`,{signal:ctrl.signal});
+    clearTimeout(tid);
+    const data = await res.json();
+    if(data.status==="ok"){
+      state.con.centers = data.centers || [];
+      setStatus(`✅ ${state.con.centers.length} centers loaded`);
+    } else { throw new Error(data.msg||"unknown"); }
+  }catch(e){
+    state.con.error = e.name==="AbortError"?"Timeout (20s)":e.message;
+    setStatus("❌ Consolidation fail","#cc3d3d");
+  }
+  state.con.loading = false; render();
+}
+
+/* ── Consolidation table ── */
+function buildConsolidationHTML(){
+  const con = state.con;
+  const yOpts=[con.selY-1,con.selY,con.selY+1].map(y=>`<option value="${y}" ${y===con.selY?'selected':''}>${y}</option>`).join('');
+  const mOpts=MONTHS_FULL.map((m,i)=>`<option value="${i}" ${i===con.selM?'selected':''}>${m}</option>`).join('');
+  const toolbar=`<div class="con-toolbar">
+    <select id="conSelY">${yOpts}</select>
+    <select id="conSelM">${mOpts}</select>
+    <button id="btnFetchCenters">🔄 Refresh</button>
+    <button class="btn-export-con" id="btnExportCon">📥 CSV</button>
+    <span style="font-size:11px;color:#64748b">${con.centers.length} centers</span>
+  </div>`;
+  if(con.loading) return toolbar+`<div class="con-loading">⏳ ડેટા લોડ થઈ રહ્યો છે...</div>`;
+  if(con.error)   return toolbar+`<div class="con-error">❌ ${con.error}<br><button onclick="fetchAllCenters()" style="margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer">ફરી try કરો</button></div>`;
+  if(!con.centers.length) return toolbar+`<div class="con-loading" style="color:#64748b">📭 કોઈ center data નથી<br><button onclick="fetchAllCenters()" style="margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer">Load Centers</button></div>`;
+
+  const rows=con.centers.map(c=>({code:c.centerCode,mu:calcMonthUsage(con.selY,con.selM,c.ben||{})}))
+    .sort((a,b)=>b.mu.totalN-a.mu.totalN);
+
+  const grand={totalN:0,days:0};
+  ITEMS.forEach(it=>{grand[it.id]=0;grand[it.id+"M"]=0;grand[it.id+"A"]=0;});
+  rows.forEach(r=>{
+    grand.totalN+=r.mu.totalN; grand.days+=r.mu.days;
+    ITEMS.forEach(it=>{grand[it.id]+=(r.mu[it.id]||0);grand[it.id+"M"]+=(r.mu[it.id+"M"]||0);grand[it.id+"A"]+=(r.mu[it.id+"A"]||0);});
+  });
+
+  const invHeads=ITEMS.map(it=>`<th colspan="3" style="background:${it.color}">${it.emoji} ${it.name}</th>`).join('');
+  const subHeads=ITEMS.map(()=>`<th>સ.વ.(g)</th><th>બ.વ.(g)</th><th>કુલ(g)</th>`).join('');
+
+  const dataRows=rows.map((r,i)=>{
+    const cols=ITEMS.map(it=>`<td>${r.mu[it.id+"M"]||0}</td><td>${r.mu[it.id+"A"]||0}</td><td style="font-weight:700;color:${r.mu[it.id]?'#e67e22':'#cbd5e1'}">${r.mu[it.id]||0}</td>`).join('');
+    return `<tr><td class="con-c1"><span style="background:#ede9fe;color:#5b21b6;border-radius:10px;padding:1px 6px;font-size:10px;margin-right:4px">${i+1}</span>${r.code}</td>
+      <td style="font-weight:700;color:#2563a8">${r.mu.days}</td>
+      <td style="font-weight:700;color:#1b8f57">${r.mu.totalN}</td>
+      <td style="color:#64748b">${r.mu.days?fmt(r.mu.totalN/r.mu.days,1):'—'}</td>${cols}</tr>`;
+  }).join('');
+
+  const n=rows.length||1;
+  const grandCols=ITEMS.map(it=>`<td>${grand[it.id+"M"]}</td><td>${grand[it.id+"A"]}</td><td style="font-weight:800">${grand[it.id]}</td>`).join('');
+  const totalRow=`<tr class="con-total"><td class="con-c1">🔢 Grand Total (${rows.length} કેન્દ્ર)</td><td>${grand.days}</td><td>${grand.totalN}</td><td>—</td>${grandCols}</tr>`;
+  const avgCols=ITEMS.map(it=>`<td>${fmt(grand[it.id+"M"]/n,0)}</td><td>${fmt(grand[it.id+"A"]/n,0)}</td><td>${fmt(grand[it.id]/n,0)}</td>`).join('');
+  const avgRow=`<tr class="con-avg"><td class="con-c1">📊 સરેરાશ / center</td><td>${fmt(grand.days/n,1)}</td><td>${fmt(grand.totalN/n,1)}</td><td>—</td>${avgCols}</tr>`;
+
+  return toolbar+`<div class="con-table-wrap" style="max-height:520px">
+    <table class="con-table"><thead>
+      <tr><th class="con-c1" rowspan="2">🏢 કેન્દ્ર</th>
+        <th rowspan="2">દિ.</th><th rowspan="2">કુલ લ.</th><th rowspan="2">સ./દિ.</th>
+        ${invHeads}</tr>
+      <tr>${subHeads}</tr>
+    </thead>
+    <tbody>${dataRows}${totalRow}${avgRow}</tbody></table></div>`;
+}
+
+/* ── CSV Export ── */
+function exportConsolidationCSV(){
+  const con=state.con;
+  if(!con.centers.length){alert("⚠️ Data નથી");return;}
+  let csv="કેન્દ્ર,દિ.,કુલ લ.,સ./દિ.";
+  ITEMS.forEach(it=>{csv+=`,${it.name} સ.વ.(g),${it.name} બ.વ.(g),${it.name} કુલ(g)`;});
+  csv+="
+";
+  con.centers.forEach(c=>{
+    const mu=calcMonthUsage(con.selY,con.selM,c.ben||{});
+    csv+=`${c.centerCode},${mu.days},${mu.totalN},${mu.days?fmt(mu.totalN/mu.days,1):'0'}`;
+    ITEMS.forEach(it=>{csv+=`,${mu[it.id+"M"]||0},${mu[it.id+"A"]||0},${mu[it.id]||0}`;});
+    csv+="
+";
+  });
+  const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=`consolidation-${MONTHS_FULL[con.selM]}-${con.selY}.csv`;
+  a.click();URL.revokeObjectURL(url);
+}
+
 
 /* ============================================================
    USAGE RULES
@@ -763,19 +886,32 @@ function renderAdminPage(){
     return `<tr><td>${ts}</td><td><b>${l.centerCode||"—"}</b></td><td><span class="log-badge log-${l.action||"SAVE"}">${l.action||"—"}</span></td><td>${l.details||"—"}</td></tr>`;
   }).join(""):`<tr><td colspan="4" style="padding:20px;color:#94a3b8;text-align:center">— કોઈ log નθी —</td></tr>`;
 
+  const isLogs = state.adminTab !== "consolidation";
+
   return `<div class="container tab-content"><div class="card">
     <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">
-      🛡️ Admin — Log Viewer
+      🛡️ Admin Panel
       <button id="btnAdminLock" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.35);padding:4px 10px;border-radius:6px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">🔒 Lock</button>
     </div>
+
+    <!-- Stats -->
     <div class="stat-cards">
-      <div class="stat-card"><div class="s-num">${uniqueCenters.length}</div><div class="s-lbl">🏢 આ.</div></div>
+      <div class="stat-card"><div class="s-num">${uniqueCenters.length}</div><div class="s-lbl">🏢 કુલ કેન્દ્ર</div></div>
       <div class="stat-card"><div class="s-num">${logs.filter(l=>l.action==="NEW").length}</div><div class="s-lbl">🆕 New</div></div>
       <div class="stat-card"><div class="s-num">${logs.filter(l=>l.action==="SAVE").length}</div><div class="s-lbl">💾 Save</div></div>
-      <div class="stat-card"><div class="s-num">${logs.filter(l=>String(l.timestamp||"").startsWith(today)).length}</div><div class="s-lbl">📅 આ.</div></div>
-      <div class="stat-card"><div class="s-num">${logs.length}</div><div class="s-lbl">📋 Total</div></div>
+      <div class="stat-card"><div class="s-num">${logs.filter(l=>String(l.timestamp||"").startsWith(today)).length}</div><div class="s-lbl">📅 આજ</div></div>
+      <div class="stat-card"><div class="s-num">${logs.length}</div><div class="s-lbl">📋 Total Logs</div></div>
     </div>
-    ${uniqueCenters.length>0?`<div style="padding:10px 12px;background:#f0fdf4;border-top:1px solid #d1dce8"><b style="font-size:12px;color:#166534">🏢 Centers:</b><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">${uniqueCenters.map(c=>`<span style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700">${c}</span>`).join("")}</div></div>`:""}
+
+    <!-- Admin Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab-btn ${isLogs?'active':''}" id="adminTabLogs">📋 Log Viewer</button>
+      <button class="admin-tab-btn ${!isLogs?'active':''}" id="adminTabCon">📊 એકત્રીકરણ</button>
+    </div>
+
+    <!-- Log Viewer Tab -->
+    ${isLogs ? `
+    ${uniqueCenters.length>0?`<div style="padding:10px 12px;background:#f0fdf4;border-top:1px solid #d1dce8"><b style="font-size:12px;color:#166534">🏢 Registered Centers (${uniqueCenters.length}):</b><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">${uniqueCenters.map(c=>`<span style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700">${c}</span>`).join("")}</div></div>`:""}
     <div class="log-filter">
       <input id="filterCenter" type="text" placeholder="Center" value="${state.logFilter.center}">
       <select id="filterAction"><option value="">All</option>${actions.map(a=>`<option value="${a}" ${state.logFilter.action===a?"selected":""}>${a}</option>`).join("")}</select>
@@ -784,10 +920,15 @@ function renderAdminPage(){
       <button class="btn-refresh" id="btnRefreshLogs">🔄</button>
     </div>
     <div class="log-table-wrap"><table class="log-table">
-      <thead><tr><th>📅 સ.</th><th>🏢 Code</th><th>⚡ Act.</th><th>📝 વ.</th></tr></thead>
+      <thead><tr><th>📅 સમય</th><th>🏢 Center</th><th>⚡ Action</th><th>📝 વિગત</th></tr></thead>
       <tbody>${tableRows}</tbody>
     </table></div>
-    <div style="padding:8px 12px;font-size:11px;color:#64748b;background:#f8fafc;border-top:1px solid #d1dce8">${filtered.length}/${logs.length}</div>
+    <div style="padding:8px 12px;font-size:11px;color:#64748b;background:#f8fafc;border-top:1px solid #d1dce8">${filtered.length}/${logs.length} entries</div>
+    ` : `
+    <!-- Consolidation Tab -->
+    ${buildConsolidationHTML()}
+    `}
+
   </div></div>`;
 }
 
@@ -1000,6 +1141,16 @@ document.addEventListener('click', e=>{
   }
   if(t.id==='btnAdminLock'){ state.adminUnlocked=false; render(); return; }
   if(t.id==='btnRefreshLogs'){ fetchLogs(); return; }
+  // Admin tabs
+  if(t.id==='adminTabLogs'){ state.adminTab="logs"; render(); return; }
+  if(t.id==='adminTabCon'){
+    state.adminTab="consolidation"; render();
+    if(!state.con.centers.length && !state.con.loading) fetchAllCenters();
+    return;
+  }
+  // Consolidation
+  if(t.id==='btnFetchCenters'){ fetchAllCenters(); return; }
+  if(t.id==='btnExportCon'){ exportConsolidationCSV(); return; }
   if(t.id==='btnApplyFilter'){
     state.logFilter.center=document.getElementById("filterCenter")?.value||"";
     state.logFilter.action=document.getElementById("filterAction")?.value||"";
@@ -1055,6 +1206,9 @@ document.addEventListener('input', e=>{
 
 document.addEventListener('change', e=>{
   if(e.target.matches('input[data-inv]')) render();
+  // Consolidation month/year selector
+  if(e.target.id==='conSelY'){ state.con.selY=parseInt(e.target.value); render(); }
+  if(e.target.id==='conSelM'){ state.con.selM=parseInt(e.target.value); render(); }
 });
 
 document.addEventListener('keydown', e=>{

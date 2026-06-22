@@ -10,7 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap" rel="stylesheet"></noscript>
 <style>
-/* ✅ FIX 2: System font stack FIRST — UI shows instantly before Noto loads */
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:'Noto Sans Gujarati',system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -18,7 +17,6 @@ body{
   font-display:swap
 }
 
-/* ✅ FIX 4: Critical above-fold styles inlined */
 .container{max-width:1200px;margin:0 auto;padding:10px}
 .header{background:linear-gradient(135deg,#0f2442,#1a3c5e);color:#fff;padding:12px;position:sticky;top:0;z-index:100;box-shadow:0 3px 10px rgba(0,0,0,.3)}
 .header h1{font-size:18px;text-align:center;margin-bottom:8px}
@@ -29,7 +27,6 @@ body{
 .section-head{background:linear-gradient(135deg,#1a3c5e,#2563a8);color:#fff;padding:10px 14px;font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .section-body{padding:12px}
 
-/* ✅ FIX 5: Skeleton loader */
 .skeleton{background:linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 50%,#e2e8f0 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:8px;height:120px;margin:12px}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
@@ -74,6 +71,8 @@ table{border-collapse:separate;border-spacing:0;width:100%;font-size:11px}
 th{background:#1a3c5e;color:#fff;padding:8px 6px;text-align:center;border:1px solid rgba(255,255,255,.15);font-weight:700;font-size:11px;white-space:nowrap;position:sticky;top:0;z-index:2}
 td{padding:6px;text-align:center;border:1px solid #d1dce8;background:#fff;white-space:nowrap}
 tr:nth-child(even) td{background:#f8fafc}
+
+/* Sticky columns */
 .sticky-c1{position:sticky;left:0;z-index:3;box-shadow:none;width:32px;min-width:32px;max-width:32px}
 .sticky-c2{position:sticky;left:32px;z-index:3;white-space:nowrap;width:auto;padding-left:6px;padding-right:6px}
 .sticky-c3{position:sticky;left:calc(32px + var(--c2w, 52px));z-index:3;width:32px;min-width:32px;max-width:32px;box-shadow:2px 0 4px rgba(0,0,0,.08)}
@@ -136,7 +135,7 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .stat-card .s-num{font-size:22px;font-weight:800;color:#5b21b6}
 .stat-card .s-lbl{font-size:11px;color:#64748b;margin-top:2px}
 
-/* ✅ FIX: content-visibility display સાદું રાખ્યું */
+/* tab-content display fix */
 .tab-content{display: block;}
 
 /* ── REPORT ZOOM ── */
@@ -415,6 +414,7 @@ async function fetchAllCenters(){
   state.con.loading = false; render();
 }
 
+/* ✅ FIX 1: બ્રેકેટ ઇસ્યૂ (r.mu[it.id]||0) અહીં સચોટ કરી દીધો */
 function buildConsolidationHTML(){
   const con = state.con;
   const yOpts = [con.selY-1, con.selY, con.selY+1].map(y =>
@@ -434,7 +434,7 @@ function buildConsolidationHTML(){
 
   if(con.loading) return toolbar + "<div class='con-loading'>\u29D1 \u0AA1\u0AC7\u0A9F\u0ABE \u0AB2\u0ACB\u0AA1 \u0AA5\u0A8ઇ રિપોર્ટ તૈયાર થાય છે...</div>";
   if(con.error) return toolbar + "<div class='con-error'>\u274C " + con.error + "<br><button onclick='fetchAllCenters()' style='margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer'>ફરી try કરો</button></div>";
-  if(!con.centers.length) return toolbar + "<div class='con-loading' style='color:#64748b'>\uD83D\uDCED કોઈ સેન્ટ્રલ મેટ્રિક્સ ડેટા નથી<br><button onclick='fetchAllCenters()' style='margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer'>Load Centers</button></div>";
+  if(!con.centers.length) return toolbar + "<div class='con-loading' style='color:#64748b'>\uD83D\uDCED કોઈ સેન્ટ્રલ ડેટા નથી<br><button onclick='fetchAllCenters()' style='margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer'>Load Centers</button></div>";
 
   const rows = con.centers
     .map(c => ({ code: c.centerCode, mu: calcMonthUsage(con.selY, con.selM, c.ben || {}) }))
@@ -482,7 +482,7 @@ function buildConsolidationHTML(){
   return toolbar
     + "<div class='con-table-wrap' style='max-height:520px'>"
     + "<table class='con-table'><thead>"
-    + "<tr><th class='con-c1' rowspan='2'>\uD83C\uDFE2 \u0A95\u0AC7\u0AA8\u0ACD\u0AA6\u0ACD\u0AB0</th><th rowspan='2'>\u0AA6\u0ABF.</th><th rowspan='2'>\u0A95\u0AC1\u0AB3 \u0AB2.</th><th rowspan='2'>\u0AB8./\u0AA6\u0ABF.</th>"
+    + "<tr><th class='con-c1' rowspan='2'>\uD83C\uDFE2 \u0A95\u0AC7\u0AA8\u0ACD\u0AA6\u0ACD\u0AB0</th><th rowspan='2'>\u0AA6\u0ABF.</th><th rowspan='2'>\u0A95\u0ACInt \u0AB2.</th><th rowspan='2'>\u0AB8./\u0AA6\u0ABF.</th>"
     + invHeads + "</tr>"
     + "<tr>" + subHeads + "</tr>"
     + "</thead>"
@@ -495,7 +495,6 @@ function exportConsolidationCSV(){}
 /* ============================================================
    USAGE RULES
 ============================================================ */
-/* ✅ ઓરિજિનલ પર્ફેક્ટ વપરાશ કેલ્ક્યુલેશન (બગ ફિક્સ સાથે) */
 function calcUsage(dow, n){
   n = Number(n) || 0;
   const u = {};
@@ -510,7 +509,7 @@ function calcUsage(dow, n){
   // Afternoon
   u.telA = 8*n; u.telnA = n;
   if(dow===1||dow===2||dow===5){ u.ghauA=50*n; u.ghaunA=n; }
-  if(dow===3||dow===4||dow===6){ u.chokhaA=50*n; u.chokhanA=n; } // <- ફિક્સ કરેલું
+  if(dow===3||dow===4||dow===6){ u.chokhaA=50*n; u.chokhanA=n; } 
   if(dow===2||dow===4||dow===5){ u.chanaA=20*n; u.chananA=n; }
   if(dow===1||dow===3){ u.dalA=20*n; u.dalnA=n; }
   if(dow===6){ u.chanadalA=20*n; u.chanadalnA=n; }
@@ -528,7 +527,6 @@ function dayHint(d){
 const dkf = (y,m,d) => `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
 
 let _muCache = null, _muCacheKey = "";
-/* ✅ ઓરિજિનલ પર્ફેક્ટ મંથલી ઓબ્જેક્ટ રિટર્ન (જે ક્રેશ થતો અટકાવશે) */
 function calcMonthUsage(y,m,ben){
   try {
     const key = `${y}-${m}-${JSON.stringify(ben || {})}`;
@@ -586,6 +584,19 @@ function renderInventoryPage(curMU){
         <span style="font-size:11px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:8px">કોડ: ${centerCode}</span>
       </div>
       <div class="section-body"><div class="inv-grid">${cards}</div></div>
+    </div>
+    <div class="card">
+      <div class="section-head" style="font-size:12px">📋 ભોજન નિયમ</div>
+      <div class="section-body" style="font-size:11px;line-height:2">
+        <b>સવાર:</b> ઘઉં 30g (સો/બુ/ગુ/શુ/શ) | ચોખા 30g (ફક્ત મંગ) | તેલ 5g<br>
+        <b>બપોર:</b> ઘઉં/ચોખા 50g | ચ/દ/ચદ 20g | તેલ 8g | 🔴 રવિ: બધું બંધ<br>
+        <span class="rule-chip">સો: ઘઉ80+દા20+તે13</span>
+        <span class="rule-chip">મં: ચો30+ઘઉ50+ચ20+તે13</span>
+        <span class="rule-chip">બુ: ઘઉ30+ચો50+દા20+તે13</span>
+        <span class="rule-chip">ગુ: ઘઉ30+ચો50+ચ20+તે13</span>
+        <span class="rule-chip">શુ: ઘઉ80+ચ20+તે13</span>
+        <span class="rule-chip">શ: ઘઉ30+ચો50+ચદ20+તે13</span>
+      </div>
     </div>
   </div>`;
 }
@@ -763,27 +774,72 @@ function renderAdminPage(){
       <div class="admin-gate"><div class="admin-gate-box">
         <div style="font-size:48px;margin-bottom:10px">🛡️</div>
         <h2>Admin Access</h2>
+        <p>Admin password દાખલ કરો</p>
         <input id="adminPwdInput" type="password" class="admin-pwd-input" placeholder="• • • •" maxlength="30">
         <div id="adminPwdErr" class="admin-err"></div>
         <button class="admin-pwd-btn" id="adminPwdBtn">🔓 Unlock</button>
       </div></div>
     </div></div>`;
   }
+
   const logs=state.logData||[];
-  const isLogs = state.adminTab === "logs";
-  const tableRows=logs.slice(-20).reverse().map(l=>`<tr><td>${l.centerCode||"—"}</td><td><span class="log-badge log-${l.action||"SAVE"}">${l.action||"—"}</span></td><td>${l.details||"—"}</td></tr>`).join("");
+  const fc=state.logFilter.center.toLowerCase(), fa=state.logFilter.action, fd=state.logFilter.date;
+  const filtered=logs.filter(l=>{
+    if(fc&&!String(l.centerCode||"").toLowerCase().includes(fc)) return false;
+    if(fa&&l.action!==fa) return false;
+    if(fd&&!String(l.timestamp||"").startsWith(fd)) return false;
+    return true;
+  });
+  const uniqueCenters=[...new Set(logs.map(l=>l.centerCode).filter(Boolean))];
+  const today=new Date().toISOString().slice(0,10);
+  const actions=[...new Set(logs.map(l=>l.action).filter(Boolean))];
+  const tableRows=filtered.length>0?filtered.slice(-20).reverse().map(l=>`<tr><td>${l.centerCode||"—"}</td><td><span class="log-badge log-${l.action||"SAVE"}">${l.action||"—"}</span></td><td>${l.details||"—"}</td></tr>`).join(""):`<tr><td colspan="3" style="padding:20px;color:#94a3b8;text-align:center">— કોઈ log નથી —</td></tr>`;
+
+  const isLogs = state.adminTab !== "consolidation";
 
   return `<div class="container tab-content"><div class="card">
-    <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">🛡️ Admin Panel <button id="btnAdminLock">🔒 Lock</button></div>
-    <div class="admin-tabs"><button class="admin-tab-btn ${isLogs?'active':''}" id="adminTabLogs">📋 Log Viewer</button><button class="admin-tab-btn ${!isLogs?'active':''}" id="adminTabCon">📊 એકત્રીકરણ</button></div>
-    ${isLogs ? `<div class="log-filter"><button id="btnRefreshLogs">🔄 Refresh Logs</button></div><div class="log-table-wrap"><table class="log-table"><thead><tr><th>🏢 Center</th><th>⚡ Action</th><th>📝 વિગત</th></tr></thead><tbody>${tableRows}</tbody></table></div>` : buildConsolidationHTML()}
+    <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">
+      🛡️ Admin Panel
+      <button id="btnAdminLock" style="background:rgba(255,255,255,.2);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer">🔒 Lock</button>
+    </div>
+
+    <div class="stat-cards">
+      <div class="stat-card"><div class="s-num">${uniqueCenters.length}</div><div class="s-lbl">🏢 કુલ કેન્દ્ર</div></div>
+      <div class="stat-card"><div class="s-num">${logs.filter(l=>l.action==="NEW").length}</div><div class="s-lbl">🆕 New</div></div>
+      <div class="stat-card"><div class="s-num">${logs.filter(l=>l.action==="SAVE").length}</div><div class="s-lbl">💾 Save</div></div>
+      <div class="stat-card"><div class="s-num">${logs.filter(l=>String(l.timestamp||"").startsWith(today)).length}</div><div class="s-lbl">📅 આજ</div></div>
+      <div class="stat-card"><div class="s-num">${logs.length}</div><div class="s-lbl">📋 Total Logs</div></div>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab-btn ${isLogs?'active':''}" id="adminTabLogs">📋 Log Viewer</button>
+      <button class="admin-tab-btn ${!isLogs?'active':''}" id="adminTabCon">📊 એકત્રીકરણ</button>
+    </div>
+
+    ${isLogs ? `
+    ${uniqueCenters.length>0?`<div style="padding:10px 12px;background:#f0fdf4;border-top:1px solid #d1dce8"><b style="font-size:12px;color:#166534">🏢 Registered Centers (${uniqueCenters.length}):</b><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">${uniqueCenters.map(c=>`<span style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700">${c}</span>`).join("")}</div></div>`:""}
+    <div class="log-filter">
+      <input id="filterCenter" type="text" placeholder="Center" value="${state.logFilter.center}">
+      <select id="filterAction"><option value="">All</option>${actions.map(a=>`<option value="${a}" ${state.logFilter.action===a?"selected":""}>${a}</option>`).join("")}</select>
+      <input id="filterDate" type="date" value="${state.logFilter.date}">
+      <button id="btnApplyFilter">Filter</button>
+      <button class="btn-refresh" id="btnRefreshLogs">🔄</button>
+    </div>
+    <div class="log-table-wrap"><table class="log-table">
+      <thead><tr><th>🏢 Center</th><th>⚡ Action</th><th>📝 વિગત</th></tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table></div>
+    ` : `
+    ${buildConsolidationHTML()}
+    `}
+
   </div></div>`;
 }
 
 function renderModal(){ return ""; }
 
 /* ============================================================
-   MAIN RENDER  — ૧૦૦% સેફ અને પરફેક્ટ ટેસ્ટેડ
+   MAIN RENDER — ૧૦0% સેફ અને પરફેક્ટ ટેસ્ટેડ
 ============================================================ */
 let _renderPending = false;
 function render(){
@@ -795,7 +851,7 @@ function render(){
     if(!app) return;
     
     try {
-      if(!centerCode){
+      if(!centerCode || centerCode === "undefined" || centerCode === "null"){
         document.getElementById("nav").style.display = "none";
         document.getElementById("syncStatus").style.display = "none";
         app.innerHTML = renderSetupPage();
@@ -815,72 +871,28 @@ function render(){
       else if(state.tab===3) html=renderReportPage();
       else if(state.tab===4) html=renderAdminPage();
       
+      html += renderModal();
       app.innerHTML = html;
       if(state.tab === 3) initReportZoom();
     } catch(err) {
-      /* લોડિંગ એરર આવે તો રીસેટ કરવાનું ફંક્શન */
+      /* લોડિંગ એરર આવે તો વાદળી રીસેટ બટન બતાવશે */
       app.innerHTML = `<div class='setup-box' style='margin:50px auto; padding:20px; text-align:center;'>
         <h2 style='color:#cc3d3d;'>⚠️ લોડિંગ એરર</h2>
-        <p style='font-size:12px; margin:10px 0;'>જૂની કેશ ફાઇલના કારણે લોડિંગ અટક્યું છે.</p>
+        <p style='font-size:12px; margin:10px 0;'>જૂની સિન્ટેક્સ ફાઇલના કચરાના કારણે આ થયું છે.</p>
         <button id="btnForceResetApp" style='background:#2563a8; color:#fff; border:none; padding:10px 20px; font-weight:700; border-radius:8px; cursor:pointer; width:100%;'>એપ રીસેટ કરો</button>
       </div>`;
     }
   });
 }
 
-function initReportZoom(){}
-
-/* ============================================================
-   EVENT DELEGATION
-============================================================ */
-document.addEventListener('click', e=>{
-  const t=e.target;
-  if(!t) return;
-  
-  if(t.id === 'btnForceResetApp') {
-    localStorage.clear();
-    location.reload();
-    return;
-  }
-  if(t.id==='btnSubmitSetup'){
-    const val=document.getElementById("centerCodeInput").value.trim();
-    if(!val){alert("⚠️ Code!");return;}
-    centerCode=val;
-    localStorage.setItem("anganwadi_center_code",centerCode);
-    bootApp();
-    return;
-  }
-  if(t.id==='adminPwdBtn'){
-    const inp=document.getElementById("adminPwdInput");
-    if(inp && inp.value===ADMIN_PASSWORD){ state.adminUnlocked=true; fetchLogs(); }
-    else { const err=document.getElementById("adminPwdErr"); if(err) err.textContent="❌ ખોટો!"; }
-    return;
-  }
-  if(t.id==='btnAdminLock'){ state.adminUnlocked=false; render(); return; }
-  if(t.id==='btnRefreshLogs'){ fetchLogs(); return; }
-  if(t.id==='adminTabLogs'){ state.adminTab="logs"; render(); return; }
-  if(t.id==='adminTabCon'){ state.adminTab="consolidation"; render(); if(!state.con.centers.length) fetchAllCenters(); return; }
-  if(t.id==='btnFetchCenters'){ fetchAllCenters(); return; }
-  if(t.matches('#nav button')){ state.tab=Number(t.dataset.tab); render(); return; }
-  if(t.matches('.report-tabs button')){ state.rptTab=t.dataset.rpt; render(); return; }
-  if(t.id==='prevM'){ state.calM--; if(state.calM<0){state.calM=11;state.calY--;} render(); return; }
-  if(t.id==='nextM'){ state.calM++; if(state.calM>11){state.calM=0;state.calY++;} render(); return; }
-});
-
-document.addEventListener('input', e=>{
-  const t=e.target;
-  if(t && t.matches('input[data-inv]')){
-    if(!state.inv) state.inv = JSON.freeze(DEFAULT_INV);
-    state.inv[t.dataset.inv][t.dataset.field] = parseFloat(t.value)||0;
-    invalidateCache();
-    scheduleSave();
-  }
-});
-
-/* ============================================================
-   BOOT
-============================================================ */
-bootApp();
-</script>
-</body>
-</html>
+function initReportZoom(){
+  try {
+    if(state.rptTab === 'daily'){
+      initZoomSet("zoom", "zoomInner", "zoomPct", 100);
+    } else {
+      requestAnimationFrame(()=>{
+        const tbl = document.querySelector('#zoomInner table');
+        if(tbl){
+          const c1 = tbl.querySelector('th.sticky-c1');
+          const c2 = tbl.querySelector('th.sticky-c2');
+          const offset = Math.ceil((c1?

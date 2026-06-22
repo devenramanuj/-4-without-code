@@ -218,7 +218,7 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 /* ============================================================
    CONFIG
 ============================================================ */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyihcULKMtQtb_4zoUuftAWVOxR9PHHOkP4Wx4FXthu/dev";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFKmZ6vaXw40X54BwONQtSWSSfEUuz3c7HYJtEhYxGcvDR-Zaa6cufrwdALgFPn9GbVA/exec";
 const ADMIN_PASSWORD  = "Dev@1";
 
 /* ============================================================
@@ -472,7 +472,7 @@ function buildConsolidationHTML(){
   const totalRow = "<tr class='con-total'><td class='con-c1'>\uD83D\uDD22 Grand Total (" + rows.length + " \u0A95\u0AC7\u0AA8\u0ACD\u0AA6\u0ACD\u0AB0)</td><td>" + grand.days + "</td><td>" + grand.totalN + "</td><td>\u2014</td>" + grandCols + "</tr>";
 
   const avgCols = ITEMS.map(it => "<td>" + fmt(grand[it.id+"M"]/n,0) + "</td>" + "<td>" + fmt(grand[it.id+"A"]/n,0) + "</td>" + "<td>" + fmt(grand[it.id]/n,0) + "</td>").join("");
-  const avgRow = "<tr class='con-avg'><td class='con-c1'>\uD83D\uDCCA \u0AB8\u0AB0\u0AC7\u0ABરાશ / center</td><td>" + fmt(grand.days/n,1) + "</td><td>" + fmt(grand.totalN/n,1) + "</td><td>\u2014</td>" + avgCols + "</tr>";
+  const avgRow = "<tr class='con-avg'><td class='con-c1'>\uD83D\uDCCA \u0AB8\u0AB0\u0AC7\u0AB0\u0ABE\u0AB6 / center</td><td>" + fmt(grand.days/n,1) + "</td><td>" + fmt(grand.totalN/n,1) + "</td><td>\u2014</td>" + avgCols + "</tr>";
 
   return toolbar
     + "<div class='con-table-wrap' style='max-height:520px'>"
@@ -506,6 +506,7 @@ function exportConsolidationCSV(){
 /* ============================================================
    USAGE RULES
 ============================================================ */
+// ✅ સુધારેલું: u.chokhanA નો ટાઇપો કાયમ માટે ફિક્સ
 function calcUsage(dow, n){
   n = Number(n) || 0;
   const u = {};
@@ -520,7 +521,7 @@ function calcUsage(dow, n){
   // Afternoon
   u.telA = 8*n; u.telnA = n;
   if(dow===1||dow===2||dow===5){ u.ghauA=50*n; u.ghaunA=n; }
-  if(dow===3||dow===4||dow===6){ u.chokhaA=50*n; u.chokhanA=n; }
+  if(dow===3||dow===4||dow===6){ u.chokhaA=50*n; u.chokhanA=n; } 
   if(dow===2||dow===4||dow===5){ u.chanaA=20*n; u.chananA=n; }
   if(dow===1||dow===3){ u.dalA=20*n; u.dalnA=n; }
   if(dow===6){ u.chanadalA=20*n; u.chanadalnA=n; }
@@ -946,7 +947,7 @@ function renderModal(){
 }
 
 /* ============================================================
-   MAIN RENDER — ✅ રોબસ્ટ અને સેફ્ટી કવર સાથેનું ફંક્શન
+   MAIN RENDER
 ============================================================ */
 let _renderPending = false;
 function render(){
@@ -958,7 +959,6 @@ function render(){
     if(!app) return;
     
     try {
-      // જો કેન્દ્ર કોડ ન હોય તો સીધું લોગિન પેજ
       if(!centerCode){
         document.getElementById("nav").style.display = "none";
         document.getElementById("syncStatus").style.display = "none";
@@ -987,7 +987,6 @@ function render(){
       }
       if(state.tab === 3 && !state.modal) initReportZoom();
     } catch(err) {
-      // જો ક્યાંય પણ લોજિક અટકે તો પણ રિકવરી મેસેજ અને લોગિન ઓપન રાખશે
       app.innerHTML = `<div class='setup-box'><h2>⚠️ લોડિંગ એરર</h2><p style='color:#cc3d3d; font-size:12px;'>${err.message}</p><button onclick='localStorage.clear(); location.reload();' style='margin-top:10px; background:#cc3d3d; color:#fff; border:none; padding:8px; border-radius:6px; cursor:pointer;'>Reset Local Storage</button></div>`;
     }
   });

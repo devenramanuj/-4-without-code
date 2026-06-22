@@ -428,57 +428,110 @@ async function fetchAllCenters(){
 }
 
 /* ── Consolidation table ── */
+/* ── Consolidation table ── */
 function buildConsolidationHTML(){
   const con = state.con;
-  const yOpts=[con.selY-1,con.selY,con.selY+1].map(y=>`<option value="${y}" ${y===con.selY?'selected':''}>${y}</option>`).join('');
-  const mOpts=MONTHS_FULL.map((m,i)=>`<option value="${i}" ${i===con.selM?'selected':''}>${m}</option>`).join('');
-  const toolbar=`<div class="con-toolbar">
-    <select id="conSelY">${yOpts}</select>
-    <select id="conSelM">${mOpts}</select>
-    <button id="btnFetchCenters">🔄 Refresh</button>
-    <button class="btn-export-con" id="btnExportCon">📥 CSV</button>
-    <span style="font-size:11px;color:#64748b">${con.centers.length} centers</span>
-  </div>`;
-  if(con.loading) return toolbar+`<div class="con-loading">⏳ ડેટા લોડ થઈ રહ્યો છે...</div>`;
-  if(con.error)   return toolbar+`<div class="con-error">❌ ${con.error}<br><button onclick="fetchAllCenters()" style="margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer">ફરી try કરો</button></div>`;
-  if(!con.centers.length) return toolbar+`<div class="con-loading" style="color:#64748b">📭 કોઈ center data નથી<br><button onclick="fetchAllCenters()" style="margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer">Load Centers</button></div>`;
 
-  const rows=con.centers.map(c=>({code:c.centerCode,mu:calcMonthUsage(con.selY,con.selM,c.ben||{})}))
-    .sort((a,b)=>b.mu.totalN-a.mu.totalN);
+  const yOpts = [con.selY-1, con.selY, con.selY+1].map(y =>
+    `<option value="${y}"${y===con.selY?" selected":""}>${y}</option>`
+  ).join("");
+  const mOpts = MONTHS_FULL.map((m,i) =>
+    `<option value="${i}"${i===con.selM?" selected":""}>${m}</option>`
+  ).join("");
 
-  const grand={totalN:0,days:0};
-  ITEMS.forEach(it=>{grand[it.id]=0;grand[it.id+"M"]=0;grand[it.id+"A"]=0;});
-  rows.forEach(r=>{
-    grand.totalN+=r.mu.totalN; grand.days+=r.mu.days;
-    ITEMS.forEach(it=>{grand[it.id]+=(r.mu[it.id]||0);grand[it.id+"M"]+=(r.mu[it.id+"M"]||0);grand[it.id+"A"]+=(r.mu[it.id+"A"]||0);});
+  const toolbar = `<div class="con-toolbar">`
+    + `<select id="conSelY">${yOpts}</select>`
+    + `<select id="conSelM">${mOpts}</select>`
+    + `<button id="btnFetchCenters">\uD83D\uDD04 Refresh</button>`
+    + `<button class="btn-export-con" id="btnExportCon">\uD83D\uDCE5 CSV</button>`
+    + `<span style="font-size:11px;color:#64748b">${con.centers.length} centers</span>`
+    + `</div>`;
+
+  if(con.loading) return toolbar
+    + `<div class="con-loading">\u29D1 \u0AA1\u0AC7\u0A9F\u0ABE \u0AB2\u0ACB\u0AA1 \u0AA5\u0A88 \u0AB0\u0AB9\u0ACD\u0AAF\u0ACB \u0A9B\u0AC7...</div>`;
+
+  if(con.error) return toolbar
+    + `<div class="con-error">\u274C ${con.error}`
+    + `<br><button onclick="fetchAllCenters()" style="margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer">\u0AAB\u0AB0\u0AC0 try \u0A95\u0AB0\u0ACB</button></div>`;
+
+  if(!con.centers.length) return toolbar
+    + `<div class="con-loading" style="color:#64748b">\uD83D\uDCED \u0A95\u0ACB\u0A88 center data \u0AA8\u0AA5\u0AC0`
+    + `<br><button onclick="fetchAllCenters()" style="margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer">Load Centers</button></div>`;
+
+  const rows = con.centers
+    .map(c => ({ code: c.centerCode, mu: calcMonthUsage(con.selY, con.selM, c.ben || {}) }))
+    .sort((a,b) => b.mu.totalN - a.mu.totalN);
+
+  const grand = { totalN:0, days:0 };
+  ITEMS.forEach(it => { grand[it.id]=0; grand[it.id+"M"]=0; grand[it.id+"A"]=0; });
+  rows.forEach(r => {
+    grand.totalN += r.mu.totalN;
+    grand.days   += r.mu.days;
+    ITEMS.forEach(it => {
+      grand[it.id]     += r.mu[it.id]     || 0;
+      grand[it.id+"M"] += r.mu[it.id+"M"] || 0;
+      grand[it.id+"A"] += r.mu[it.id+"A"] || 0;
+    });
   });
 
-  const invHeads=ITEMS.map(it=>`<th colspan="3" style="background:${it.color}">${it.emoji} ${it.name}</th>`).join('');
-  const subHeads=ITEMS.map(()=>`<th>સ.વ.(g)</th><th>બ.વ.(g)</th><th>કુલ(g)</th>`).join('');
+  const invHeads = ITEMS.map(it =>
+    `<th colspan="3" style="background:${it.color}">${it.emoji} ${it.name}</th>`
+  ).join("");
+  const subHeads = ITEMS.map(() =>
+    `<th>\u0AB8.\u0AB5.(g)</th><th>\u0AAC.\u0AB5.(g)</th><th>\u0A95\u0AC1\u0AB3(g)</th>`
+  ).join("");
 
-  const dataRows=rows.map((r,i)=>{
-    const cols=ITEMS.map(it=>`<td>${r.mu[it.id+"M"]||0}</td><td>${r.mu[it.id+"A"]||0}</td><td style="font-weight:700;color:${r.mu[it.id]?'#e67e22':'#cbd5e1'}">${r.mu[it.id]||0}</td>`).join('');
-    return `<tr><td class="con-c1"><span style="background:#ede9fe;color:#5b21b6;border-radius:10px;padding:1px 6px;font-size:10px;margin-right:4px">${i+1}</span>${r.code}</td>
-      <td style="font-weight:700;color:#2563a8">${r.mu.days}</td>
-      <td style="font-weight:700;color:#1b8f57">${r.mu.totalN}</td>
-      <td style="color:#64748b">${r.mu.days?fmt(r.mu.totalN/r.mu.days,1):'—'}</td>${cols}</tr>`;
-  }).join('');
+  const dataRows = rows.map((r,i) => {
+    const cols = ITEMS.map(it =>
+      `<td>${r.mu[it.id+"M"]||0}</td>`
+      + `<td>${r.mu[it.id+"A"]||0}</td>`
+      + `<td style="font-weight:700;color:${r.mu[it.id] ? "#e67e22" : "#cbd5e1"}">`
+      + `${r.mu[it.id]||0}</td>`
+    ).join("");
+    return `<tr>`
+      + `<td class="con-c1">`
+      + `<span style="background:#ede9fe;color:#5b21b6;border-radius:10px;padding:1px 6px;font-size:10px;margin-right:4px">${i+1}</span>`
+      + `${r.code}</td>`
+      + `<td style="font-weight:700;color:#2563a8">${r.mu.days}</td>`
+      + `<td style="font-weight:700;color:#1b8f57">${r.mu.totalN}</td>`
+      + `<td style="color:#64748b">${r.mu.days ? fmt(r.mu.totalN/r.mu.days,1) : "\u2014"}</td>`
+      + `${cols}</tr>`;
+  }).join("");
 
-  const n=rows.length||1;
-  const grandCols=ITEMS.map(it=>`<td>${grand[it.id+"M"]}</td><td>${grand[it.id+"A"]}</td><td style="font-weight:800">${grand[it.id]}</td>`).join('');
-  const totalRow=`<tr class="con-total"><td class="con-c1">🔢 Grand Total (${rows.length} કેન્દ્ર)</td><td>${grand.days}</td><td>${grand.totalN}</td><td>—</td>${grandCols}</tr>`;
-  const avgCols=ITEMS.map(it=>`<td>${fmt(grand[it.id+"M"]/n,0)}</td><td>${fmt(grand[it.id+"A"]/n,0)}</td><td>${fmt(grand[it.id]/n,0)}</td>`).join('');
-  const avgRow=`<tr class="con-avg"><td class="con-c1">📊 સરેરાશ / center</td><td>${fmt(grand.days/n,1)}</td><td>${fmt(grand.totalN/n,1)}</td><td>—</td>${avgCols}</tr>`;
+  const n = rows.length || 1;
+  const grandCols = ITEMS.map(it =>
+    `<td>${grand[it.id+"M"]}</td>`
+    + `<td>${grand[it.id+"A"]}</td>`
+    + `<td style="font-weight:800">${grand[it.id]}</td>`
+  ).join("");
+  const totalRow = `<tr class="con-total">`
+    + `<td class="con-c1">\uD83D\uDD22 Grand Total (${rows.length} \u0A95\u0AC7\u0AA8\u0ACD\u0AA6\u0ACD\u0AB0)</td>`
+    + `<td>${grand.days}</td><td>${grand.totalN}</td><td>\u2014</td>`
+    + `${grandCols}</tr>`;
 
-  return toolbar+`<div class="con-table-wrap" style="max-height:520px">
-    <table class="con-table"><thead>
-      <tr><th class="con-c1" rowspan="2">🏢 કેન્દ્ર</th>
-        <th rowspan="2">દિ.</th><th rowspan="2">કુલ લ.</th><th rowspan="2">સ./દિ.</th>
-        ${invHeads}</tr>
-      <tr>${subHeads}</tr>
-    </thead>
-    <tbody>${dataRows}${totalRow}${avgRow}</tbody></table></div>`;
+  const avgCols = ITEMS.map(it =>
+    `<td>${fmt(grand[it.id+"M"]/n,0)}</td>`
+    + `<td>${fmt(grand[it.id+"A"]/n,0)}</td>`
+    + `<td>${fmt(grand[it.id]/n,0)}</td>`
+  ).join("");
+  const avgRow = `<tr class="con-avg">`
+    + `<td class="con-c1">\uD83D\uDCCA \u0AB8\u0AB0\u0AC7\u0AB0\u0ABE\u0AB6 / center</td>`
+    + `<td>${fmt(grand.days/n,1)}</td><td>${fmt(grand.totalN/n,1)}</td><td>\u2014</td>`
+    + `${avgCols}</tr>`;
+
+  return toolbar
+    + `<div class="con-table-wrap" style="max-height:520px">`
+    + `<table class="con-table"><thead>`
+    + `<tr><th class="con-c1" rowspan="2">\uD83C\uDFE2 \u0A95\u0AC7\u0AA8\u0ACD\u0AA6\u0ACD\u0AB0</th>`
+    + `<th rowspan="2">\u0AA6\u0ABF.</th><th rowspan="2">\u0A95\u0AC1\u0AB3 \u0AB2.</th>`
+    + `<th rowspan="2">\u0AB8./\u0AA6\u0ABF.</th>`
+    + `${invHeads}</tr>`
+    + `<tr>${subHeads}</tr>`
+    + `</thead>`
+    + `<tbody>${dataRows}${totalRow}${avgRow}</tbody>`
+    + `</table></div>`;
 }
+
 
 /* ── CSV Export ── */
 function exportConsolidationCSV(){

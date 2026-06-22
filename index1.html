@@ -468,6 +468,46 @@ function buildConsolidationHTML(){
     grand.totalN += r.mu.totalN;
     grand.days   += r.mu.days;
     ITEMS.forEach(it => {
+/* ── Consolidation table ── */
+function buildConsolidationHTML(){
+  const con = state.con;
+
+  const yOpts = [con.selY-1, con.selY, con.selY+1].map(y =>
+    `<option value="${y}"${y===con.selY?" selected":""}>${y}</option>`
+  ).join("");
+  const mOpts = MONTHS_FULL.map((m,i) =>
+    `<option value="${i}"${i===con.selM?" selected":""}>${m}</option>`
+  ).join("");
+
+  const toolbar = `<div class="con-toolbar">`
+    + `<select id="conSelY">${yOpts}</select>`
+    + `<select id="conSelM">${mOpts}</select>`
+    + `<button id="btnFetchCenters">\uD83D\uDD04 Refresh</button>`
+    + `<button class="btn-export-con" id="btnExportCon">\uD83D\uDCE5 CSV</button>`
+    + `<span style="font-size:11px;color:#64748b">${con.centers.length} centers</span>`
+    + `</div>`;
+
+  if(con.loading) return toolbar
+    + `<div class="con-loading">\u29D1 \u0AA1\u0AC7\u0A9F\u0ABE \u0AB2\u0ACB\u0AA1 \u0AA5\u0A88 \u0AB0\u0AB9\u0ACD\u0AAF\u0ACB \u0A9B\u0AC7...</div>`;
+
+  if(con.error) return toolbar
+    + `<div class="con-error">\u274C ${con.error}`
+    + `<br><button onclick="fetchAllCenters()" style="margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer">\u0AAB\u0AB0\u0AC0 try \u0A95\u0AB0\u0ACB</button></div>`;
+
+  if(!con.centers.length) return toolbar
+    + `<div class="con-loading" style="color:#64748b">\uD83D\uDCED \u0A95\u0ACB\u0A88 center data \u0AA8\u0AA5\u0AC0`
+    + `<br><button onclick="fetchAllCenters()" style="margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer">Load Centers</button></div>`;
+
+  const rows = con.centers
+    .map(c => ({ code: c.centerCode, mu: calcMonthUsage(con.selY, con.selM, c.ben || {}) }))
+    .sort((a,b) => b.mu.totalN - a.mu.totalN);
+
+  const grand = { totalN:0, days:0 };
+  ITEMS.forEach(it => { grand[it.id]=0; grand[it.id+"M"]=0; grand[it.id+"A"]=0; });
+  rows.forEach(r => {
+    grand.totalN += r.mu.totalN;
+    grand.days   += r.mu.days;
+    ITEMS.forEach(it => {
       grand[it.id]     += r.mu[it.id]     || 0;
       grand[it.id+"M"] += r.mu[it.id+"M"] || 0;
       grand[it.id+"A"] += r.mu[it.id+"A"] || 0;

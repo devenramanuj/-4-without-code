@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>My Daily Report</title>
+<!-- ✅ FIX 1: font-display:swap + preload = no blocking -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap">
@@ -283,6 +284,12 @@ function setStatus(msg, color="#1b8f57"){
 const _hasURL = APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("YOUR_URL");
 
 function bootApp(){
+  /* ✅ ફોર્સફુલ સેફ્ટી ચેક: જો બ્રાઉઝરમાં અગાઉથી કોઈ અધૂરો/બગડેલો ડેટા સેવ હોય તો તેને ક્લીયર કરી દેશે જેથી એપ બ્લેન્ક ન રહે */
+  if(!centerCode || centerCode === "undefined" || centerCode === "null") {
+    localStorage.removeItem("anganwadi_center_code");
+    centerCode = "";
+  }
+  
   loadLocalFallback(); // લોકલ પહેલા, નેટ વગર ચાલુ થવા માટે
   if(!centerCode){ render(); return; }
   showNav();
@@ -434,7 +441,7 @@ function buildConsolidationHTML(){
     + "<span style='font-size:11px;color:#64748b'>" + con.centers.length + " centers</span>"
     + "</div>";
 
-  if(con.loading) return toolbar + "<div class='con-loading'>\u29D1 \u0AA1\u0AC7\u0A9F\u0ABE \u0AB2\u0ACB\u0AA1 \u0AA5\u0A88 \u0AB0\u0AB9\u0ACD\u0AAF\u0ACB \u0A9B\u0AC7...</div>";
+  if(con.loading) return toolbar + "<div class='con-loading'>\u29D1 \u0AA1\u0AC7\u0A9F\u0ABE \u0AB2\u0ACB\u0AA1 \u0AA5\u0A88 \u0AB0\u0AB9\u0ACH\u0AAF\u0ACB \u0A9B\u0AC7...</div>";
   if(con.error) return toolbar + "<div class='con-error'>\u274C " + con.error + "<br><button onclick='fetchAllCenters()' style='margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer'>ફરી try કરો</button></div>";
   if(!con.centers.length) return toolbar + "<div class='con-loading' style='color:#64748b'>\uD83D\uDCED \u0A95\u0ACB\u0A8ઇ center data \u0AA8\u0AA5\u0AC0<br><button onclick='fetchAllCenters()' style='margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer'>Load Centers</button></div>";
 
@@ -513,7 +520,7 @@ function exportConsolidationCSV(){
 /* ============================================================
    USAGE RULES
 ============================================================ */
-/* ✅ FIX 6: u.chokhaA ડુપ્લિકેટ કી અસાઇનમેન્ટ નો મોટો બગ અહીં ફિક્સ કરી દીધો */
+/* ✅ ઓરિજિનલ વપરાશ ગણતરી લોજિક, બગ ફિક્સ સાથે એકદમ સચોટ */
 function calcUsage(dow, n){
   n = Number(n) || 0;
   const u = {};
@@ -528,7 +535,7 @@ function calcUsage(dow, n){
   // Afternoon
   u.telA = 8*n; u.telnA = n;
   if(dow===1||dow===2||dow===5){ u.ghauA=50*n; u.ghaunA=n; }
-  if(dow===3||dow===4||dow===6){ u.chokhaA=50*n; u.chokhanA=n; } // <- અહીં chokhaA=n હતું જે બદલીને chokhanA કર્યું
+  if(dow===3||dow===4||dow===6){ u.chokhaA=50*n; u.chokhanA=n; } 
   if(dow===2||dow===4||dow===5){ u.chanaA=20*n; u.chananA=n; }
   if(dow===1||dow===3){ u.dalA=20*n; u.dalnA=n; }
   if(dow===6){ u.chanadalA=20*n; u.chanadalnA=n; }
@@ -577,7 +584,7 @@ function renderSetupPage(){
   return `<div class="setup-box">
     <h2>🏢 આંગણવાડી કેન્દ્ર લોગિન</h2>
     <p style="font-size:13px;color:#64748b;margin-bottom:15px">તમારો ડેટા અલગ રાખવા માટે કેન્દ્રનો કોડ અથવા મોબાઈલ નંબર નાખો.</p>
-    <input type="text" id="centerCodeInput" placeholder="દા.ત. AW-101 અથવા નંબર" value="${centerCode}" autocomplete="off">
+    <input type="text" id="centerCodeInput" placeholder="દા.ત. AW-101 અથવા નંબર" value="" autocomplete="off">
     <button id="btnSubmitSetup">એપ શરૂ કરો ➔</button>
   </div>`;
 }
@@ -779,7 +786,7 @@ function renderReportPage(){
               <th>સ. વપરાશ (g)</th>
               <th>બ. વપરાશ (g)</th>
               <th>કુલ (g)</th>
-              <th>OFF સિલક (kg)</th>
+              <th>બંધ સિલક (kg)</th>
             </tr></thead>
             <tbody>${dailyRows}</tbody>
           </table>
@@ -954,7 +961,7 @@ function renderModal(){
 }
 
 /* ============================================================
-   MAIN RENDER  — Try-Catch સેફ્ટી કવર અને રિસ્પોન્સિવ લોડિંગ
+   MAIN RENDER  — Try-Catch સેફ્ટી કવર
 ============================================================ */
 let _renderPending = false;
 function render(){
@@ -966,7 +973,7 @@ function render(){
     if(!app) return;
     
     try {
-      if(!centerCode || centerCode === "undefined"){
+      if(!centerCode || centerCode === "undefined" || centerCode === "null"){
         document.getElementById("nav").style.display = "none";
         document.getElementById("syncStatus").style.display = "none";
         app.innerHTML = renderSetupPage();

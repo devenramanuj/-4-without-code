@@ -10,7 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap" rel="stylesheet"></noscript>
 <style>
-/* ✅ System font stack FIRST — UI shows instantly before Noto loads */
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:'Noto Sans Gujarati',system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -28,7 +27,6 @@ body{
 .section-head{background:linear-gradient(135deg,#1a3c5e,#2563a8);color:#fff;padding:10px 14px;font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .section-body{padding:12px}
 
-/* Skeleton loader for instant visual feedback */
 .skeleton{background:linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 50%,#e2e8f0 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:8px;height:120px;margin:12px}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
@@ -74,7 +72,6 @@ th{background:#1a3c5e;color:#fff;padding:8px 6px;text-align:center;border:1px so
 td{padding:6px;text-align:center;border:1px solid #d1dce8;background:#fff;white-space:nowrap}
 tr:nth-child(even) td{background:#f8fafc}
 
-/* ── Sticky columns: તા. | વ. | સં. ── */
 .sticky-c1{position:sticky;left:0;z-index:3;box-shadow:none;width:32px;min-width:32px;max-width:32px}
 .sticky-c2{position:sticky;left:32px;z-index:3;white-space:nowrap;width:auto;padding-left:6px;padding-right:6px}
 .sticky-c3{position:sticky;left:calc(32px + var(--c2w, 52px));z-index:3;width:32px;min-width:32px;max-width:32px;box-shadow:2px 0 4px rgba(0,0,0,.08)}
@@ -137,7 +134,7 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .stat-card .s-num{font-size:22px;font-weight:800;color:#5b21b6}
 .stat-card .s-lbl{font-size:11px;color:#64748b;margin-top:2px}
 
-/* ✅ FIX 7: content-visibility નો લોચો હટાવી દીધો */
+/* ✅ content-visibility લોચા કરતું હતું એટલે ફક્ત display રાખ્યું */
 .tab-content{display: block;}
 
 /* ── REPORT ZOOM ── */
@@ -414,6 +411,7 @@ async function fetchAllCenters(){
   state.con.loading = false; render();
 }
 
+// ✅ સુધારેલું: ફિક્સ \u0AAB\u0AB0\u0ACおり લોચો
 function buildConsolidationHTML(){
   const con = state.con;
   const yOpts = [con.selY-1, con.selY, con.selY+1].map(y =>
@@ -432,7 +430,7 @@ function buildConsolidationHTML(){
     + "</div>";
 
   if(con.loading) return toolbar + "<div class='con-loading'>\u29D1 \u0AA1\u0AC7\u0A9F\u0ABE \u0AB2\u0ACB\u0AA1 \u0AA5\u0A88 \u0AB0\u0AB9\u0ACD\u0AAF\u0ACB \u0A9B\u0AC7...</div>";
-  if(con.error) return toolbar + "<div class='con-error'>\u274C " + con.error + "<br><button onclick='fetchAllCenters()' style='margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer'>\u0AAB\u0AB0\u0ACおり try \u0A95\u0AB0\u0ACB</button></div>";
+  if(con.error) return toolbar + "<div class='con-error'>\u274C " + con.error + "<br><button onclick='fetchAllCenters()' style='margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer'>ફરી try કરો</button></div>";
   if(!con.centers.length) return toolbar + "<div class='con-loading' style='color:#64748b'>\uD83D\uDCED \u0A95\u0ACB\u0A8ઇ center data \u0AA8\u0AA5\u0AC0<br><button onclick='fetchAllCenters()' style='margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer'>Load Centers</button></div>";
 
   const rows = con.centers
@@ -459,7 +457,7 @@ function buildConsolidationHTML(){
       "<td>" + (r.mu[it.id+"M"]||0) + "</td>"
       + "<td>" + (r.mu[it.id+"A"]||0) + "</td>"
       + "<td style='font-weight:700;color:" + (r.mu[it.id] ? "#e67e22" : "#cbd5e1") + "'>"
-      + (r.mu[it.id]||0) + "</td>"
+      + (r.mu[it.id||0]) + "</td>"
     ).join("");
     return "<tr>"
       + "<td class='con-c1'>"
@@ -524,7 +522,7 @@ function calcUsage(dow, n){
   // Afternoon
   u.telA = 8*n; u.telnA = n;
   if(dow===1||dow===2||dow===5){ u.ghauA=50*n; u.ghaunA=n; }
-  if(dow===3||dow===4||dow===6){ u.chokhaA=50*n; u.chokhaA=n; }
+  if(dow===3||dow===4||dow===6){ u.chokhaA=50*n; u.chokhanA=n; }
   if(dow===2||dow===4||dow===5){ u.chanaA=20*n; u.chananA=n; }
   if(dow===1||dow===3){ u.dalA=20*n; u.dalnA=n; }
   if(dow===6){ u.chanadalA=20*n; u.chanadalnA=n; }
@@ -679,7 +677,7 @@ function renderMonthlyPage(curMU){
             <th>સવાર વ. (g)</th>
             <th>બપોર વ. (g)</th>
             <th>કુલ વ. (g)</th>
-            <th>બંધ સિલક (kg)</th>
+            <th>供应商 સિલક (kg)</th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
@@ -946,7 +944,7 @@ function renderModal(){
 }
 
 /* ============================================================
-   MAIN RENDER  — ✅ સુધારેલું અને ટેસ્ટેડ
+   MAIN RENDER
 ============================================================ */
 let _renderPending = false;
 function render(){
@@ -957,7 +955,6 @@ function render(){
     const app = document.getElementById('app');
     if(!app) return;
     
-    // જો કેન્દ્ર કોડ ન હોય તો આંગણવાડી લોગિન બતાવો
     if(!centerCode){
       document.getElementById("nav").style.display = "none";
       document.getElementById("syncStatus").style.display = "none";

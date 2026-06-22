@@ -230,8 +230,9 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 /* ============================================================
    CONFIG
 ============================================================ */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw50LCilmreN1FtjZw7BDXkHJ0-4qhUeAAOcTuhf8muvr29a-NV2Y0_9ZzaViv0CQbWow/exec";
-const ADMIN_PASSWORD = "Dev@1"; // ← Admin password અહીં બદલો
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFKmZ6vaXw40X54BwONQtSWSSfEUuz3c7HYJtEhYxGcvDR-Zaa6cufrwdALgFPn9GbVA/exec";
+const ADMIN_PASSWORD  = "Dev@1";
+
 /* ============================================================
    CONSTANTS  (frozen objects = faster property lookup)
 ============================================================ */
@@ -456,35 +457,56 @@ function buildConsolidationHTML(){
     + "<div class='con-loading' style='color:#64748b'>\uD83D\uDCED \u0A95\u0ACB\u0A88 center data \u0AA8\u0AA5\u0AC0"
     + "<br><button onclick='fetchAllCenters()' style='margin-top:10px;padding:6px 14px;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer'>Load Centers</button></div>";
 
-  const rows = con.centers
-    .map(c => ({ code: c.centerCode, mu: calcMonthUsage(con.selY, con.selM, c.ben || {}) }))
-    .sort((a,b) => b.mu.totalN - a.mu.totalN);
+  // ── rows: mu + closing balance per item ──
+  const rows = con.centers.map(c => {
+    const mu  = calcMonthUsage(con.selY, con.selM, c.ben || {});
+    const inv = c.inv || {};
+    // closing balance per item (kg)
+    const closing = {};
+    ITEMS.forEach(it => {
+      const iv      = inv[it.id] || {o:0, r:0};
+      const opening = (iv.o || 0) + (iv.r || 0);
+      closing[it.id] = opening - (mu[it.id] || 0) / 1000;
+    });
+    return { code: c.centerCode, mu, closing };
+  }).sort((a,b) => b.mu.totalN - a.mu.totalN);
 
+  // ── grand totals ──
   const grand = { totalN:0, days:0 };
-  ITEMS.forEach(it => { grand[it.id]=0; grand[it.id+"M"]=0; grand[it.id+"A"]=0; });
+  ITEMS.forEach(it => {
+    grand[it.id]          = 0;
+    grand[it.id+"M"]      = 0;
+    grand[it.id+"A"]      = 0;
+    grand[it.id+"closing"]= 0;
+  });
   rows.forEach(r => {
     grand.totalN += r.mu.totalN;
     grand.days   += r.mu.days;
     ITEMS.forEach(it => {
-      grand[it.id]     += r.mu[it.id]     || 0;
-      grand[it.id+"M"] += r.mu[it.id+"M"] || 0;
-      grand[it.id+"A"] += r.mu[it.id+"A"] || 0;
+      grand[it.id]           += r.mu[it.id]     || 0;
+      grand[it.id+"M"]       += r.mu[it.id+"M"] || 0;
+      grand[it.id+"A"]       += r.mu[it.id+"A"] || 0;
+      grand[it.id+"closing"] += r.closing[it.id]|| 0;
     });
   });
 
+  // ── table headers: colspan 4 (સ.વ. | બ.વ. | કુલ | બ.સિ.) ──
   const invHeads = ITEMS.map(it =>
-    "<th colspan='3' style='background:" + it.color + "'>" + it.emoji + " " + it.name + "</th>"
+    "<th colspan='4' style='background:" + it.color + "'>" + it.emoji + " " + it.name + "</th>"
   ).join("");
   const subHeads = ITEMS.map(() =>
     "<th>\u0AB8.\u0AB5.(g)</th><th>\u0AAC.\u0AB5.(g)</th><th>\u0A95\u0AC1\u0AB3(g)</th>"
+    + "<th style='color:#86efac'>\u0AAC.\u0AB8\u0ABF.(kg)</th>"
   ).join("");
 
+  // ── data rows ──
   const dataRows = rows.map((r,i) => {
     const cols = ITEMS.map(it =>
       "<td>" + (r.mu[it.id+"M"]||0) + "</td>"
       + "<td>" + (r.mu[it.id+"A"]||0) + "</td>"
       + "<td style='font-weight:700;color:" + (r.mu[it.id] ? "#e67e22" : "#cbd5e1") + "'>"
-      + (r.mu[it.id]||0) + "</td>"
+        + (r.mu[it.id]||0) + "</td>"
+      + "<td style='font-weight:700;color:#1b8f57'>" + fmt(r.closing[it.id],3) + "</td>"
     ).join("");
     return "<tr>"
       + "<td class='con-c1'>"
@@ -496,21 +518,25 @@ function buildConsolidationHTML(){
       + cols + "</tr>";
   }).join("");
 
+  // ── grand total row ──
   const n = rows.length || 1;
   const grandCols = ITEMS.map(it =>
     "<td>" + grand[it.id+"M"] + "</td>"
     + "<td>" + grand[it.id+"A"] + "</td>"
     + "<td style='font-weight:800'>" + grand[it.id] + "</td>"
+    + "<td style='font-weight:800;color:#1b8f57'>" + fmt(grand[it.id+"closing"],3) + "</td>"
   ).join("");
   const totalRow = "<tr class='con-total'>"
     + "<td class='con-c1'>\uD83D\uDD22 Grand Total (" + rows.length + " \u0A95\u0AC7\u0AA8\u0ACD\u0AA6\u0ACD\u0AB0)</td>"
     + "<td>" + grand.days + "</td><td>" + grand.totalN + "</td><td>\u2014</td>"
     + grandCols + "</tr>";
 
+  // ── average row ──
   const avgCols = ITEMS.map(it =>
     "<td>" + fmt(grand[it.id+"M"]/n,0) + "</td>"
     + "<td>" + fmt(grand[it.id+"A"]/n,0) + "</td>"
     + "<td>" + fmt(grand[it.id]/n,0) + "</td>"
+    + "<td style='color:#1b8f57'>" + fmt(grand[it.id+"closing"]/n,3) + "</td>"
   ).join("");
   const avgRow = "<tr class='con-avg'>"
     + "<td class='con-c1'>\uD83D\uDCCA \u0AB8\u0AB0\u0AC7\u0AB0\u0ABE\u0AB6 / center</td>"
@@ -529,20 +555,23 @@ function buildConsolidationHTML(){
     + "<tbody>" + dataRows + totalRow + avgRow + "</tbody>"
     + "</table></div>";
 }
-/* ── CSV Export ── */
 function exportConsolidationCSV(){
   const con = state.con;
   if(!con.centers.length){ alert("Data નથી"); return; }
   let csv = "કેન્દ્ર,દિ.,કુળ લ.,સ./દિ.";
   ITEMS.forEach(it => {
-    csv += "," + it.name + " સ.વ.(g)," + it.name + " બ.વ.(g)," + it.name + " કુળ(g)";
+    csv += "," + it.name + " સ.વ.(g)," + it.name + " બ.વ.(g)," + it.name + " કુળ(g)," + it.name + " બ.સિ.(kg)";
   });
   csv += "\n";
   con.centers.forEach(c => {
-    const mu = calcMonthUsage(con.selY, con.selM, c.ben || {});
+    const mu  = calcMonthUsage(con.selY, con.selM, c.ben || {});
+    const inv = c.inv || {};
     csv += c.centerCode + "," + mu.days + "," + mu.totalN + "," + (mu.days ? fmt(mu.totalN/mu.days,1) : "0");
     ITEMS.forEach(it => {
-      csv += "," + (mu[it.id+"M"]||0) + "," + (mu[it.id+"A"]||0) + "," + (mu[it.id]||0);
+      const iv      = inv[it.id] || {o:0, r:0};
+      const opening = (iv.o||0) + (iv.r||0);
+      const closing = opening - (mu[it.id]||0)/1000;
+      csv += "," + (mu[it.id+"M"]||0) + "," + (mu[it.id+"A"]||0) + "," + (mu[it.id]||0) + "," + fmt(closing,3);
     });
     csv += "\n";
   });

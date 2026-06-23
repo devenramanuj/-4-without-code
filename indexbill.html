@@ -923,12 +923,12 @@ function render(){
 }
 
 /* ============================================================
-   💰 બિલ પેજ — સુધારેલ (નિયમો મુજબ)
+   💰 બિલ પેજ — સાચા નિયમો મુજબ
 ============================================================ */
 function renderBillPage(curMU) {
   const totalN = curMU && curMU.totalN ? curMU.totalN : 0;
-  let fruitN = 0;           // સોમવાર + શુક્રવાર
-  let chanaTuverN = 0;      // ચણા + તુવેરદાળ (જે દિવસે આવે તે દિવસના લાભાર્થી)
+  let fruitN = 0;          // સોમવાર + શુક્રવારના કુલ લાભાર્થી
+  let chanaTuverN = 0;     // ચણા અને તુવેરદાળ આવતા દિવસોના કુલ લાભાર્થી
 
   const dim = new Date(state.calY, state.calM + 1, 0).getDate();
   
@@ -939,14 +939,14 @@ function renderBillPage(curMU) {
 
     const dow = new Date(state.calY, state.calM, d).getDay();
 
-    // 1. ફ્રુટ બિલ — માત્ર સોમવાર (1) અને શુક્રવાર (5)
+    // 1. ફ્રુટ બિલ — સોમવાર (1) અને શુક્રવાર (5)
     if (dow === 1 || dow === 5) {
       fruitN += n;
     }
 
-    // 3. ચણા + તુવેરદાળ — જે દિવસે આ બંનેમાંથી કોઈ એક આવે છે
-    // (calcUsage મુજબ: chana → dow 2,4,5 અને dal → dow 1,3)
-    if (dow === 1 || dow === 2 || dow === 3 || dow === 4 || dow === 5) {
+    // 3. ચણા + તુવેરદાળ — જે દિવસે આવે છે (calcUsage મુજબ)
+    // chana: dow 2,4,5 | dal: dow 1,3
+    if ([1,2,3,4,5].includes(dow)) {
       chanaTuverN += n;
     }
   }
@@ -954,7 +954,7 @@ function renderBillPage(curMU) {
   const bills = [
     { 
       name: "🍎 ફ્રુટ બિલ", 
-      calc: `સોમ + શુક્ર = ${fruitN}`, 
+      calc: `સોમ+શુક્ર લા. = ${fruitN}`, 
       amount: (fruitN * 3.12 / 100).toFixed(2) 
     },
     { 
@@ -975,7 +975,7 @@ function renderBillPage(curMU) {
     { 
       name: "🧂 મસાલા બિલ", 
       calc: `કુલ લાભાર્થી = ${totalN}`, 
-      amount: (totalN * 1.00).toFixed(2)   // 1 રૂપિયા
+      amount: (totalN * 1.00).toFixed(2) 
     },
     { 
       name: "🚚 વાહતુક બિલ", 
@@ -1007,7 +1007,7 @@ function renderBillPage(curMU) {
             </tr></thead>
             <tbody>${rows}</tbody>
             <tfoot><tr class="total-row">
-              <td colspan="2" style="text-align:right;font-weight:800">કુલ બિલ રકમ</td>
+              <td colspan="2" style="text-align:right">કુલ બિલ રકમ</td>
               <td style="color:#1b8f57;font-weight:800">₹ ${totalAmount}</td>
             </tr></tfoot>
           </table>
@@ -1020,7 +1020,6 @@ function renderBillPage(curMU) {
     </div>
   </div>`;
 }
-
 /* ============================================================
    MODAL HELPERS
 ============================================================ */

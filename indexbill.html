@@ -923,29 +923,65 @@ function render(){
 }
 
 /* ============================================================
-   💰 બિલ પેજ (નવું)
+   💰 બિલ પેજ — સુધારેલ (નિયમો મુજબ)
 ============================================================ */
 function renderBillPage(curMU) {
   const totalN = curMU && curMU.totalN ? curMU.totalN : 0;
-  let fruitN = 0;
+  let fruitN = 0;           // સોમવાર + શુક્રવાર
+  let chanaTuverN = 0;      // ચણા + તુવેરદાળ (જે દિવસે આવે તે દિવસના લાભાર્થી)
+
   const dim = new Date(state.calY, state.calM + 1, 0).getDate();
   
   for (let d = 1; d <= dim; d++) {
     const k = `\( {state.calY}- \){String(state.calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const n = Number(state.ben[k] || 0);
+    if (n <= 0) continue;
+
     const dow = new Date(state.calY, state.calM, d).getDay();
-    if ((dow === 1 || dow === 5) && n > 0) {
+
+    // 1. ફ્રુટ બિલ — માત્ર સોમવાર (1) અને શુક્રવાર (5)
+    if (dow === 1 || dow === 5) {
       fruitN += n;
+    }
+
+    // 3. ચણા + તુવેરદાળ — જે દિવસે આ બંનેમાંથી કોઈ એક આવે છે
+    // (calcUsage મુજબ: chana → dow 2,4,5 અને dal → dow 1,3)
+    if (dow === 1 || dow === 2 || dow === 3 || dow === 4 || dow === 5) {
+      chanaTuverN += n;
     }
   }
 
   const bills = [
-    { name: "🍎 ફ્રુટ બિલ", calc: `સોમ + શુક્ર = ${fruitN}`, amount: (fruitN * 3.12 / 100).toFixed(2) },
-    { name: "🔥 ગરમ નાસ્તો બિલ", calc: `કુલ લાભાર્થી = ${totalN}`, amount: (totalN * 1.30 / 100).toFixed(2) },
-    { name: "🫘 ચણા + તુવેરદાળ બિલ", calc: `કુલ લાભાર્થી = ${totalN}`, amount: (totalN * 1.60 / 100).toFixed(2) },
-    { name: "🥬 શાકભાજી બિલ", calc: `કુલ લાભાર્થી = ${totalN}`, amount: (totalN * 0.15 / 100).toFixed(2) },
-    { name: "🧂 મસાલા બિલ", calc: `કુલ લાભાર્થી = ${totalN}`, amount: (totalN * 1.00).toFixed(2) },
-    { name: "🚚 વાહતુક બિલ", calc: `કુલ લાભાર્થી = ${totalN}`, amount: (totalN * 0.05 / 100).toFixed(2) }
+    { 
+      name: "🍎 ફ્રુટ બિલ", 
+      calc: `સોમ + શુક્ર = ${fruitN}`, 
+      amount: (fruitN * 3.12 / 100).toFixed(2) 
+    },
+    { 
+      name: "🔥 ગરમ નાસ્તો બિલ", 
+      calc: `કુલ લાભાર્થી = ${totalN}`, 
+      amount: (totalN * 1.30 / 100).toFixed(2) 
+    },
+    { 
+      name: "🫘 ચણા + તુવેરદાળ બિલ", 
+      calc: `સંબંધિત લા. = ${chanaTuverN}`, 
+      amount: (chanaTuverN * 1.60 / 100).toFixed(2) 
+    },
+    { 
+      name: "🥬 શાકભાજી બિલ", 
+      calc: `કુલ લાભાર્થી = ${totalN}`, 
+      amount: (totalN * 0.15 / 100).toFixed(2) 
+    },
+    { 
+      name: "🧂 મસાલા બિલ", 
+      calc: `કુલ લાભાર્થી = ${totalN}`, 
+      amount: (totalN * 1.00).toFixed(2)   // 1 રૂપિયા
+    },
+    { 
+      name: "🚚 વાહતુક બિલ", 
+      calc: `કુલ લાભાર્થી = ${totalN}`, 
+      amount: (totalN * 0.05 / 100).toFixed(2) 
+    }
   ];
 
   const rows = bills.map(b => `
@@ -971,7 +1007,7 @@ function renderBillPage(curMU) {
             </tr></thead>
             <tbody>${rows}</tbody>
             <tfoot><tr class="total-row">
-              <td colspan="2" style="text-align:right">કુલ બિલ રકમ</td>
+              <td colspan="2" style="text-align:right;font-weight:800">કુલ બિલ રકમ</td>
               <td style="color:#1b8f57;font-weight:800">₹ ${totalAmount}</td>
             </tr></tfoot>
           </table>

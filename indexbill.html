@@ -926,48 +926,36 @@ function render(){
    💰 બિલ પેજ — સાચા નિયમો મુજબ
 ============================================================ */
 
-/* ============================================================
-   💰 બિલ પેજ — સાચા નિયમો મુજબ
-============================================================ */
-function renderBillPage(curMU) {
+== 5) function renderBillPage(curMU) {
   const y = state.calY, m = state.calM;
-  const dim = new Date(y, m + 1, 0).getDate(); // મહિનાના કુલ દિવસો
   
-  let fruitBeneficiaries = 0;
-  let totalBeneficiaries = 0;
-  let chanaTuverBeneficiaries = 0;
+  // માસિક પેજ (curMU) માંથી સીધા જ કુલ લાભાર્થી (550)
+  const totalBeneficiaries = curMU.totalN || 0; 
 
-  // આખા મહિનાના દિવસો ફરીને સાચા લાભાર્થીઓ પ્લસ કરવા
+  // ૧. ફ્રુટ બિલ માટે: આખા મહિનાના સોમ અને શુક્રના કુલ લાભાર્થી
+  let fruitBeneficiaries = 0;
+  const dim = new Date(y, m + 1, 0).getDate();
   for (let d = 1; d <= dim; d++) {
     const k = dkf(y, m, d);
     const n = Number(state.ben[k] || 0);
-    if (!n) continue;
-
-    const dow = new Date(y, m, d).getDay();
-
-    // કુલ માસ દરમિયાનના લાભાર્થીઓ (નિયમ ૨, ૪, ૫, ૬ માટે)
-    totalBeneficiaries += n;
-
-    // ૧. નિયમ મુજબ: ફક્ત સોમવાર (1) અને શુક્રવાર (5) ના જ ફ્રુટ લાભાર્થી
-    if (dow === 1 || dow === 5) {
+    if (n && (new Date(y, m, d).getDay() === 1 || new Date(y, m, d).getDay() === 5)) {
       fruitBeneficiaries += n;
-    }
-
-    // ૩. નિયમ મુજબ: ચણા + તુવેરદાળના લાભાર્થી (જે મંગળવાર(2), બુધવાર(3), ગુરુવાર(4), શુક્રવાર(5), શનિવાર(6) માં વપરાય છે)
-    if ([2, 3, 4, 5, 6].includes(dow)) {
-      chanaTuverBeneficiaries += n;
     }
   }
 
-  // સરકારે આપેલા નિયમો મુજબ ગુણાકાર (રૂપિયા લેખે સાચી ગણતરી)
-  const fruitBill       = fruitBeneficiaries * 3.12;       // લાભાર્થી દીઠ ૩.૧૨ રૂપિયા
-  const garamNastoBill   = totalBeneficiaries * 1.30;       // કુલ લાભાર્થી * ૧.૩૦ રૂપિયા
-  const chanaTuverBill   = chanaTuverBeneficiaries * 1.60;  // કુલ લાભાર્થી * ૧.૬૦ રૂપિયા
-  const shakbhajiBill    = totalBeneficiaries * 0.15;       // કુલ લાભાર્થી * ૦.૧૫ રૂપિયા
-  const masalaBill       = totalBeneficiaries * 1.00;       // કુલ લાભાર્થી * ૧.૦0 રૂપિયો
-  const vahatukBill      = totalBeneficiaries * 0.05;       // કુલ લાભાર્થી * ૦.૦૫ રૂપિયા
+  // ૩. ચણા + તુવેરદાળ બિલ: ઈમેજ મુજબ (ચણા ૨૭૫ + તુવેરદાળ ૧૯૧ = ૪૬૬) - ચણાદાળ છોડી દીધી છે
+  const chanaN = curMU["chananA"] || 0; 
+  const dalN   = curMU["dalnA"] || 0;   
+  const chanaTuverBeneficiaries = chanaN + dalN; // બરાબર 466 આવશે
 
-  // કુલ બિલ રકમ
+  // નિયમો મુજબ બિલની સાચી ગણતરી
+  const fruitBill       = fruitBeneficiaries * 3.12;
+  const garamNastoBill   = totalBeneficiaries * 1.30;
+  const chanaTuverBill   = chanaTuverBeneficiaries * 1.60; // 466 * 1.60
+  const shakbhajiBill    = totalBeneficiaries * 0.15;
+  const masalaBill       = totalBeneficiaries * 1.00;
+  const vahatukBill      = totalBeneficiaries * 0.05;
+
   const totalBillAmount = fruitBill + garamNastoBill + chanaTuverBill + shakbhajiBill + masalaBill + vahatukBill;
 
   return `<div class="container tab-content">
@@ -1028,12 +1016,11 @@ function renderBillPage(curMU) {
       </div>
       <div class="actions">
         <button class="btn-print" id="btnPrint">🖨️ Print</button>
-        <button class="btn-share" style="background:#1b8f57;" onclick="alert('બિલ રિપોર્ટ કોપી થઈ ગયો!')">📤 Share</button>
+        <button class="btn-share" style="background:#1b8f57;" id="btnShareM">📤 Share</button>
       </div>
     </div>
   </div>`;
 }
-
 
 /* ============================================================
    MODAL HELPERS

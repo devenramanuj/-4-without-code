@@ -925,101 +925,95 @@ function render(){
 /* ============================================================
    💰 બિલ પેજ — સાચા નિયમો મુજબ
 ============================================================ */
-function renderBillPage(curMU) {
-  const totalN = curMU && curMU.totalN ? curMU.totalN : 0;
-  let fruitN = 0;          // સોમવાર + શુક્રવારના કુલ લાભાર્થી
-  let chanaTuverN = 0;     // ચણા અને તુવેરદાળ આવતા દિવસોના કુલ લાભાર્થી
 
-  const dim = new Date(state.calY, state.calM + 1, 0).getDate();
-  
-  for (let d = 1; d <= dim; d++) {
-    const k = `\( {state.calY}- \){String(state.calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const n = Number(state.ben[k] || 0);
-    if (n <= 0) continue;
+      
+function renderBill(billData) {
+    // billData માં આખા મહિનાના લાભાર્થીઓની વિગત હોવી જોઈએ.
+    // ઉદાહરણ તરીકે: 
+    // billData.totalBeneficiaries (કુલ લાભાર્થી)
+    // billData.fruitBeneficiaries (માત્ર સોમવાર અને શુક્રવારના લાભાર્થી)
+    // billData.chanaTuverBeneficiaries (ચણા+તુવેરદાળના કુલ લાભાર્થી)
 
-    const dow = new Date(state.calY, state.calM, d).getDay();
+    const fruitBeneficiaries = billData.fruitBeneficiaries || 0;
+    const totalBeneficiaries = billData.totalBeneficiaries || 0;
+    const chanaTuverBeneficiaries = billData.chanaTuverBeneficiaries || 0;
 
-    // 1. ફ્રુટ બિલ — સોમવાર (1) અને શુક્રવાર (5)
-    if (dow === 1 || dow === 5) {
-      fruitN += n;
-    }
+    // ૧. ફ્રુટ બિલ - લાભાર્થી દીઠ ૩.૧૨ પૈસા (રૂપિયામાં ફેરવવા 3.12 / 100 એટલે 0.0312)
+    const fruitBill = fruitBeneficiaries * 0.0312;
 
-    // 3. ચણા + તુવેરદાળ — જે દિવસે આવે છે (calcUsage મુજબ)
-    // chana: dow 2,4,5 | dal: dow 1,3
-    if ([1,2,3,4,5].includes(dow)) {
-      chanaTuverN += n;
-    }
-  }
+    // ૨. ગરમ નાસ્તો બિલ - કુલ લાભાર્થી * ૧.૩૦ પૈસા (1.30 / 100 એટલે 0.013)
+    const garamNastoBill = totalBeneficiaries * 0.013;
 
-  const bills = [
-    { 
-      name: "🍎 ફ્રુટ બિલ", 
-      calc: `સોમ+શુક્ર લા. = ${fruitN}`, 
-      amount: (fruitN * 3.12 / 100).toFixed(2) 
-    },
-    { 
-      name: "🔥 ગરમ નાસ્તો બિલ", 
-      calc: `કુલ લાભાર્થી = ${totalN}`, 
-      amount: (totalN * 1.30 / 100).toFixed(2) 
-    },
-    { 
-      name: "🫘 ચણા + તુવેરદાળ બિલ", 
-      calc: `સંબંધિત લા. = ${chanaTuverN}`, 
-      amount: (chanaTuverN * 1.60 / 100).toFixed(2) 
-    },
-    { 
-      name: "🥬 શાકભાજી બિલ", 
-      calc: `કુલ લાભાર્થી = ${totalN}`, 
-      amount: (totalN * 0.15 / 100).toFixed(2) 
-    },
-    { 
-      name: "🧂 મસાલા બિલ", 
-      calc: `કુલ લાભાર્થી = ${totalN}`, 
-      amount: (totalN * 1.00).toFixed(2) 
-    },
-    { 
-      name: "🚚 વાહતુક બિલ", 
-      calc: `કુલ લાભાર્થી = ${totalN}`, 
-      amount: (totalN * 0.05 / 100).toFixed(2) 
-    }
-  ];
+    // ૩. ચણા, તુવેરદાળ બીલ - કુલ લાભાર્થી * ૧.૬૦ પૈસા (1.60 / 100 એટલે 0.016)
+    const chanaTuverBill = chanaTuverBeneficiaries * 0.016;
 
-  const rows = bills.map(b => `
-    <tr>
-      <td style="text-align:left;font-weight:600">${b.name}</td>
-      <td>${b.calc}</td>
-      <td style="font-weight:700;color:#2563a8">₹ ${b.amount}</td>
-    </tr>
-  `).join("");
+    // ૪. શાકભાજી બિલ - કુલ લાભાર્થી * ૦.૧૫ પૈસા (0.15 / 100 એટલે 0.0015)
+    const shakbhajiBill = totalBeneficiaries * 0.0015;
 
-  const totalAmount = bills.reduce((sum, b) => sum + parseFloat(b.amount), 0).toFixed(2);
+    // ૫. મસાલા બિલ - કુલ લાભાર્થી * ૧.૦૦ રૂપિયા
+    const masalaBill = totalBeneficiaries * 1.00;
 
-  return `<div class="container tab-content">
-    <div class="card">
-      <div class="section-head">💰 બિલ — ${MONTHS_FULL[state.calM]} ${state.calY}</div>
-      <div class="section-body">
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th style="text-align:left">બિલ પ્રકાર</th>
-              <th>ગણતરી</th>
-              <th>રકમ (₹)</th>
-            </tr></thead>
-            <tbody>${rows}</tbody>
-            <tfoot><tr class="total-row">
-              <td colspan="2" style="text-align:right">કુલ બિલ રકમ</td>
-              <td style="color:#1b8f57;font-weight:800">₹ ${totalAmount}</td>
-            </tr></tfoot>
-          </table>
+    // ૬. વાહતુક બિલ - કુલ લાભાર્થી * ૦.૦૫ પૈસા (0.05 / 100 એટલે 0.0005)
+    const vahatukBill = totalBeneficiaries * 0.0005;
+
+    // કુલ બિલની રકમ
+    const totalAmount = fruitBill + garamNastoBill + chanaTuverBill + shakbhajiBill + masalaBill + vahatukBill;
+
+    // HTML માં બિલ ડિસ્પ્લે કરવાનો સેક્શન
+    const billContainer = document.getElementById('billRenderSection');
+    
+    billContainer.innerHTML = `
+        <div style="padding: 15px; border: 1px solid #ccc; border-radius: 5px; background: #fff;">
+            <h3 style="text-align: center; margin-top: 0;">માસિક બિલ ગણતરી પત્રક</h3>
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #ddd; background: #f2f2f2;">
+                        <th style="padding: 8px;">બિલનું નામ</th>
+                        <th style="padding: 8px;">લાભાર્થી સંખ્યા</th>
+                        <th style="padding: 8px; text-align: right;">કુલ રકમ (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 8px;">૧. ફ્રુટ બિલ (સોમ/શુક્ર)</td>
+                        <td style="padding: 8px;">${fruitBeneficiaries}</td>
+                        <td style="padding: 8px; text-align: right;">₹${fruitBill.toFixed(2)}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 8px;">૨. ગરમ નાસ્તો બિલ</td>
+                        <td style="padding: 8px;">${totalBeneficiaries}</td>
+                        <td style="padding: 8px; text-align: right;">₹${garamNastoBill.toFixed(2)}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 8px;">૩. ચણા, તુવેરદાળ બીલ</td>
+                        <td style="padding: 8px;">${chanaTuverBeneficiaries}</td>
+                        <td style="padding: 8px; text-align: right;">₹${chanaTuverBill.toFixed(2)}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 8px;">૪. શાકભાજી બિલ</td>
+                        <td style="padding: 8px;">${totalBeneficiaries}</td>
+                        <td style="padding: 8px; text-align: right;">₹${shakbhajiBill.toFixed(2)}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 8px;">૫. મસાલા બિલ</td>
+                        <td style="padding: 8px;">${totalBeneficiaries}</td>
+                        <td style="padding: 8px; text-align: right;">₹${masalaBill.toFixed(2)}</td>
+                    </tr>
+                    <tr style="border-bottom: 2px solid #ddd;">
+                        <td style="padding: 8px;">૬. વાહતુક બિલ</td>
+                        <td style="padding: 8px;">${totalBeneficiaries}</td>
+                        <td style="padding: 8px; text-align: right;">₹${vahatukBill.toFixed(2)}</td>
+                    </tr>
+                    <tr style="font-weight: bold; background: #e6f7ff;">
+                        <td style="padding: 8px;" colspan="2">કુલ મળવાપાત્ર રકમ:</td>
+                        <td style="padding: 8px; text-align: right;">₹${totalAmount.toFixed(2)}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-      </div>
-      <div class="actions">
-        <button class="btn-print" id="btnPrint">🖨️ Print</button>
-        <button class="btn-share" id="btnShareBill">📤 Share</button>
-      </div>
-    </div>
-  </div>`;
+    `;
 }
+
 /* ============================================================
    MODAL HELPERS
 ============================================================ */

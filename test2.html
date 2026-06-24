@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0f2442" />
+<meta name="description" content="My Daily Report - Anganwadi Food Tracking App" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="My Daily Report" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%230f2442' width='192' height='192'/><text x='50%' y='50%' font-size='80' text-anchor='middle' dominant-baseline='middle' fill='%23fff' font-weight='bold'>🌾</text></svg>" />
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22My%20Daily%20Report%22,%22short_name%22:%22MDR%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20192%20192%27%3E%3Crect%20fill=%27%230f2442%27%20width=%27192%27%20height=%27192%27/%3E%3Ctext%20x=%2750%25%27%20y=%2750%25%27%20font-size=%2780%27%20text-anchor=%27middle%27%20dominant-baseline=%27middle%27%20fill=%27%23fff%27%20font-weight=%27bold%27%3E🌾%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22,%22purpose%22:%22any%22}],%22start_url%22:%22/%22,%22scope%22:%22/%22,%22display%22:%22standalone%22,%22orientation%22:%22portrait-primary%22,%22theme_color%22:%22%230f2442%22,%22background_color%22:%22%23f0f4f8%22}" />
 <title>My Daily Report</title>
 <!-- ✅ FIX 1: font-display:swap + preload = no blocking -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -195,6 +202,51 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
   .cal-cell .n{font-size:12px}
   table{font-size:10px}
   th,td{padding:5px 4px}
+}
+
+/* ✅ Mobile Touch Optimization */
+@media (hover:none) and (pointer:coarse){
+  button, .nav button, input[type="button"], input[type="submit"]{
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    min-height: 44px;
+    min-width: 44px;
+    border-radius: 8px;
+  }
+  .cal-cell{
+    min-height: 48px;
+  }
+  .modal input{
+    padding: 14px !important;
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+  /* Prevent zoom on double-tap */
+  input, button, select, textarea{
+    font-size: 16px;
+  }
+}
+
+/* Landscape mode optimization */
+@media (max-height:600px) and (orientation:landscape){
+  .header h1{font-size:14px}
+  .nav button{padding:4px 6px;font-size:10px}
+  .container{padding:6px}
+  .card{margin-bottom:8px}
+  .section-head{padding:8px 10px;font-size:12px}
+  .section-body{padding:8px}
+  table{font-size:9px}
+  th,td{padding:3px 2px}
+}
+
+/* Prevent accidental selection on touch */
+*{
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+input, textarea, button, a{
+  -webkit-user-select: text;
 }
 </style>
 </head>
@@ -1441,6 +1493,67 @@ document.addEventListener('keydown', e=>{
    BOOT  — ✅ instant local first, cloud in background
 ============================================================ */
 if(centerCode){ bootApp(); } else { render(); }
+
+/* ============================================================
+   SERVICE WORKER — offline support + app-like experience
+============================================================ */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('data:application/javascript,'
+      + encodeURIComponent(`
+const CACHE_NAME = 'mdr-v1';
+const urlsToCache = ['/'];
+
+self.addEventListener('install', event => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(clients.claim());
+});
+
+self.addEventListener('fetch', event => {
+  if(event.request.method !== 'GET') return;
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      if(response) return response;
+      return fetch(event.request).then(response => {
+        if(!response || response.status !== 200) return response;
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, responseToCache);
+        });
+        return response;
+      }).catch(() => {
+        return caches.match('/') || new Response('Offline');
+      });
+    })
+  );
+});
+`)
+    ).catch(err => console.log('SW registration failed:', err));
+  });
+}
+
+/* Mobile install prompt */
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const msg = '📲 Home screen પર add કરો!';
+  setStatus(msg, '#2563a8');
+  setTimeout(() => {
+    if(centerCode && deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if(choiceResult.outcome === 'accepted') {
+          setStatus('✅ App installed!', '#1b8f57');
+        }
+        deferredPrompt = null;
+      });
+    }
+  }, 3000);
+});
 </script>
   <footer style="text-align: center; margin: 20px 0; clear: both; display: block; position: relative; z-index: 9999;">
     <a href="privacy.html" target="_blank" style="color: #666; text-decoration: none; font-size: 14px; font-weight: bold;">Privacy Policy</a>

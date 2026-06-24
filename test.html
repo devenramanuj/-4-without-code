@@ -833,6 +833,70 @@ for (let d = 1; d <= dimCount; d++) {
       name: "🌶️ મસાલા બિલ",
       desc: "કુલ લાભાર્થી દીઠ",
       qty: curMU.totalN,
+function renderBillPage(){
+  const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
+  
+  // ચણા અને દાળના દિવસોના લાભાર્થી ગણવા માટે લૂપ
+  let chanaDalBenCount = 0;
+  const dimCount = new Date(state.calY, state.calM + 1, 0).getDate();
+  for (let d = 1; d <= dimCount; d++) {
+    const k = dkf(state.calY, state.calM, d);
+    const n = Number(state.ben[k] || 0);
+    const dow = new Date(state.calY, state.calM, d).getDay();
+    if (n > 0) {
+      if (dow === 1 || dow === 2 || dow === 3 || dow === 4 || dow === 5 || dow === 6) {
+        chanaDalBenCount += n;
+      }
+    }
+  }
+  
+  // ફ્રુટ બિલ કેલ્ક્યુલેશન
+  let fruitBenCount = 0;
+  const dim = new Date(state.calY, state.calM+1, 0).getDate();
+  for(let d=1; d<=dim; d++){
+    const k = dkf(state.calY, state.calM, d);
+    const n = Number(state.ben[k] || 0);
+    const dow = new Date(state.calY, state.calM, d).getDay();
+    if((dow === 1 || dow === 5) && n > 0) fruitBenCount += n;
+  }
+
+  const bills = [
+    {
+      name: "🍎 ફ્રુટ બિલ",
+      desc: "સોમવાર અને શુક્રવાર",
+      qty: fruitBenCount,
+      rate: 3.12,
+      total: fruitBenCount * 3.12,
+      note: `${fruitBenCount} લાભાર્થી × ₹3.12`
+    },
+    {
+      name: "🥒 ગરમ નાસ્તો બિલ",
+      desc: "કુલ લાભાર્થી દીઠ",
+      qty: curMU.totalN,
+      rate: 1.30,
+      total: curMU.totalN * 1.30,
+      note: `${curMU.totalN} લાભાર્થી × ₹1.30`
+    },
+    {
+      name: "🫘 ચણા અને તુવેર દાળ બિલ",
+      desc: "ચણા + દાળ લાભાર્થી",
+      qty: chanaDalBenCount,
+      rate: 1.60,
+      total: chanaDalBenCount * 1.60,
+      note: `${chanaDalBenCount} લાભાર્થી × ₹1.60`
+    },
+    {
+      name: "🥬 શાકભાજી બિલ",
+      desc: "કુલ લાભાર્થી દીઠ",
+      qty: curMU.totalN,
+      rate: 0.15,
+      total: curMU.totalN * 0.15,
+      note: `${curMU.totalN} લાભાર્થી × ₹0.15`
+    },
+    {
+      name: "🌶️ મસાલા બિલ",
+      desc: "કુલ લાભાર્થી દીઠ",
+      qty: curMU.totalN,
       rate: 1.00,
       total: curMU.totalN * 1.00,
       note: `${curMU.totalN} લાભાર્થી × ₹1.00`
@@ -915,6 +979,7 @@ for (let d = 1; d <= dimCount; d++) {
     </div>
   </div>`;
 }
+
 
 function renderReportPage(){
   const today=new Date();

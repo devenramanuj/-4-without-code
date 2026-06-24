@@ -599,17 +599,15 @@ function renderMonthlyPage(curMU){
 }
 
 
-      
-            function renderBillPage(){
+      function renderBillPage(){
   const curMU = calcMonthUsage(state.calY, state.calM, state.ben) || {};
   
-  // ✅ રિપોર્ટની છેલ્લી ટોટલ રો માંથી ચણા + દાળ + ચણાદાળના સાચા લાભાર્થીઓનો સીધો સરવાળો
-  const chanaBens    = Number(curMU['chananA'] || 0);
-  const dalBens      = Number(curMU['dalnA'] || 0);
-  const chanaDalBens = Number(curMU['chanadalnA'] || curMU['chanadalA'] || 0);
+  // ✅ શનિવારની ચણાદાળ સિવાય માત્ર ચણા અને તુવેરદાળના જ કુલ લાભાર્થી લેવા
+  const chanaBens = Number(curMU['chananA'] || 0); // મંગળ, ગુરુ, શુક્ર (ચણા)
+  const dalBens   = Number(curMU['dalnA'] || 0);   // સોમ, બુધ (તુવેરદાળ)
   
-  // ત્રણેય આઇટમના કુલ માસિક લાભાર્થીની સંખ્યાનો સરવાળો
-  const chanaDalBenCount = chanaBens + dalBens + chanaDalBens;
+  // શનિવાર સિવાયનો ચોક્કસ સરવાળો
+  const chanaDalBenCount = chanaBens + dalBens;
   
   // ફ્રુટ બિલ કેલ્ક્યુલેશન (સોમવાર અને શુક્રવાર)
   let fruitBenCount = 0;

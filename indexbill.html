@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>My Daily Report</title>
-<!-- ✅ FIX 1: font-display:swap + preload = no blocking -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap">
@@ -151,9 +150,7 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .zoom-btn{background:#2563a8;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:14px;font-weight:700;cursor:pointer;line-height:1;flex-shrink:0}
 .zoom-btn:active{background:#1a3c5e}
 .zoom-reset{background:#e2e8f0;color:#475569;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0}
-/* outer clip — scrollable container */
 .zoomable-outer{overflow:auto;-webkit-overflow-scrolling:touch;width:100%}
-/* ✅ CSS zoom (not transform) — sticky position works correctly inside zoom */
 .zoomable-inner{display:block;min-width:100%;zoom:1}
 
 @media print{
@@ -221,8 +218,8 @@ const ITEMS = Object.freeze([
 ]);
 const DAYS_SHORT  = ["ર","સો","મં","બુ","ગુ","શુ","શ"];
 const DAYS_TBL    = ["રવિ","સોમ","મંગળ","બુધ","ગુ","શુ","શ"];
-const DAYS_FULL   = ["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","ગુરુવાર","શુક્રવાર","શનિવાર"];
-const MONTHS_FULL = ["જાન્યુઆરી","ફેબ્રուઆરી","માર્ચ","એપ્રિલ","મે","જૂન","જુલાઈ","ઓગસ્ટ","સપ્ટેમ્બર","ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર"];
+const DAYS_FULL   = ["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","गુરુવાર","શુક્રવાર","શનિવાર"];
+const MONTHS_FULL = ["જાન્યુઆરી","ફેબ્રુઆરી","માર્ચ","એપ્રિલ","મે","જૂન","જુલાઈ","ઓગસ્ટ","સપ્ટેમ્બર","ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર"];
 const DEFAULT_INV = {ghau:{o:500,r:200},chokha:{o:300,r:100},tel:{o:50,r:20},chana:{o:80,r:30},dal:{o:80,r:30},chanadal:{o:80,r:30}};
 
 /* ============================================================
@@ -239,6 +236,9 @@ let state = {
   adminUnlocked:false, logData:[], logFilter:{center:"",action:"",date:""},
   allCentersData:[] 
 };
+
+/* ✅ URL ચેક ડેફિનેશન */
+const _hasURL = APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("YOUR_URL");
 
 let _saveTimer = null;
 function scheduleSave(){ clearTimeout(_saveTimer); _saveTimer = setTimeout(saveState, 800); }
@@ -258,8 +258,6 @@ function setStatus(msg, color="#1b8f57"){
 /* ============================================================
    CLOUD  — load & save
 ============================================================ */
-const _hasURL = APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("YOUR_URL");
-
 function bootApp(){
   if(!centerCode){ render(); return; }
   loadLocalFallback();           
@@ -289,13 +287,15 @@ async function syncCloud(){
     clearTimeout(tid);
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    if(data && data.status !== "new_user" && data.status !== "error"){
+    
+    // 🎯 સચોટ સિંક ફિક્સ: ડેટા ઓબ્જેક્ટ અથવા ડાયરેક્ટ રિસ્પોન્સ હેન્ડલિંગ
+    if(data && data.status !== "error"){
       if(data.inv) state.inv = data.inv;
-      if(data.ben) state.ben = data.ben;
+      if(data.ben) state.ben = data.ben; // ✅ અહીં સાચો વેરિયેબલ સેટ કર્યો
       localStorage.setItem("mdr_offline_" + centerCode, JSON.stringify({inv:state.inv, ben:state.ben}));
       setStatus(`☁️ Synced — ${centerCode}`);
       render();
-    } else if(data.status === "new_user"){
+    } else if(data && data.status === "new_user"){
       setStatus(`🆕 નવું કેન્દ્ર: ${centerCode}`);
       sendLog("NEW", `નવી આંગણ: ${centerCode}`);
     } else {
@@ -317,7 +317,7 @@ async function saveState(){
   try{
     const ctrl = new AbortController();
     const tid  = setTimeout(()=>ctrl.abort(), 12000);
-    const res  = await fetch(APPS_SCRIPT_URL,{
+    const res = await fetch(APPS_SCRIPT_URL,{
       method:"POST",
       headers:{"Content-Type":"text/plain"},
       body:JSON.stringify({centerCode, data:{inv:state.inv, ben:state.ben}}),
@@ -338,43 +338,8 @@ async function saveState(){
 }
 
 /* ============================================================
-   HELPERS
+   🟢 ADMIN LIVE FETCH FUNCTION
 ============================================================ */
-function showNav(){
-  document.getElementById("nav").style.display = "flex";
-  document.getElementById("syncStatus").style.display = "block";
-}
-function showHeaderInfo(){
-  const bar = document.getElementById("centerInfoBar");
-  const btn = document.getElementById("btnLogoutHeader");
-  if(bar && centerCode){ bar.style.display="block"; bar.innerHTML=`🏢 કेन्द्र: <b style="color:#f39c12">${centerCode}</b>`; }
-  if(btn) btn.style.display = "block";
-}
-
-async function sendLog(action, details){
-  if(!_hasURL || !centerCode) return;
-  try{
-    await fetch(APPS_SCRIPT_URL,{
-      method:"POST",headers:{"Content-Type":"text/plain"},
-      body:JSON.stringify({action:"LOG",centerCode,logAction:action,logDetails:details,timestamp:new Date().toISOString()})
-    });
-  }catch(_){}
-}
-async function fetchLogs(){
-  setStatus("⏳ Logs...","#2563a8");
-  try{
-    const res  = await fetch(`${APPS_SCRIPT_URL}?action=getLogs`);
-    const data = await res.json();
-    state.logData = data.logs || [];
-    setStatus(`✅ ${state.logData.length} log entries`);
-  }catch(_){
-    state.logData = [];
-    setStatus("❌ Log fetch નિષ્ફળ","#cc3d3d");
-  }
-  render();
-}
-
-// 🟢 એડમિન માટે બધા કેન્દ્રોનો લાઈવ ડેટા લાવવાનું ફંક્શન
 async function fetchAllCentersCloudData(){
   if(!_hasURL) return;
   setStatus("⏳ બધા કેન્દ્રોનો ડેટા લોડ થઈ રહ્યો છે...", "#2563a8");
@@ -382,7 +347,7 @@ async function fetchAllCentersCloudData(){
     const res = await fetch(`${APPS_SCRIPT_URL}?action=getAllCenters`);
     const result = await res.json();
     
-    // Apps Script ના એરે રિસ્પોન્સને સચોટ રીતે ફિલ્ટર કરવું
+    // 🎯 ક્લાઉડ રિસ્પોન્સ એરે વેરિફિકેશન ફિક્સ
     if (result && Array.isArray(result)) {
       state.allCentersData = result;
     } else if (result && result.data && Array.isArray(result.data)) {
@@ -473,50 +438,6 @@ function dayHint(d) {
   ];
   return h[d] || "";
 }
-
-const dkf = (y, m, d) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-let _muCache = null, _muCacheKey = "";
-
-function calcMonthUsage(y, m, ben) {
-  const key = `${y}-${m}-${JSON.stringify(ben)}`;
-  if (_muCache && _muCacheKey === key) return _muCache;
-
-  const total = { totalN: 0, days: 0 };
-  ITEMS.forEach(it => { 
-    total[it.id] = 0;
-    total[it.id + "M"] = 0; total[it.id + "A"] = 0;
-    total[it.id + "nM"] = 0; total[it.id + "nA"] = 0; 
-  });
-
-  const dim = new Date(y, m + 1, 0).getDate(); 
-  
-  for (let d = 1; d <= dim; d++) {
-    const dateStr = dkf(y, m, d);
-    const n = Number(ben[dateStr] || 0);
-    if (!n) continue;
-
-    const dayOfWeek = new Date(y, m, d).getDay();
-    const u = calcUsage(dayOfWeek, n);
-
-    ITEMS.forEach(it => { 
-      total[it.id] += u[it.id];
-      total[it.id + "M"] += u[it.id + "M"];
-      total[it.id + "A"] += u[it.id + "A"];
-      total[it.id + "nM"] += u[it.id + "nM"];
-      total[it.id + "nA"] += u[it.id + "nA"]; 
-    });
-    
-    total.totalN += n; 
-    total.days++;
-  }
-
-  _muCache = total; 
-  _muCacheKey = key;
-  return total;
-}
-
-function invalidateCache() { _muCache = null; _muCacheKey = ""; }
-const fmt = (n, d = 0) => (n == null || isNaN(n)) ? "0" : Number(n).toFixed(d);
 
 /* ============================================================
    RENDER — PAGES
@@ -811,7 +732,7 @@ function renderReportPage(){
 }
 
 /* ============================================================
-   🛡️ ADMIN PAGE — સાચો ઓરિજિનલ પ્લસ લાઈવ "એકત્રીકરણ" સેક્શન
+   🛡️ ADMIN PAGE — સાચો ઓરિજિનલ પ્લસ "એકત્રીકરણ" સેક્શન
 ============================================================ */
 function renderAdminPage(){
   if(!state.adminUnlocked){
@@ -844,7 +765,7 @@ function renderAdminPage(){
     return `<tr><td>${ts}</td><td><b>${l.centerCode||"—"}</b></td><td><span class="log-badge log-${l.action||"SAVE"}">${l.action||"—"}</span></td><td>${l.details||"—"}</td></tr>`;
   }).join(""):`<tr><td colspan="4" style="padding:20px;color:#94a3b8;text-align:center">— કોઈ log નથી —</td></tr>`;
 
-  // 🟢 ડેટા પ્રોસેસિંગ પત્રક લિસ્ટ
+  // 🟢 લાઈવ એકત્રીકરણ (Aggregation) ટેબલ રો પ્રોસેસિંગ
   let aggregationRowsHtml = `<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:15px;">⏳ કોઈ ડેટા નથી અથવા 'રિફ્રેશ ડેટા' પર ક્લિક કરો...</td></tr>`;
   if (state.allCentersData && state.allCentersData.length > 0) {
     aggregationRowsHtml = state.allCentersData.map((c, index) => {
@@ -875,7 +796,6 @@ function renderAdminPage(){
       <button id="btnAdminLock" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.35);padding:4px 10px;border-radius:6px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">🔒 Lock</button>
     </div>
     
-    <!-- 🟢 એકત્રીકરણ પત્રક સેક્શન ડિઝાઇન -->
     <div style="padding: 12px; border-bottom: 2px dashed #d1dce8; background: #faf5ff;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <h3 style="color:#5b21b6; font-size:14px; font-weight:700;">📊 કેન્દ્રોનું એકત્રીકરણ પત્રક (Consolidated Stock)</h3>
@@ -981,7 +901,7 @@ function render(){
 }
 
 /* ============================================================
-   💰 બિલ પૃષ્ઠ — ૪૬૬ લાભાર્થીઓનું પત્રક ગણતરી
+   💰 બિલ પૃષ્ઠ — ૪૬૬ લાભાર્થીઓનું ફિલ્ટર લોજિક
 ============================================================ */
 function renderBillPage(curMU) {
   const y = state.calY, m = state.calM;
@@ -1026,7 +946,7 @@ function renderBillPage(curMU) {
             <tr style="background: #1a3c5e; color: #fff;">
               <th style="padding: 10px; text-align: left;">બિલ પ્રકાર</th>
               <th style="padding: 10px;">ગણતરી</th>
-              <th style="padding: 10px; text-align: right;">รકમ (₹)</th>
+              <th style="padding: 10px; text-align: right;">રકમ (₹)</th>
             </tr>
           </thead>
           <tbody>

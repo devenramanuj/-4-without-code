@@ -736,20 +736,39 @@ function renderAdminPage(){
       </div></div>
     </div></div>`;
   }
-  return `<div class="container tab-content"><div class="card"><div class="section-head">🛡️ Admin — Log Viewer <button id="btnAdminLock">🔒 Lock</button></div><div style="padding:20px;text-align:center">Admin Panel Active</div></div></div>`;
-}
 
-function renderModal(){
-  if(!state.modal) return "";
-  const {y,m,d}=state.modal;
-  return `<div class="modal-bg" id="modalBg">
-    <div class="modal">
-      <h3>📅 ${d} ${MONTHS_FULL[m]} ${y}</h3>
-      <input type="number" id="modalInput" min="0" placeholder="લાભાર્થી સંખ્યા" value="${state.modalVal}" autofocus>
-      <div class="modal-btns">
-        <button class="btn-cancel" id="modalCancel">રદ</button>
-        <button class="btn-clear"  id="modalClear">સાફ</button>
-        <button class="btn-save"   id="modalSave">✅ સેવ</button>
+  // ✅ લોગ ડેટાને ટેબલ ફોર્મેટમાં બતાવવા માટેનો સુધારેલો કોડ
+  const rows = state.logData.map(log => {
+    return `<tr>
+      <td>${log.timestamp ? new Date(log.timestamp).toLocaleString('gu-IN') : '—'}</td>
+      <td><span class="log-badge log-${log.action}">${log.action}</span></td>
+      <td><b>${log.centerCode || '—'}</b></td>
+      <td style="white-space: normal; text-align: left;">${log.details || '—'}</td>
+    </tr>`;
+  }).join("");
+
+  return `<div class="container tab-content">
+    <div class="card">
+      <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">
+        🛡️ Admin — Log Viewer 
+        <button id="btnAdminLock" style="background:#cc3d3d; color:#fff; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px;">🔒 Lock</button>
+      </div>
+      <div class="section-body">
+        <div class="log-table-wrap">
+          <table class="log-table" style="width:100%; min-width:600px;">
+            <thead>
+              <tr style="background:#1a3c5e; color:#fff;">
+                <th>સમય</th>
+                <th>એક્શન</th>
+                <th>કેન્દ્ર કોડ</th>
+                <th style="text-align: left;">વિગત</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.length ? rows : '<tr><td colspan="4" style="text-align:center; padding:20px; color:#64748b;">કોઈ લોગ ડેટા મળ્યો નથી અથવા લોડ થઈ રહ્યો છે...</td></tr>'}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>`;

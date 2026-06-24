@@ -148,8 +148,6 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .con-table tr:nth-child(even) td.con-c1{background:#f8fafc}
 .con-table tr.con-total td{background:#fef3c7 !important;font-weight:800;color:#92400e;border-top:2px solid #f59e0b}
 .con-table tr.con-total td.con-c1{background:#fef3c7 !important;color:#92400e}
-.con-table tr.con-avg td{background:#f0fdf4 !important;font-weight:700;color:#166534}
-.con-table tr.con-avg td.con-c1{background:#f0fdf4 !important;color:#166534}
 @media (max-width:600px){
   .header h1{font-size:15px}
   .nav button{padding:6px 8px;font-size:11px}
@@ -270,7 +268,7 @@ async function syncCloud(){
     const data = await res.json();
     if(data && data.status !== "new_user" && data.status !== "error"){
       if(data.inv) state.inv = data.inv;
-      if(data.ben) state.ben = data.ben;
+      if(data.ben) data.ben = data.ben;
       localStorage.setItem("mdr_offline_" + centerCode, JSON.stringify({inv:state.inv, ben:state.ben}));
       setStatus(`☁️ Synced — ${centerCode}`);
       render();
@@ -322,8 +320,8 @@ function showNav(){
 }
 function showHeaderInfo(){
   const bar = document.getElementById("centerInfoBar");
-  const btn = document.getElementById("btnLogoutHeader");
   if(bar && centerCode){ bar.style.display="block"; bar.innerHTML=`🏢 કેન્દ્ર: <b style="color:#f39c12">${centerCode}</b>`; }
+  const btn = document.getElementById("btnLogoutHeader");
   if(btn) btn.style.display = "block";
 }
 
@@ -373,12 +371,8 @@ async function fetchAllCenters(){
 
 function buildConsolidationHTML(){
   const con = state.con;
-  const yOpts = [con.selY-1, con.selY, con.selY+1].map(y =>
-    "<option value='" + y + "'" + (y===con.selY?" selected":"") + ">" + y + "</option>"
-  ).join("");
-  const mOpts = MONTHS_FULL.map((m,i) =>
-    "<option value='" + i + "'" + (i===con.selM?" selected":"") + ">" + m + "</option>"
-  ).join("");
+  const yOpts = [con.selY-1, con.selY, con.selY+1].map(y => "<option value='" + y + "'" + (y===con.selY?" selected":"") + ">" + y + "</option>").join("");
+  const mOpts = MONTHS_FULL.map((m,i) => "<option value='" + i + "'" + (i===con.selM?" selected":"") + ">" + m + "</option>").join("");
 
   const toolbar = "<div class='con-toolbar'>"
     + "<select id='conSelY'>" + yOpts + "</select>"
@@ -426,15 +420,11 @@ function buildConsolidationHTML(){
   const subHeads = ITEMS.map(() => "<th>\u0AB8.\u0AB5.(g)</th><th>\u0AAC.\u0AB5.(g)</th><th>\u0A95\u0AC1\u0AB3(g)</th><th style='color:#86efac'>\u0AAC.\u0AB8\u0ABF.(kg)</th>").join("");
 
   const dataRows = rows.map((r,i) => {
-    const cols = ITEMS.map(it =>
-      "<td>" + (r.mu[it.id+"M"]||0) + "</td><td>" + (r.mu[it.id+"A"]||0) + "</td><td style='font-weight:700;color:" + (r.mu[it.id] ? "#e67e22" : "#cbd5e1") + "'>" + (r.mu[it.id]||0) + "</td><td style='font-weight:700;color:#1b8f57'>" + fmt(r.closing[it.id],3) + "</td>"
-    ).join("");
+    const cols = ITEMS.map(it => "<td>" + (r.mu[it.id+"M"]||0) + "</td><td>" + (r.mu[it.id+"A"]||0) + "</td><td style='font-weight:700;color:" + (r.mu[it.id] ? "#e67e22" : "#cbd5e1") + "'>" + (r.mu[it.id]||0) + "</td><td style='font-weight:700;color:#1b8f57'>" + fmt(r.closing[it.id],3) + "</td>").join("");
     return "<tr><td class='con-c1'><span style='background:#ede9fe;color:#5b21b6;border-radius:10px;padding:1px 6px;font-size:10px;margin-right:4px'>" + (i+1) + "</span>" + r.code + "</td><td style='font-weight:700;color:#2563a8'>" + r.mu.days + "</td><td style='font-weight:700;color:#1b8f57'>" + r.mu.totalN + "</td><td>" + (r.mu.days ? fmt(r.mu.totalN/r.mu.days,1) : "\u2014") + "</td>" + cols + "</tr>";
   }).join("");
 
-  const n = rows.length || 1;
-  const grandCols = ITEMS.map(it => "<td>" + grand[it.id+"M"] + "</td><td>" + grand[it.id+"A"] + "</td><td style='font-weight:800'>" + grand[it.id] + "</td><td style='font-weight:800;color:#1b8f57'>" + fmt(grand[it.id+"closing"],3) + "</td>").join("");
-  const totalRow = "<tr class='con-total'><td class='con-c1'>\uD83D\uDD22 Grand Total</td><td>" + grand.days + "</td><td>" + grand.totalN + "</td><td>\u2014</td>" + grandCols + "</tr>";
+  const totalRow = "<tr class='con-total'><td class='con-c1'>\uD83D\uDD22 Grand Total</td><td>" + grand.days + "</td><td>" + grand.totalN + "</td><td>\u2014</td>" + ITEMS.map(it => "<td>" + grand[it.id+"M"] + "</td><td>" + grand[it.id+"A"] + "</td><td style='font-weight:800'>" + grand[it.id] + "</td><td style='font-weight:800;color:#1b8f57'>" + fmt(grand[it.id+"closing"],3) + "</td>").join("") + "</tr>";
 
   return toolbar + "<div class='con-table-wrap' style='max-height:520px'><table class='con-table'><thead><tr><th class='con-c1' rowspan='2'>\uD83C\uDFE2 \u0A95\u0AC7\u0AA8\u0ACD\u0AA6\u0ACD\u0AB0</th><th rowspan='2'>\u0AA6\u0ABF.</th><th rowspan='2'>\u0A95\u0AC1\u0AB3 \u0AB2.</th><th rowspan='2'>\u0AB8./\u0AA6\u0ABF.</th>" + invHeads + "</tr><tr>" + subHeads + "</tr></thead><tbody>" + dataRows + totalRow + "</tbody></table></div>";
 }
@@ -502,7 +492,7 @@ function calcMonthUsage(y,m,ben){
   const total = {totalN:0,days:0};
   ITEMS.forEach(it=>{ total[it.id]=0;total[it.id+"M"]=0;total[it.id+"A"]=0;total[it.id+"nM"]=0;total[it.id+"nA"]=0; });
   const dim = new Date(y,m+1,0).getDate();
-  for(let d=1;d<=dim;d++){
+  for(let d=1; d<=dim; d++){
     const n = Number(ben[dkf(y,m,d)] || 0);
     if(!n) continue;
     const u = calcUsage(new Date(y,m,d).getDay(), n);
@@ -598,20 +588,16 @@ function renderMonthlyPage(curMU){
   </div>`;
 }
 
-
-      function renderBillPage(){
+function renderBillPage(){
   const curMU = calcMonthUsage(state.calY, state.calM, state.ben) || {};
   
-  // ✅ શનિવારની ચણાદાળ સિવાય માત્ર ચણા અને તુવેરદાળના જ કુલ લાભાર્થી લેવા
-  const chanaBens = Number(curMU['chananA'] || 0); // મંગળ, ગુરુ, શુક્ર (ચણા)
-  const dalBens   = Number(curMU['dalnA'] || 0);   // સોમ, બુધ (તુવેરદાળ)
-  
-  // શનિવાર સિવાયનો ચોક્કસ સરવાળો
+  // શનિવારની ચણાદાળ સિવાય માત્ર ચણા અને તુવેરદાળના જ સાચા માસિક લાભાર્થી
+  const chanaBens = Number(curMU['chananA'] || 0);
+  const dalBens   = Number(curMU['dalnA'] || 0);
   const chanaDalBenCount = chanaBens + dalBens;
   
-  // ફ્રુટ બિલ કેલ્ક્યુલેશન (સોમવાર અને શુક્રવાર)
   let fruitBenCount = 0;
-  const dim = new Date(state.calY, state.calM + 1, 0).getDate();
+  const dim = new Date(state.calY, state.calM+1, 0).getDate();
   for(let d=1; d<=dim; d++){
     const k = dkf(state.calY, state.calM, d);
     const n = state.ben ? Number(state.ben[k] || 0) : 0;
@@ -620,54 +606,12 @@ function renderMonthlyPage(curMU){
   }
 
   const bills = [
-    {
-      name: "🍎 ફ્રુટ બિલ",
-      desc: "સોમવાર અને શુક્રવાર",
-      qty: fruitBenCount,
-      rate: 3.12,
-      total: fruitBenCount * 3.12,
-      note: `${fruitBenCount} લાભાર્થી × ₹3.12`
-    },
-    {
-      name: "🥒 ગરમ નાસ્તો બિલ",
-      desc: "કુલ લાભાર્થી દીઠ",
-      qty: curMU.totalN || 0,
-      rate: 1.30,
-      total: (curMU.totalN || 0) * 1.30,
-      note: `${curMU.totalN || 0} લાભાર્થી × ₹1.30`
-    },
-    {
-      name: "🫘 ચણા અને તુવેર દાળ બિલ",
-      desc: "ચણા + દાળ લાભાર્થી",
-      qty: chanaDalBenCount,
-      rate: 1.60,
-      total: chanaDalBenCount * 1.60,
-      note: `${chanaDalBenCount} લાભાર્થી × ₹1.60`
-    },
-    {
-      name: "🥬 શાકભાજી બિલ",
-      desc: "કુલ લાભાર્થી દીઠ",
-      qty: curMU.totalN || 0,
-      rate: 0.15,
-      total: (curMU.totalN || 0) * 0.15,
-      note: `${curMU.totalN || 0} લાભાર્થી × ₹0.15`
-    },
-    {
-      name: "🌶️ મસાલા બિલ",
-      desc: "કુલ લાભાર્થી દીઠ",
-      qty: curMU.totalN || 0,
-      rate: 1.00,
-      total: (curMU.totalN || 0) * 1.00,
-      note: `${curMU.totalN || 0} લાભાર્થી × ₹1.00`
-    },
-    {
-      name: "🚗 વાહતુક બિલ",
-      desc: "કુલ લાભાર્થી દીઠ",
-      qty: curMU.totalN || 0,
-      rate: 0.05,
-      total: (curMU.totalN || 0) * 0.05,
-      note: `${curMU.totalN || 0} લાભાર્થી × ₹0.05`
-    }
+    { name: "🍎 ફ્રુટ બિલ", desc: "સોમવાર અને શુક્રવાર", qty: fruitBenCount, rate: 3.12, total: fruitBenCount * 3.12, note: `${fruitBenCount} લાભાર્થી × ₹3.12` },
+    { name: "🥒 ગરમ નાસ્તો બિલ", desc: "કુલ લાભાર્થી દીઠ", qty: curMU.totalN || 0, rate: 1.30, total: (curMU.totalN || 0) * 1.30, note: `${curMU.totalN || 0} લાભાર્થી × ₹1.30` },
+    { name: "🫘 ચણા અને તુવેર દાળ બિલ", desc: "ચણા + દાળ લાભાર્થી", qty: chanaDalBenCount, rate: 1.60, total: chanaDalBenCount * 1.60, note: `${chanaDalBenCount} લાભાર્થી × ₹1.60` },
+    { name: "🥬 શાકભાજી બિલ", desc: "કુલ લાભાર્થી દીઠ", qty: curMU.totalN || 0, rate: 0.15, total: (curMU.totalN || 0) * 0.15, note: `${curMU.totalN || 0} લાભાર્થી × ₹0.15` },
+    { name: "🌶️ મસાલા બિલ", desc: "કુલ લાભાર્થી દીઠ", qty: curMU.totalN || 0, rate: 1.00, total: (curMU.totalN || 0) * 1.00, note: `${curMU.totalN || 0} લાભાર્થી × ₹1.00` },
+    { name: "🚗 વાહતુક બિલ", desc: "કુલ લાભાર્થી દીઠ", qty: curMU.totalN || 0, rate: 0.05, total: (curMU.totalN || 0) * 0.05, note: `${curMU.totalN || 0} લાભાર્થી × ₹0.05` }
   ];
 
   const billCards = bills.map(b => `
@@ -678,22 +622,11 @@ function renderMonthlyPage(curMU){
       </div>
       <div class="section-body">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
-          <div style="padding:10px;background:#f0f6f1;border-radius:8px;text-align:center">
-            <div style="font-size:11px;color:#64748b;margin-bottom:4px">જથ્થો</div>
-            <div style="font-size:24px;font-weight:800;color:#198754">${b.qty}</div>
-          </div>
-          <div style="padding:10px;background:#fffbeb;border-radius:8px;text-align:center">
-            <div style="font-size:11px;color:#64748b;margin-bottom:4px">દર</div>
-            <div style="font-size:20px;font-weight:800;color:#f59e0b">₹${fmt(b.rate,2)}</div>
-          </div>
-          <div style="padding:10px;background:#dbeafe;border-radius:8px;text-align:center">
-            <div style="font-size:11px;color:#64748b;margin-bottom:4px">કુલ</div>
-            <div style="font-size:24px;font-weight:800;color:#2563a8">₹${fmt(b.total,2)}</div>
-          </div>
+          <div style="padding:10px;background:#f0f6f1;border-radius:8px;text-align:center"><div style="font-size:11px;color:#64748b;margin-bottom:4px">જથ્થો</div><div style="font-size:24px;font-weight:800;color:#198754">${b.qty}</div></div>
+          <div style="padding:10px;background:#fffbeb;border-radius:8px;text-align:center"><div style="font-size:11px;color:#64748b;margin-bottom:4px">દર</div><div style="font-size:20px;font-weight:800;color:#f59e0b">₹${fmt(b.rate,2)}</div></div>
+          <div style="padding:10px;background:#dbeafe;border-radius:8px;text-align:center"><div style="font-size:11px;color:#64748b;margin-bottom:4px">કુલ</div><div style="font-size:24px;font-weight:800;color:#2563a8">₹${fmt(b.total,2)}</div></div>
         </div>
-        <div style="font-size:12px;color:#64748b;padding:8px;background:#f8fafc;border-radius:6px;border-left:3px solid #198754">
-          ${b.note}
-        </div>
+        <div style="font-size:12px;color:#64748b;padding:8px;background:#f8fafc;border-radius:6px;border-left:3px solid #198754">${b.note}</div>
       </div>
     </div>
   `).join("");
@@ -723,11 +656,6 @@ function renderMonthlyPage(curMU){
     </div>
   </div>`;
 }
-
-
-
-
-
 
 function renderReportPage(){
   const today=new Date();
@@ -774,6 +702,21 @@ function renderReportPage(){
   const invHeads=ITEMS.map(it=>`<th colspan="4" style="background:${it.color}">${it.emoji} ${it.name}</th>`).join("");
   const subHeads=ITEMS.map(()=>`<th>સ. વ. (g)</th><th>બ. વ. (g)</th><th>કુલ (g)</th><th>સિલક (kg)</th>`).join("");
 
+  // ✅ રીસ્ટોર: માસિક સમરી (ઈન્વેન્ટરી સારાંશ) નું ટેબલ
+  const summaryRows=ITEMS.map(it=>{
+    const iv=state.inv[it.id], opening=iv.o+iv.r;
+    const morN=curMU[it.id+"nM"]||0, aftN=curMU[it.id+"nA"]||0;
+    const mor=curMU[it.id+"M"]||0, aft=curMU[it.id+"A"]||0, tot=curMU[it.id]||0;
+    return `<tr>
+      <td style="text-align:left"><span class="badge" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</span></td>
+      <td><b style="color:#2563a8">${morN}</b></td><td><b style="color:#7c3aed">${aftN}</b></td>
+      <td style="color:#2980b9;font-weight:700">${fmt(opening,3)}</td>
+      <td>${fmt(mor)}</td><td>${fmt(aft)}</td>
+      <td style="color:#e67e22;font-weight:700">${fmt(tot)}</td>
+      <td style="color:#1b8f57;font-weight:700">${fmt(opening-tot/1000,3)}</td>
+    </tr>`;
+  }).join("");
+
   const dailyHtml=`<div class="card">
     <div class="section-head">📅 દૈનિક રિપોર્ટ</div>
     <div class="section-body">
@@ -788,15 +731,45 @@ function renderReportPage(){
 
   const monthlyHtml=`<div class="card">
     <div class="section-head">📊 માસિક કોષ્ટક</div>
-    <div class="section-body">
-      <div class="zoomable-outer" style="max-height:500px">
-        <table style="min-width:1400px">
-          <thead>
-            <tr><th class="sticky-c1" rowspan="2">તારીખ</th><th class="sticky-c2" rowspan="2">વાર</th><th class="sticky-c3" rowspan="2">સં.</th>${invHeads}</tr>
-            <tr>${subHeads}</tr>
-          </thead>
-          <tbody>${dateRowsArr.join("")}${totalRow}</tbody>
-        </table>
+    <div class="section-body" style="padding:8px">
+      <div class="zoom-toolbar">
+        <label>🔍 Zoom:</label>
+        <button class="zoom-btn" id="zoomOut">−</button>
+        <input type="range" class="zoom-slider" id="zoomSlider" min="30" max="120" value="70" step="5">
+        <button class="zoom-btn" id="zoomIn">+</button>
+        <span class="zoom-pct" id="zoomPct">70%</span>
+        <button class="zoom-reset" id="zoomReset">Reset</button>
+      </div>
+      <div class="zoomable-outer" id="zoomOuter" style="max-height:500px">
+        <div class="zoomable-inner" id="zoomInner">
+          <table style="min-width:1400px">
+            <thead>
+              <tr><th class="sticky-c1" rowspan="2">તારીખ</th><th class="sticky-c2" rowspan="2">વાર</th><th class="sticky-c3" rowspan="2">સં.</th>${invHeads}</tr>
+              <tr>${subHeads}</tr>
+            </thead>
+            <tbody>${dateRowsArr.join("")}${totalRow}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <h4 style="color:#1a3c5e;margin:14px 0 4px;font-size:13px">📦 ઈ. સારાંશ</h4>
+      <div class="zoom-toolbar" style="margin-bottom:4px">
+        <label>🔍 Zoom:</label>
+        <button class="zoom-btn" id="zoom2Out">−</button>
+        <input type="range" class="zoom-slider" id="zoom2Slider" min="50" max="150" value="100" step="5">
+        <button class="zoom-btn" id="zoom2In">+</button>
+        <span class="zoom-pct" id="zoom2Pct">100%</span>
+        <button class="zoom-reset" id="zoom2Reset">Reset</button>
+      </div>
+      <div class="zoomable-outer" id="zoom2Outer">
+        <div class="zoomable-inner" id="zoom2Inner">
+          <table style="min-width:820px">
+            <thead><tr>
+              <th style="text-align:left">ઇન્વેન્ટરી</th><th>સ. લાભ.</th><th>બ. લાભ.</th><th>ઊઘડતી (kg)</th><th>સ. વ. (g)</th><th>બ. વ. (g)</th><th>કુલ (g)</th><th>બંધ (kg)</th>
+            </tr></thead>
+            <tbody>${summaryRows}</tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>`;
@@ -866,7 +839,39 @@ function render(){
     else if(state.tab===4) html=renderAdminPage();
     html += renderModal();
     app.innerHTML = html;
+    if(state.tab === 3 && !state.modal) initReportZoom();
   });
+}
+
+function applyZoom(innerId, pctId, val){
+  val = Math.max(25, Math.min(200, val));
+  const inner = document.getElementById(innerId);
+  const pct   = document.getElementById(pctId);
+  if(inner) inner.style.zoom = (val/100);
+  if(pct)   pct.textContent  = val + "%";
+  return val;
+}
+
+function initZoomSet(prefix, innerId, pctId, defaultVal){
+  const slider  = document.getElementById(prefix+"Slider");
+  const btnOut  = document.getElementById(prefix+"Out");
+  const btnIn   = document.getElementById(prefix+"In");
+  const btnRst  = document.getElementById(prefix+"Reset");
+  if(!slider) return;
+  let cur = defaultVal || parseInt(slider.value) || 100;
+  const sync = v => { cur = applyZoom(innerId, pctId, v); slider.value = cur; };
+  slider.addEventListener('input', () => sync(parseInt(slider.value)));
+  btnOut && btnOut.addEventListener('click', () => sync(cur - 10));
+  btnIn  && btnIn.addEventListener('click',  () => sync(cur + 10));
+  btnRst && btnRst.addEventListener('click', () => sync(defaultVal || 100));
+  sync(cur);
+}
+
+function initReportZoom(){
+  if(state.rptTab === 'monthly'){
+    initZoomSet("zoom",  "zoomInner",  "zoomPct",  70);
+    initZoomSet("zoom2", "zoom2Inner", "zoom2Pct", 100);
+  }
 }
 
 function openModal(d){ state.modal={y:state.calY,m:state.calM,d}; state.modalVal=state.ben[dkf(state.calY,state.calM,d)]||""; render(); }

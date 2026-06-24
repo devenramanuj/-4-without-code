@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>My Daily Report</title>
+<!-- ✅ FIX 1: font-display:swap + preload = no blocking -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap">
@@ -93,20 +94,11 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .actions button{padding:7px 12px;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer;font-size:12px;color:#fff}
 .btn-print{background:#475569}
 .btn-share{background:#1b8f57}
-.btn-export{background:#7c3aed}
-.btn-import{background:#0891b2}
 .badge{padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block}
 .footer{text-align:center;padding:12px;color:#64748b;font-size:11px}
 .logout-btn{background:rgba(204,61,61,.85);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s}
 .logout-btn:hover{background:#cc3d3d}
-.header-center-info{font-size:11px;color:#a0b4c8;text-align:center;margin-bottom:6px}
-
-/* ✅ FIX 6: sync status — content-visibility for off-screen perf */
 .sync-status{text-align:center;padding:4px 8px;font-size:11px;font-weight:600;color:#1b8f57;background:#e8f5e9;transition:all .3s;cursor:pointer}
-.sync-status.syncing{color:#2563a8;background:#dbeafe}
-.sync-status.error{color:#cc3d3d;background:#fee2e2}
-
-/* Setup */
 .setup-box{max-width:400px;margin:50px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1);border:1px solid #d1dce8;text-align:center}
 .setup-box h2{color:#1a3c5e;margin-bottom:15px;font-size:18px}
 .setup-box input{width:100%;padding:10px;font-size:16px;text-align:center;border:2px solid #cbd5e1;border-radius:8px;margin-bottom:15px;font-family:inherit;font-weight:700}
@@ -116,8 +108,7 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .admin-gate-box{text-align:center;max-width:280px;width:100%}
 .admin-gate-box h2{color:#5b21b6;font-size:16px;margin-bottom:6px}
 .admin-gate-box p{color:#64748b;font-size:12px;margin-bottom:14px}
-.admin-pwd-input{width:100%;padding:10px;border:2px solid #d1dce8;border-radius:8px;font-size:18px;text-align:center;font-family:inherit;letter-spacing:4px;margin-bottom:8px;transition:border-color .2s}
-.admin-pwd-input:focus{outline:none;border-color:#7c3aed}
+.admin-pwd-input{width:100%;padding:10px;border:2px solid #d1dce8;border-radius:8px;font-size:18px;text-align:center;font-family:inherit;letter-spacing:4px;margin-bottom:8px}
 .admin-pwd-btn{width:100%;padding:10px;background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer}
 .admin-err{color:#cc3d3d;font-size:12px;min-height:16px;margin-bottom:10px}
 .log-filter{display:flex;gap:8px;flex-wrap:wrap;padding:10px;background:#f8fafc;border-bottom:1px solid #d1dce8;align-items:center}
@@ -138,27 +129,15 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .stat-card{background:#f8fafc;border:1px solid #d1dce8;border-radius:8px;padding:10px;text-align:center}
 .stat-card .s-num{font-size:22px;font-weight:800;color:#5b21b6}
 .stat-card .s-lbl{font-size:11px;color:#64748b;margin-top:2px}
-
-/* ✅ FIX 7: content-visibility for off-screen tabs — big render boost */
 .tab-content{content-visibility:auto;contain-intrinsic-size:0 500px}
-
-/* ── REPORT ZOOM ── */
 .zoom-toolbar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f0f7ff;border-bottom:1px solid #d1dce8;flex-wrap:wrap}
 .zoom-toolbar label{font-size:12px;font-weight:700;color:#1a3c5e;white-space:nowrap}
 .zoom-slider{flex:1;min-width:100px;max-width:220px;accent-color:#2563a8;cursor:pointer;height:4px}
 .zoom-pct{font-size:12px;font-weight:800;color:#2563a8;min-width:38px;text-align:right}
 .zoom-btn{background:#2563a8;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:14px;font-weight:700;cursor:pointer;line-height:1;flex-shrink:0}
-.zoom-btn:active{background:#1a3c5e}
 .zoom-reset{background:#e2e8f0;color:#475569;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0}
 .zoomable-outer{overflow:auto;-webkit-overflow-scrolling:touch;width:100%}
 .zoomable-inner{display:block;min-width:100%;zoom:1}
-
-@media print{
-  .header,.actions,.nav,.report-tabs,.cal-head button,.sync-status{display:none !important}
-  body{background:#fff}
-  .card{box-shadow:none;border:1px solid #000}
-  th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-}
 .admin-tabs{display:flex;gap:0;border-bottom:2px solid #d1dce8}
 .admin-tab-btn{flex:1;padding:10px;border:none;background:#f8fafc;color:#475569;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
 .admin-tab-btn.active{background:#fff;color:#5b21b6;border-bottom-color:#5b21b6}
@@ -186,6 +165,12 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
   .cal-cell .n{font-size:12px}
   table{font-size:10px}
   th,td{padding:5px 4px}
+}
+@media print{
+  .header,.actions,.nav,.report-tabs,.cal-head button,.sync-status{display:none !important}
+  body{background:#fff}
+  .card{box-shadow:none;border:1px solid #000}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
 </head>
@@ -292,7 +277,7 @@ async function syncCloud(){
     const data = await res.json();
     if(data && data.status !== "new_user" && data.status !== "error"){
       if(data.inv) state.inv = data.inv;
-      if(data.ben) state.ben = data.ben; // ✅ ડેટા બાઈન્ડિંગ સુરક્ષિત
+      if(data.ben) state.ben = data.ben;
       localStorage.setItem("mdr_offline_" + centerCode, JSON.stringify({inv:state.inv, ben:state.ben}));
       setStatus(`☁️ Synced — ${centerCode}`);
       render();
@@ -504,7 +489,7 @@ const morU = (id,u) => u[id+"M"] || 0;
 const aftU = (id,u) => u[id+"A"] || 0;
 
 function dayHint(d){
-  const h=["🔴 રવિ — રજા (સ+બ બંધ)","સ:ઘઉ30+તે5 | બ:ઘઉ50+દા20+તે8","સ:ચો30+તે5 | બ:ઘઉ50+ચ20+તે8","સ:ઘઉ30+તે5 | બ:ચો50+દા20+તે8","સ:ઘઉ30+તે5 | બ:ચો50+ચ20+તે8","સ:ઘઉ30+તે5 | બ:ઘઉ50+ચ20+તે8","સ:ઘઉ30+તે5 | બ:ચો50+ચદ20+તે8"];
+  const h=["🔴 રવિ — રજા (સ+બ બંધ)","સ:ઘઉ30+停5 | બ:ઘઉ50+દા20+તે8","સ:ચો30+તે5 | બ:ઘઉ50+ચ20+તે8","સ:ઘઉ30+તે5 | બ:ચો50+દા20+તે8","સ:ઘઉ30+તે5 | બ:ચો50+ચ20+તે8","સ:ઘઉ30+તે5 | બ:ઘઉ50+ચ20+તે8","સ:ઘઉ30+તે5 | બ:ચો50+ચદ20+તે8"];
   return h[d] || "";
 }
 const dkf = (y,m,d) => `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
@@ -566,7 +551,6 @@ function renderCalendarPage(){
   const today=new Date();
   let cells="", monthN=0, monthD=0;
   
-  // ફિક્સ: રવિવારથી પ્રિન્ટ કરવા ખાલી બોક્સ સેટ કરવા
   for(let i=0; i<first; i++) {
     cells+=`<div class="cal-cell empty"></div>`;
   }
@@ -625,7 +609,7 @@ function renderMonthlyPage(curMU){
 function renderBillPage(){
   const curMU = calcMonthUsage(state.calY, state.calM, state.ben) || {};
   
-  // ✅ ઓરિજિનલ સુધારો: છેલ્લી રોમાંથી માત્ર ચણા + દાળના આંકડા લેવા (શનિવારની ચણાદાળ સિવાય)
+  // ✅ રીપોર્ટ ટેબલની છેલ્લી રોમાંથી વાસ્તવિક ચણા + દાળના આંકડા લોડ કરવા
   const chanaBens = Number(curMU['chananA'] || 0);
   const dalBens   = Number(curMU['dalnA'] || 0);
   const chanaDalBenCount = chanaBens + dalBens;
@@ -736,7 +720,6 @@ function renderReportPage(){
   const invHeads=ITEMS.map(it=>`<th colspan="4" style="background:${it.color}">${it.emoji} ${it.name}</th>`).join("");
   const subHeads=ITEMS.map(()=>`<th>સ. વ. (g)</th><th>બ. વ. (g)</th><th>કુલ (g)</th><th>સિલક (kg)</th>`).join("");
 
-  // ✅ ઓરિજિનલ માસિક સમરી રીસ્ટોર
   const summaryRows=ITEMS.map(it=>{
     const iv=state.inv[it.id], opening=iv.o+iv.r;
     const morN=curMU[it.id+"nM"]||0, aftN=curMU[it.id+"nA"]||0;
@@ -869,7 +852,7 @@ function render(){
     else if(state.tab===1) html=renderCalendarPage();
     else if(state.tab===2) html=renderMonthlyPage(calcMonthUsage(state.calY, state.calM, state.ben));
     else if(state.tab===3) html=renderReportPage();
-    else if(state.tab===5) html=renderBillPage();
+    else if(state.tab===5) html=renderBillPage(); // ✅ બિલ પેજ અટેચમેન્ટ ફિક્સ
     else if(state.tab===4) html=renderAdminPage();
     html += renderModal();
     app.innerHTML = html;

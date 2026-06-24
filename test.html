@@ -600,32 +600,23 @@ function renderMonthlyPage(curMU){
 
 
       
-        function renderBillPage(){
+            function renderBillPage(){
   const curMU = calcMonthUsage(state.calY, state.calM, state.ben) || {};
   
-  // ✅ ૧૦૦% કાયમી અને સચોટ સુધારો: ડાયરેક્ટ કેલેન્ડર ડેટા લૂપિંગ લોજિક
-  let chanaDalBenCount = 0;
+  // ✅ રિપોર્ટની છેલ્લી ટોટલ રો માંથી ચણા + દાળ + ચણાદાળના સાચા લાભાર્થીઓનો સીધો સરવાળો
+  const chanaBens    = Number(curMU['chananA'] || 0);
+  const dalBens      = Number(curMU['dalnA'] || 0);
+  const chanaDalBens = Number(curMU['chanadalnA'] || curMU['chanadalA'] || 0);
   
-  // ચાલુ મહિનાના કુલ દિવસો મેળવવા
-  const dimCount = new Date(state.calY, state.calM + 1, 0).getDate();
-  
-  // દરેક તારીખ પર લૂપ ચલાવીને રવિવાર સિવાયના (૧ થી ૬) દિવસોના જ લાભાર્થી ગણવા
-  for (let d = 1; d <= dimCount; d++) {
-    const k = dkf(state.calY, state.calM, d);
-    const n = (state.ben && state.ben[k]) ? Number(state.ben[k] || 0) : 0;
-    const dow = new Date(state.calY, state.calM, d).getDay();
-    
-    // જો તે દિવસે બાળકો હાજર હોય (n > 0) અને તે રવિવાર ન હોય (dow !== 0)
-    if (n > 0 && dow !== 0) {
-      chanaDalBenCount += n;
-    }
-  }
+  // ત્રણેય આઇટમના કુલ માસિક લાભાર્થીની સંખ્યાનો સરવાળો
+  const chanaDalBenCount = chanaBens + dalBens + chanaDalBens;
   
   // ફ્રુટ બિલ કેલ્ક્યુલેશન (સોમવાર અને શુક્રવાર)
   let fruitBenCount = 0;
-  for(let d=1; d<=dimCount; d++){
+  const dim = new Date(state.calY, state.calM + 1, 0).getDate();
+  for(let d=1; d<=dim; d++){
     const k = dkf(state.calY, state.calM, d);
-    const n = (state.ben && state.ben[k]) ? Number(state.ben[k] || 0) : 0;
+    const n = state.ben ? Number(state.ben[k] || 0) : 0;
     const dow = new Date(state.calY, state.calM, d).getDay();
     if((dow === 1 || dow === 5) && n > 0) fruitBenCount += n;
   }
@@ -734,6 +725,7 @@ function renderMonthlyPage(curMU){
     </div>
   </div>`;
 }
+
 
 
 

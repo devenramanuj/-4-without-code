@@ -1010,6 +1010,117 @@ function renderBillPage(){
 
   return `<div class="container tab-content">
     <div class="card">
+function renderBillPage(){
+  const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
+  
+  // ✅ સુધારો: ચણા અને દાળના સાચા દિવસો વાઇઝ લાભાર્થી ગણવા માટેનું લોજિક
+  let chanaDalBenCount = 0;
+  const dimCount = new Date(state.calY, state.calM + 1, 0).getDate();
+  for (let d = 1; d <= dimCount; d++) {
+    const k = dkf(state.calY, state.calM, d);
+    const n = Number(state.ben[k] || 0);
+    const dow = new Date(state.calY, state.calM, d).getDay();
+    if (n > 0) {
+      // રવિવાર (0) સિવાયના સોમ થી શનિ (1 થી 6) સુધીના વાર માટે સરવાળો
+      if (dow === 1 || dow === 2 || dow === 3 || dow === 4 || dow === 5 || dow === 6) {
+        chanaDalBenCount += n;
+      }
+    }
+  }
+  
+  // ફ્રુટ બિલ કેલ્ક્યુલેશન (સોમવાર અને શુક્રવાર)
+  let fruitBenCount = 0;
+  const dim = new Date(state.calY, state.calM+1, 0).getDate();
+  for(let d=1; d<=dim; d++){
+    const k = dkf(state.calY, state.calM, d);
+    const n = Number(state.ben[k] || 0);
+    const dow = new Date(state.calY, state.calM, d).getDay();
+    if((dow === 1 || dow === 5) && n > 0) fruitBenCount += n;
+  }
+
+  const bills = [
+    {
+      name: "🍎 ફ્રુટ બિલ",
+      desc: "સોમવાર અને શુક્રવાર",
+      qty: fruitBenCount,
+      rate: 3.12,
+      total: fruitBenCount * 3.12,
+      note: `${fruitBenCount} લાભાર્થી × ₹3.12`
+    },
+    {
+      name: "🥒 ગરમ નાસ્તો બિલ",
+      desc: "કુલ લાભાર્થી દીઠ",
+      qty: curMU.totalN,
+      rate: 1.30,
+      total: curMU.totalN * 1.30,
+      note: `${curMU.totalN} લાભાર્થી × ₹1.30`
+    },
+    {
+      name: "🫘 ચણા અને તુવેર દાળ બિલ",
+      desc: "ચણા + દાળ લાભાર્થી",
+      qty: chanaDalBenCount,
+      rate: 1.60,
+      total: chanaDalBenCount * 1.60,
+      note: `${chanaDalBenCount} લાભાર્થી × ₹1.60`
+    },
+    {
+      name: "🥬 શાકભાજી બિલ",
+      desc: "કુલ લાભાર્થી દીઠ",
+      qty: curMU.totalN,
+      rate: 0.15,
+      total: curMU.totalN * 0.15,
+      note: `${curMU.totalN} લાભાર્થી × ₹0.15`
+    },
+    {
+      name: "🌶️ મસાલા બિલ",
+      desc: "કુલ લાભાર્થી દીઠ",
+      qty: curMU.totalN,
+      rate: 1.00,
+      total: curMU.totalN * 1.00,
+      note: `${curMU.totalN} લાભાર્થી × ₹1.00`
+    },
+    {
+      name: "🚗 વાહતુક બિલ",
+      desc: "કુલ લાભાર્થી દીઠ",
+      qty: curMU.totalN,
+      rate: 0.05,
+      total: curMU.totalN * 0.05,
+      note: `${curMU.totalN} લાભાર્થી × ₹0.05`
+    }
+  ];
+
+  const billCards = bills.map(b => `
+    <div class="card">
+      <div class="section-head" style="background:linear-gradient(135deg,#0f5132,#198754);display:flex;justify-content:space-between;align-items:center">
+        <div>${b.name}</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.9)">${b.desc}</div>
+      </div>
+      <div class="section-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+          <div style="padding:10px;background:#f0f6f1;border-radius:8px;text-align:center">
+            <div style="font-size:11px;color:#64748b;margin-bottom:4px">જથ્થો</div>
+            <div style="font-size:24px;font-weight:800;color:#198754">${b.qty}</div>
+          </div>
+          <div style="padding:10px;background:#fffbeb;border-radius:8px;text-align:center">
+            <div style="font-size:11px;color:#64748b;margin-bottom:4px">દર</div>
+            <div style="font-size:20px;font-weight:800;color:#f59e0b">₹${fmt(b.rate,2)}</div>
+          </div>
+          <div style="padding:10px;background:#dbeafe;border-radius:8px;text-align:center">
+            <div style="font-size:11px;color:#64748b;margin-bottom:4px">કુલ</div>
+            <div style="font-size:24px;font-weight:800;color:#2563a8">₹${fmt(b.total,2)}</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#64748b;padding:8px;background:#f8fafc;border-radius:6px;border-left:3px solid #198754">
+          ${b.note}
+        </div>
+      </div>
+    </div>
+  `).join("");
+
+  const grandTotal = bills.reduce((sum, b) => sum + b.total, 0);
+
+  return `<div class="container tab-content">
+    <div class="card">
       <div class="section-head" style="background:linear-gradient(135deg,#0f5132,#198754)">🧾 બિલ તાલીમ — ${MONTHS_FULL[state.calM]} ${state.calY}</div>
       <div style="padding:14px;border-bottom:1px solid #d1dce8;background:#f0f6f1">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
@@ -1046,8 +1157,6 @@ function renderBillPage(){
     </div>
   </div>`;
 }
-
-
 
 function renderReportPage(){
   const today=new Date();

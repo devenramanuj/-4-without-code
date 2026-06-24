@@ -778,7 +778,9 @@ function renderBillPage(){
     const k = dkf(state.calY, state.calM, d);
     const n = Number(state.ben[k] || 0);
     const dow = new Date(state.calY, state.calM, d).getDay();
-    if((dow === 1 || dow === 5) && n > 0) fruitBenCount += n;
+    if((dow === 1 || dow === 4)) {
+      fruitBenCount += n;
+    }
   }
 
   const bills = [

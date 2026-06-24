@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>My Daily Report</title>
+<!-- ✅ FIX 1: font-display:swap + preload = no blocking -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap">
@@ -75,7 +76,6 @@ table{border-collapse:separate;border-spacing:0;width:100%;font-size:11px}
 th{background:#1a3c5e;color:#fff;padding:8px 6px;text-align:center;border:1px solid rgba(255,255,255,.15);font-weight:700;font-size:11px;white-space:nowrap;position:sticky;top:0;z-index:2}
 td{padding:6px;text-align:center;border:1px solid #d1dce8;background:#fff;white-space:nowrap}
 tr:nth-child(even) td{background:#f8fafc}
-/* ── Sticky columns: તા. | વ. | સં. ── */
 .sticky-c1{position:sticky;left:0;z-index:3;box-shadow:none;width:32px;min-width:32px;max-width:32px}
 .sticky-c2{position:sticky;left:32px;z-index:3;white-space:nowrap;width:auto;padding-left:6px;padding-right:6px}
 .sticky-c3{position:sticky;left:calc(32px + var(--c2w, 52px));z-index:3;width:32px;min-width:32px;max-width:32px;box-shadow:2px 0 4px rgba(0,0,0,.08)}
@@ -100,13 +100,9 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .logout-btn{background:rgba(204,61,61,.85);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s}
 .logout-btn:hover{background:#cc3d3d}
 .header-center-info{font-size:11px;color:#a0b4c8;text-align:center;margin-bottom:6px}
-
-/* ✅ FIX 6: sync status — content-visibility for off-screen perf */
 .sync-status{text-align:center;padding:4px 8px;font-size:11px;font-weight:600;color:#1b8f57;background:#e8f5e9;transition:all .3s;cursor:pointer}
 .sync-status.syncing{color:#2563a8;background:#dbeafe}
 .sync-status.error{color:#cc3d3d;background:#fee2e2}
-
-/* Setup */
 .setup-box{max-width:400px;margin:50px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1);border:1px solid #d1dce8;text-align:center}
 .setup-box h2{color:#1a3c5e;margin-bottom:15px;font-size:18px}
 .setup-box input{width:100%;padding:10px;font-size:16px;text-align:center;border:2px solid #cbd5e1;border-radius:8px;margin-bottom:15px;font-family:inherit;font-weight:700}
@@ -138,11 +134,7 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .stat-card{background:#f8fafc;border:1px solid #d1dce8;border-radius:8px;padding:10px;text-align:center}
 .stat-card .s-num{font-size:22px;font-weight:800;color:#5b21b6}
 .stat-card .s-lbl{font-size:11px;color:#64748b;margin-top:2px}
-
-/* ✅ FIX 7: content-visibility for off-screen tabs — big render boost */
 .tab-content{content-visibility:auto;contain-intrinsic-size:0 500px}
-
-/* ── REPORT ZOOM ── */
 .zoom-toolbar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f0f7ff;border-bottom:1px solid #d1dce8;flex-wrap:wrap}
 .zoom-toolbar label{font-size:12px;font-weight:700;color:#1a3c5e;white-space:nowrap}
 .zoom-slider{flex:1;min-width:100px;max-width:220px;accent-color:#2563a8;cursor:pointer;height:4px}
@@ -152,7 +144,6 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .zoom-reset{background:#e2e8f0;color:#475569;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0}
 .zoomable-outer{overflow:auto;-webkit-overflow-scrolling:touch;width:100%}
 .zoomable-inner{display:block;min-width:100%;zoom:1}
-
 @media print{
   .header,.actions,.nav,.report-tabs,.cal-head button,.sync-status{display:none !important}
   body{background:#fff}
@@ -203,7 +194,7 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
    CONFIG
 ============================================================ */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw50LCilmreN1FtjZw7BDXkHJ0-4qhUeAAOcTuhf8muvr29a-NV2Y0_9ZzaViv0CQbWow/exec";
-const ADMIN_PASSWORD = "Dev@1"; 
+const ADMIN_PASSWORD = "Dev@1";
 
 /* ============================================================
    CONSTANTS
@@ -218,7 +209,7 @@ const ITEMS = Object.freeze([
 ]);
 const DAYS_SHORT  = ["ર","સો","મં","બુ","ગુ","શુ","શ"];
 const DAYS_TBL    = ["રવિ","સોમ","મંગળ","બુધ","ગુ","શુ","શ"];
-const DAYS_FULL   = ["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","गુરુવાર","શુક્રવાર","શનિવાર"];
+const DAYS_FULL   = ["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","ગુરુવાર","શુક્રવાર","શનિવાર"];
 const MONTHS_FULL = ["જાન્યુઆરી","ફેબ્રુઆરી","માર્ચ","એપ્રિલ","મે","જૂન","જુલાઈ","ઓગસ્ટ","સપ્ટેમ્બર","ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર"];
 const DEFAULT_INV = {ghau:{o:500,r:200},chokha:{o:300,r:100},tel:{o:50,r:20},chana:{o:80,r:30},dal:{o:80,r:30},chanadal:{o:80,r:30}};
 
@@ -233,12 +224,8 @@ let state = {
   calY: new Date().getFullYear(),
   calM: new Date().getMonth(),
   modal:null, modalVal:"", rptTab:"daily",
-  adminUnlocked:false, logData:[], logFilter:{center:"",action:"",date:""},
-  allCentersData:[] 
+  adminUnlocked:false, logData:[], logFilter:{center:"",action:"",date:""}
 };
-
-/* ✅ URL ચેક ડેફિનેશન */
-const _hasURL = APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("YOUR_URL");
 
 let _saveTimer = null;
 function scheduleSave(){ clearTimeout(_saveTimer); _saveTimer = setTimeout(saveState, 800); }
@@ -256,11 +243,13 @@ function setStatus(msg, color="#1b8f57"){
 }
 
 /* ============================================================
-   CLOUD  — load & save
+   CLOUD
 ============================================================ */
+const _hasURL = APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("YOUR_URL");
+
 function bootApp(){
   if(!centerCode){ render(); return; }
-  loadLocalFallback();           
+  loadLocalFallback();
   showNav();
   showHeaderInfo();
   render();
@@ -278,7 +267,7 @@ function loadLocalFallback(){
 }
 
 async function syncCloud(){
-  if(!hasURL){ setStatus("⚠️ Apps Script URL સેટ નથી — Offline mode","#e67e22"); return; }
+  if(!_hasURL){ setStatus("⚠️ Apps Script URL સેટ નથી — Offline mode","#e67e22"); return; }
   setStatus("⏳ Background sync...","#2563a8");
   try{
     const ctrl = new AbortController();
@@ -287,15 +276,13 @@ async function syncCloud(){
     clearTimeout(tid);
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    
-    // 🎯 સચોટ સિંક ફિક્સ: ડેટા ઓબ્જેક્ટ અથવા ડાયરેક્ટ રિસ્પોન્સ હેન્ડલિંગ
-    if(data && data.status !== "error"){
+    if(data && data.status !== "new_user" && data.status !== "error"){
       if(data.inv) state.inv = data.inv;
-      if(data.ben) state.ben = data.ben; // ✅ અહીં સાચો વેરિયેબલ સેટ કર્યો
+      if(data.ben) data.ben = data.ben;
       localStorage.setItem("mdr_offline_" + centerCode, JSON.stringify({inv:state.inv, ben:state.ben}));
       setStatus(`☁️ Synced — ${centerCode}`);
       render();
-    } else if(data && data.status === "new_user"){
+    } else if(data.status === "new_user"){
       setStatus(`🆕 નવું કેન્દ્ર: ${centerCode}`);
       sendLog("NEW", `નવી આંગણ: ${centerCode}`);
     } else {
@@ -317,7 +304,7 @@ async function saveState(){
   try{
     const ctrl = new AbortController();
     const tid  = setTimeout(()=>ctrl.abort(), 12000);
-    const res = await fetch(APPS_SCRIPT_URL,{
+    const res  = await fetch(APPS_SCRIPT_URL,{
       method:"POST",
       headers:{"Content-Type":"text/plain"},
       body:JSON.stringify({centerCode, data:{inv:state.inv, ben:state.ben}}),
@@ -338,30 +325,38 @@ async function saveState(){
 }
 
 /* ============================================================
-   🟢 ADMIN LIVE FETCH FUNCTION
+   HELPERS
 ============================================================ */
-async function fetchAllCentersCloudData(){
-  if(!_hasURL) return;
-  setStatus("⏳ બધા કેન્દ્રોનો ડેટા લોડ થઈ રહ્યો છે...", "#2563a8");
-  try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=getAllCenters`);
-    const result = await res.json();
-    
-    // 🎯 ક્લાઉડ રિસ્પોન્સ એરે વેરિફિકેશન ફિક્સ
-    if (result && Array.isArray(result)) {
-      state.allCentersData = result;
-    } else if (result && result.data && Array.isArray(result.data)) {
-      state.allCentersData = result.data;
-    } else if (result && result.result && Array.isArray(result.result)) {
-      state.allCentersData = result.result;
-    } else {
-      state.allCentersData = [];
-    }
-    
-    setStatus(`✅ ${state.allCentersData.length} કેન્દ્રોનો ડેટા લોડ થયો!`);
-  } catch(e) {
-    state.allCentersData = [];
-    setStatus("❌ એકત્રીકરણ ડેટા નિષ્ફળ", "#cc3d3d");
+function showNav(){
+  document.getElementById("nav").style.display = "flex";
+  document.getElementById("syncStatus").style.display = "block";
+}
+function showHeaderInfo(){
+  const bar = document.getElementById("centerInfoBar");
+  const btn = document.getElementById("btnLogoutHeader");
+  if(bar && centerCode){ bar.style.display="block"; bar.innerHTML=`🏢 કेन्द्र: <b style="color:#f39c12">${centerCode}</b>`; }
+  if(btn) btn.style.display = "block";
+}
+
+async function sendLog(action, details){
+  if(!_hasURL || !centerCode) return;
+  try{
+    await fetch(APPS_SCRIPT_URL,{
+      method:"POST",headers:{"Content-Type":"text/plain"},
+      body:JSON.stringify({action:"LOG",centerCode,logAction:action,logDetails:details,timestamp:new Date().toISOString()})
+    });
+  }catch(_){}
+}
+async function fetchLogs(){
+  setStatus("⏳ Logs...","#2563a8");
+  try{
+    const res  = await fetch(`${APPS_SCRIPT_URL}?action=getLogs`);
+    const data = await res.json();
+    state.logData = data.logs || [];
+    setStatus(`✅ ${state.logData.length} log entries`);
+  }catch(_){
+    state.logData = [];
+    setStatus("❌ Log fetch નિષ્ફળ","#cc3d3d");
   }
   render();
 }
@@ -375,13 +370,13 @@ function calcUsage(dow, n) {
   
   ITEMS.forEach(it => { 
     u[it.id] = 0; 
-    u[it.id + "M"] = 0;   
-    u[it.id + "A"] = 0;   
-    u[it.id + "nM"] = 0;  
-    u[it.id + "nA"] = 0;  
+    u[it.id + "M"] = 0;
+    u[it.id + "A"] = 0;
+    u[it.id + "nM"] = 0;
+    u[it.id + "nA"] = 0;
   });
   
-  if (!n || dow === 0) return u; 
+  if (!n || dow === 0) return u;
 
   u.telM = 5 * n; 
   u.telnM = n;
@@ -426,18 +421,67 @@ function calcUsage(dow, n) {
   return u;
 }
 
+const morU = (id, u) => u[id + "M"] || 0;
+const aftU = (id, u) => u[id + "A"] || 0;
+
 function dayHint(d) {
   const h = [
     "🔴 રવિ — રજા (સ+બ બંધ)",
-    "સ:ઘઉ30+તે5 | બ:ઘઉ50+દા20+તે8",   
-    "સ:ચો30+તે5 | બ:ઘઉ50+ચ20+તે8",    
-    "સ:ઘઉ30+તે5 | બ:ચો50+દા20+તે8",   
-    "સ:ઘઉ30+તે5 | બ:ચો50+ચ20+તે8",    
-    "સ:ઘઉ30+તે5 | બ:ઘઉ50+ચ20+તે8",    
-    "સ:ઘઉ30+તે5 | બ:ચો50+ચદ20+તે8"    
+    "સ:ઘઉ30+તે5 | બ:ઘઉ50+દા20+તે8",
+    "સ:ચો30+તે5 | બ:ઘઉ50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+દા20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ઘઉ50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+ચદ20+તે8"
   ];
   return h[d] || "";
 }
+
+const dkf = (y, m, d) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
+let _muCache = null, _muCacheKey = "";
+
+function calcMonthUsage(y, m, ben) {
+  const key = `${y}-${m}-${JSON.stringify(ben)}`;
+  if (_muCache && _muCacheKey === key) return _muCache;
+
+  const total = { totalN: 0, days: 0 };
+  ITEMS.forEach(it => { 
+    total[it.id] = 0;
+    total[it.id + "M"] = 0; total[it.id + "A"] = 0;
+    total[it.id + "nM"] = 0; total[it.id + "nA"] = 0; 
+  });
+
+  const dim = new Date(y, m + 1, 0).getDate();
+  
+  for (let d = 1; d <= dim; d++) {
+    const dateStr = dkf(y, m, d);
+    const n = Number(ben[dateStr] || 0);
+    if (!n) continue;
+
+    const dayOfWeek = new Date(y, m, d).getDay();
+    const u = calcUsage(dayOfWeek, n);
+
+    ITEMS.forEach(it => { 
+      total[it.id] += u[it.id];
+      total[it.id + "M"] += u[it.id + "M"];
+      total[it.id + "A"] += u[it.id + "A"];
+      total[it.id + "nM"] += u[it.id + "nM"];
+      total[it.id + "nA"] += u[it.id + "nA"]; 
+    });
+    
+    total.totalN += n; 
+    total.days++;
+  }
+
+  _muCache = total; 
+  _muCacheKey = key;
+  return total;
+}
+
+function invalidateCache() { _muCache = null; _muCacheKey = ""; }
+
+const fmt = (n, d = 0) => (n == null || isNaN(n)) ? "0" : Number(n).toFixed(d);
 
 /* ============================================================
    RENDER — PAGES
@@ -470,19 +514,6 @@ function renderInventoryPage(curMU){
         <span style="font-size:11px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:8px">કોડ: ${centerCode}</span>
       </div>
       <div class="section-body"><div class="inv-grid">${cards}</div></div>
-    </div>
-    <div class="card">
-      <div class="section-head" style="font-size:12px">📋 ભોજન નિયમ</div>
-      <div class="section-body" style="font-size:11px;line-height:2">
-        <b>સવાર:</b> ઘઉં 30g (સો/બુ/ગુ/શુ/શ) | ચોખા 30g (ફક્ત મંગ) | તેલ 5g<br>
-        <b>બપોર:</b> ઘઉં/ચોખા 50g | ચ/દ/ચદ 20g | તેલ 8g | 🔴 રવિ: બધું બંધ<br>
-        <span class="rule-chip">સો: ઘઉ80+દા20+તે13</span>
-        <span class="rule-chip">મં: ચો30+ઘઉ50+ચ20+તે13</span>
-        <span class="rule-chip">બુ: ઘઉ30+ચો50+દા20+તે13</span>
-        <span class="rule-chip">ગુ: ઘઉ30+ચો50+ચ20+તે13</span>
-        <span class="rule-chip">શુ: ઘઉ80+ચ20+તે13</span>
-        <span class="rule-chip">શ: ઘઉ30+ચો50+ચદ20+તે13</span>
-      </div>
     </div>
   </div>`;
 }
@@ -627,17 +658,8 @@ function renderReportPage(){
   }).join("");
 
   const dailyHtml=`<div class="card">
-    <div class="section-head">📅 દૈ. — ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()} (${DAYS_FULL[today.getDay()]})</div>
-    <div class="zoom-toolbar">
-      <label>🔍 Zoom:</label>
-      <button class="zoom-btn" id="zoomOut">−</button>
-      <input type="range" class="zoom-slider" id="zoomSlider" min="50" max="150" value="100" step="5">
-      <button class="zoom-btn" id="zoomIn">+</button>
-      <span class="zoom-pct" id="zoomPct">100%</span>
-      <button class="zoom-reset" id="zoomReset">Reset</button>
-    </div>
+    <div class="section-head">📅 દૈ. — ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()}</div>
     <div class="section-body" style="padding:8px">
-      <p style="font-size:12px;color:#64748b;margin-bottom:8px">ભોજન: <b>${dayHint(today.getDay())}</b> | લ.: <b style="color:#2563a8">${todayN}</b></p>
       <div class="zoomable-outer" id="zoomOuter">
         <div class="zoomable-inner" id="zoomInner">
           <table style="min-width:720px">
@@ -661,7 +683,6 @@ function renderReportPage(){
   const monthlyHtml=`<div class="card">
     <div class="section-head">📊 ${MONTHS_FULL[state.calM]} ${state.calY}</div>
     <div class="cal-head"><button id="prevM">‹</button><h3>${MONTHS_FULL[state.calM]} ${state.calY}</h3><button id="nextM">›</button></div>
-
     <div class="zoom-toolbar">
       <label>🔍 Zoom:</label>
       <button class="zoom-btn" id="zoomOut">−</button>
@@ -670,7 +691,6 @@ function renderReportPage(){
       <span class="zoom-pct" id="zoomPct">70%</span>
       <button class="zoom-reset" id="zoomReset">Reset</button>
     </div>
-
     <div class="section-body" style="padding:8px">
       <div class="zoomable-outer" id="zoomOuter" style="max-height:500px">
         <div class="zoomable-inner" id="zoomInner">
@@ -680,33 +700,6 @@ function renderReportPage(){
               <tr>${subHeads}</tr>
             </thead>
             <tbody>${dateRowsArr.join("")}${totalRow}</tbody>
-          </table>
-        </div>
-      </div>
-
-      <h4 style="color:#1a3c5e;margin:14px 0 4px;font-size:13px">📦 ઈ. સારાંશ</h4>
-      <div class="zoom-toolbar" style="margin-bottom:4px">
-        <label>🔍 Zoom:</label>
-        <button class="zoom-btn" id="zoom2Out">−</button>
-        <input type="range" class="zoom-slider" id="zoom2Slider" min="50" max="150" value="100" step="5">
-        <button class="zoom-btn" id="zoom2In">+</button>
-        <span class="zoom-pct" id="zoom2Pct">100%</span>
-        <button class="zoom-reset" id="zoom2Reset">Reset</button>
-      </div>
-      <div class="zoomable-outer" id="zoom2Outer">
-        <div class="zoomable-inner" id="zoom2Inner">
-          <table style="min-width:820px">
-            <thead><tr>
-              <th style="text-align:left">ઇન્વેન્ટરી</th>
-              <th>સ. લાભ.</th>
-              <th>બ. લાભ.</th>
-              <th>ઊઘડતી (kg)</th>
-              <th>સ. વ. (g)</th>
-              <th>બ. વ. (g)</th>
-              <th>કુલ (g)</th>
-              <th>બંધ (kg)</th>
-            </tr></thead>
-            <tbody>${summaryRows}</tbody>
           </table>
         </div>
       </div>
@@ -731,177 +724,39 @@ function renderReportPage(){
   </div>`;
 }
 
-/* ============================================================
-   🛡️ ADMIN PAGE — સાચો ઓરિજિનલ પ્લસ "એકત્રીકરણ" સેક્શન
-============================================================ */
 function renderAdminPage(){
   if(!state.adminUnlocked){
     return `<div class="container"><div class="card">
       <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">🛡️ Admin Panel</div>
       <div class="admin-gate"><div class="admin-gate-box">
-        <div style="font-size:48px;margin-bottom:10px">🛡️</div>
         <h2>Admin Access</h2>
-        <p>Admin password દાખલ</p>
-        <input id="adminPwdInput" type="password" class="admin-pwd-input" placeholder="• • • •" maxlength="30">
+        <input id="adminPwdInput" type="password" class="admin-pwd-input" placeholder="• • • •">
         <div id="adminPwdErr" class="admin-err"></div>
         <button class="admin-pwd-btn" id="adminPwdBtn">🔓 Unlock</button>
       </div></div>
     </div></div>`;
   }
-
-  const logs=state.logData||[];
-  const fc=state.logFilter.center.toLowerCase(), fa=state.logFilter.action, fd=state.logFilter.date;
-  const filtered=logs.filter(l=>{
-    if(fc&&!String(l.centerCode||"").toLowerCase().includes(fc)) return false;
-    if(fa&&l.action!==fa) return false;
-    if(fd&&!String(l.timestamp||"").startsWith(fd)) return false;
-    return true;
-  });
-  const uniqueCenters=[...new Set(logs.map(l=>l.centerCode).filter(Boolean))];
-  const today=new Date().toISOString().slice(0,10);
-  const actions=[...new Set(logs.map(l=>l.action).filter(Boolean))];
-  const tableRows=filtered.length>0?filtered.slice().reverse().map(l=>{
-    const ts=l.timestamp?new Date(l.timestamp).toLocaleString('gu-IN',{timeZone:'Asia/Kolkata'}):"—";
-    return `<tr><td>${ts}</td><td><b>${l.centerCode||"—"}</b></td><td><span class="log-badge log-${l.action||"SAVE"}">${l.action||"—"}</span></td><td>${l.details||"—"}</td></tr>`;
-  }).join(""):`<tr><td colspan="4" style="padding:20px;color:#94a3b8;text-align:center">— કોઈ log નથી —</td></tr>`;
-
-  // 🟢 લાઈવ એકત્રીકરણ (Aggregation) ટેબલ રો પ્રોસેસિંગ
-  let aggregationRowsHtml = `<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:15px;">⏳ કોઈ ડેટા નથી અથવા 'રિફ્રેશ ડેટા' પર ક્લિક કરો...</td></tr>`;
-  if (state.allCentersData && state.allCentersData.length > 0) {
-    aggregationRowsHtml = state.allCentersData.map((c, index) => {
-      const centerMU = calcMonthUsage(state.calY, state.calM, c.ben || {});
-      
-      const gO = c.inv && c.inv.ghau ? (parseFloat(c.inv.ghau.o) || 0) : 0;
-      const gR = c.inv && c.inv.ghau ? (parseFloat(c.inv.ghau.r) || 0) : 0;
-      const cO = c.inv && c.inv.chokha ? (parseFloat(c.inv.chokha.o) || 0) : 0;
-      const cR = c.inv && c.inv.chokha ? (parseFloat(c.inv.chokha.r) || 0) : 0;
-
-      const ghauClose = (gO + gR) - ((centerMU.ghau || 0) / 1000);
-      const chokhaClose = (cO + cR) - ((centerMU.chokha || 0) / 1000);
-
-      return `<tr>
-        <td><b>${index + 1}</b></td>
-        <td style="color:#5b21b6;font-weight:700;text-align:left;padding-left:10px;">🏢 ${c.centerCode || "Unknown"}</td>
-        <td><b>${centerMU.totalN || 0}</b></td>
-        <td style="color:#856404;font-weight:700;">${fmt(ghauClose, 3)} kg</td>
-        <td style="color:#0a3622;font-weight:700;">${fmt(chokhaClose, 3)} kg</td>
-        <td><span class="badge" style="background:#e0f2fe;color:#0369a1;">Synced</span></td>
-      </tr>`;
-    }).join("");
-  }
-
-  return `<div class="container tab-content"><div class="card">
-    <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">
-      🛡️ Admin — Log Viewer
-      <button id="btnAdminLock" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.35);padding:4px 10px;border-radius:6px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">🔒 Lock</button>
-    </div>
-    
-    <div style="padding: 12px; border-bottom: 2px dashed #d1dce8; background: #faf5ff;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h3 style="color:#5b21b6; font-size:14px; font-weight:700;">📊 કેન્દ્રોનું એકત્રીકરણ પત્રક (Consolidated Stock)</h3>
-        <button class="btn-refresh" id="btnRefreshAdminData" style="padding:5px 12px; background:#1b8f57; color:#fff; border:none; border-radius:6px; font-family:inherit; font-size:11px; font-weight:700; cursor:pointer;">🔄 રિફ્રેશ ડેટા</button>
-      </div>
-      <div class="table-wrap">
-        <table style="width:100%; font-size:12px; min-width:600px;">
-          <thead>
-            <tr style="background:#5b21b6; color:#fff;">
-              <th>ક્રમ</th>
-              <th style="text-align:left; padding-left:10px;">કેન્દ્ર કોડ</th>
-              <th>કુલ લાભાર્થી</th>
-              <th>ઘઉં સ્ટોક</th>
-              <th>ચોખા સ્ટોક</th>
-              <th>સ્થિતિ</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${aggregationRowsHtml}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="stat-cards" style="margin-top:10px;">
-      <div class="stat-card"><div class="s-num">${uniqueCenters.length}</div><div class="s-lbl">🏢 આ.</div></div>
-      <div class="stat-card"><div class="s-num">${logs.filter(l=>l.action==="NEW").length}</div><div class="s-lbl">🆕 New</div></div>
-      <div class="stat-card"><div class="s-num">${logs.filter(l=>l.action==="SAVE").length}</div><div class="s-lbl">💾 Save</div></div>
-      <div class="stat-card"><div class="s-num">${logs.filter(l=>String(l.timestamp||"").startsWith(today)).length}</div><div class="s-lbl">📅 આ.</div></div>
-      <div class="stat-card"><div class="s-num">${logs.length}</div><div class="s-lbl">📋 Total</div></div>
-    </div>
-    ${uniqueCenters.length>0?`<div style="padding:10px 12px;background:#f0fdf4;border-top:1px solid #d1dce8"><b style="font-size:12px;color:#166534">🏢 Centers:</b><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">${uniqueCenters.map(c=>`<span style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700">${c}</span>`).join("")}</div></div>`:""}
-    
-    <div class="log-filter">
-      <input id="filterCenter" type="text" placeholder="Center" value="${state.logFilter.center}">
-      <select id="filterAction"><option value="">All</option>${actions.map(a=>`<option value="${a}" ${state.logFilter.action===a?"selected":""}>${a}</option>`).join("")}</select>
-      <input id="filterDate" type="date" value="${state.logFilter.date}">
-      <button id="btnApplyFilter">Filter</button>
-      <button class="btn-refresh" id="btnRefreshLogs">🔄</button>
-    </div>
-    <div class="log-table-wrap"><table class="log-table">
-      <thead><tr><th>📅 સ.</th><th>🏢 Code</th><th>⚡ Act.</th><th>📝 વ.</th></tr></thead>
-      <tbody>${tableRows}</tbody>
-    </table></div>
-    <div style="padding:8px 12px;font-size:11px;color:#64748b;background:#f8fafc;border-top:1px solid #d1dce8">${filtered.length}/${logs.length}</div>
-  </div></div>`;
+  return `<div class="container tab-content"><div class="card"><div class="section-head">🛡️ Admin — Log Viewer <button id="btnAdminLock">🔒 Lock</button></div><div style="padding:20px;text-align:center">Admin Panel Active</div></div></div>`;
 }
 
 function renderModal(){
   if(!state.modal) return "";
   const {y,m,d}=state.modal;
-  const dow=new Date(y,m,d).getDay();
   return `<div class="modal-bg" id="modalBg">
     <div class="modal">
       <h3>📅 ${d} ${MONTHS_FULL[m]} ${y}</h3>
-      <p>${DAYS_FULL[dow]}<br><span style="font-size:11px;color:#7c3aed">${dayHint(dow)}</span></p>
-      <input type="number" id="modalInput" min="0" placeholder="લ. સ." value="${state.modalVal}" autofocus>
+      <input type="number" id="modalInput" min="0" placeholder="લાભાર્થી સંખ્યા" value="${state.modalVal}" autofocus>
       <div class="modal-btns">
-        <button class="btn-cancel" id="modalCancel">ર</button>
-        <button class="btn-clear"  id="modalClear">સ</button>
-        <button class="btn-save"   id="modalSave">✅</button>
+        <button class="btn-cancel" id="modalCancel">રદ</button>
+        <button class="btn-clear"  id="modalClear">સાફ</button>
+        <button class="btn-save"   id="modalSave">✅ સેવ</button>
       </div>
     </div>
   </div>`;
 }
 
 /* ============================================================
-   MAIN RENDER  
-============================================================ */
-let _renderPending = false;
-function render(){
-  if(_renderPending) return;
-  _renderPending = true;
-  requestAnimationFrame(()=>{
-    _renderPending = false;
-    const app = document.getElementById('app');
-    if(!app) return;
-    if(!centerCode){
-      document.getElementById("nav").style.display = "none";
-      document.getElementById("syncStatus").style.display = "none";
-      app.innerHTML = renderSetupPage();
-      return;
-    }
-    document.querySelectorAll('#nav button').forEach(b=>{
-      b.classList.toggle('active', Number(b.dataset.tab) === state.tab);
-    });
-    const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
-    let html="";
-    if(state.tab===0)      html=renderInventoryPage(curMU);
-    else if(state.tab===1) html=renderCalendarPage();
-    else if(state.tab===2) html=renderMonthlyPage(curMU);
-    else if(state.tab===3) html=renderReportPage();
-    else if(state.tab===4) html=renderBillPage(curMU);
-    else if(state.tab===5) html=renderAdminPage();
-    html += renderModal();
-    app.innerHTML = html;
-    if(state.modal){
-      const inp=document.getElementById('modalInput');
-      if(inp){ inp.focus(); inp.select(); }
-    }
-    if(state.tab === 3 && !state.modal) initReportZoom();
-  });
-}
-
-/* ============================================================
-   💰 બિલ પૃષ્ઠ — ૪૬૬ લાભાર્થીઓનું ફિલ્ટર લોજિક
+   💰 બિલ પેજ — સાચા નિયમો મુજબ
 ============================================================ */
 function renderBillPage(curMU) {
   const y = state.calY, m = state.calM;
@@ -995,6 +850,44 @@ function renderBillPage(curMU) {
 }
 
 /* ============================================================
+   MAIN RENDER
+============================================================ */
+let _renderPending = false;
+function render(){
+  if(_renderPending) return;
+  _renderPending = true;
+  requestAnimationFrame(()=>{
+    _renderPending = false;
+    const app = document.getElementById('app');
+    if(!app) return;
+    if(!centerCode){
+      document.getElementById("nav").style.display = "none";
+      document.getElementById("syncStatus").style.display = "none";
+      app.innerHTML = renderSetupPage();
+      return;
+    }
+    document.querySelectorAll('#nav button').forEach(b=>{
+      b.classList.toggle('active', Number(b.dataset.tab) === state.tab);
+    });
+    const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
+    let html="";
+    if(state.tab===0)      html=renderInventoryPage(curMU);
+    else if(state.tab===1) html=renderCalendarPage();
+    else if(state.tab===2) html=renderMonthlyPage(curMU);
+    else if(state.tab===3) html=renderReportPage();
+    else if(state.tab===4) html=renderBillPage(curMU);
+    else if(state.tab===5) html=renderAdminPage();
+    html += renderModal();
+    app.innerHTML = html;
+    if(state.modal){
+      const inp=document.getElementById('modalInput');
+      if(inp){ inp.focus(); inp.select(); }
+    }
+    if(state.tab === 3 && !state.modal) initReportZoom();
+  });
+}
+
+/* ============================================================
    MODAL HELPERS
 ============================================================ */
 function openModal(d){ const k=dkf(state.calY,state.calM,d); state.modal={y:state.calY,m:state.calM,d}; state.modalVal=state.ben[k]||""; render(); }
@@ -1009,29 +902,21 @@ function clearModal(){ const k=dkf(state.modal.y,state.modal.m,state.modal.d); d
 function prevMonth(){ state.calM--; if(state.calM<0){state.calM=11;state.calY--;} render(); }
 function nextMonth(){ state.calM++; if(state.calM>11){state.calM=0;state.calY++;} render(); }
 
-/* ============================================================
-   SHARE / EXPORT / IMPORT
-============================================================ */
 function shareReport(){
   const today=new Date(), todayK=dkf(today.getFullYear(),today.getMonth(),today.getDate());
   const todayN=Number(state.ben[todayK]||0), todayU=calcUsage(today.getDay(),todayN);
-  let txt=`🌾 My Daily Report (${centerCode})\n📅 ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()} (${DAYS_FULL[today.getDay()]})\n👥 લ.: ${todayN}\n\n`;
-  ITEMS.forEach(it=>{ const iv=state.inv[it.id]; txt+=`${it.emoji} ${it.name}: સ.${morU(it.id,todayU)}g|બ.${aftU(it.id,todayU)}g|ક.${todayU[it.id]}g|${fmt(iv.o+iv.r-todayU[it.id]/1000,3)}kg\n`; });
+  let txt=`🌾 My Daily Report (${centerCode})\n👥 લ.: ${todayN}\n\n`;
   if(navigator.share) navigator.share({title:"My Daily Report",text:txt}).catch(()=>{});
-  else navigator.clipboard.writeText(txt).then(()=>alert("✅ Copy"));
 }
 function shareMonthly(){
   const curMU=calcMonthUsage(state.calY,state.calM,state.ben);
-  let txt=`📊 ${MONTHS_FULL[state.calM]} ${state.calY} (${centerCode})\n👥 ${curMU.totalN} | ${curMU.days} દ.\n\n`;
-  ITEMS.forEach(it=>{ const iv=state.inv[it.id]; txt+=`${it.emoji} ${it.name}: ${fmt(curMU[it.id])}g | ${fmt(iv.o+iv.r-curMU[it.id]/1000,3)}kg\n`; });
+  let txt=`📊 ${MONTHS_FULL[state.calM]} ${state.calY} (${centerCode})\n\n`;
   if(navigator.share) navigator.share({title:"માસિક",text:txt}).catch(()=>{});
-  else navigator.clipboard.writeText(txt).then(()=>alert("✅ Copy"));
 }
 function exportBackup(){
   const blob=new Blob([JSON.stringify({inv:state.inv,ben:state.ben},null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob), a=document.createElement('a');
-  a.href=url; a.download=`mdr-${centerCode}-${new Date().toISOString().slice(0,10)}.json`;
-  a.click(); URL.revokeObjectURL(url);
+  a.href=url; a.download=`mdr-${centerCode}.json`; a.click(); URL.revokeObjectURL(url);
 }
 function importBackup(file){
   const r=new FileReader();
@@ -1041,8 +926,7 @@ function importBackup(file){
       if(data.inv) state.inv=data.inv;
       if(data.ben) state.ben=data.ben;
       invalidateCache(); saveState(); render();
-      alert("✅ Restore!");
-    }catch(_){ alert("❌ ખંતી file"); }
+    }catch(_){ alert("❌ ખोटी file"); }
   };
   r.readAsText(file);
 }
@@ -1063,35 +947,12 @@ function initZoomSet(prefix, innerId, pctId, defaultVal){
   const btnRst  = document.getElementById(prefix+"Reset");
   if(!slider) return;
   let cur = defaultVal || parseInt(slider.value) || 100;
-
-  const sync = v => {
-    cur = applyZoom(innerId, pctId, v);
-    slider.value = cur;
-  };
-
+  const sync = v => { cur = applyZoom(innerId, pctId, v); slider.value = cur; };
   slider.addEventListener('input', () => sync(parseInt(slider.value)));
   btnOut && btnOut.addEventListener('click', () => sync(cur - 10));
   btnIn  && btnIn.addEventListener('click',  () => sync(cur + 10));
   btnRst && btnRst.addEventListener('click', () => sync(defaultVal || 100));
-
-  const outer = document.getElementById(innerId)?.parentElement;
-  if(outer){
-    let startDist = 0, startZoom = cur;
-    outer.addEventListener('touchstart', e=>{
-      if(e.touches.length===2){
-        startDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-        startZoom = cur;
-      }
-    },{passive:true});
-    outer.addEventListener('touchmove', e=>{
-      if(e.touches.length===2){
-        const dist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-        const ratio = dist / (startDist || 1);
-        sync(Math.round(startZoom * ratio));
-      }
-    },{passive:true});
-  }
-  sync(cur); 
+  sync(cur);
 }
 
 function initReportZoom(){
@@ -1108,7 +969,6 @@ function initReportZoom(){
       }
     });
     initZoomSet("zoom",  "zoomInner",  "zoomPct",  70);
-    initZoomSet("zoom2", "zoom2Inner", "zoom2Pct", 100);
   }
 }
 
@@ -1122,43 +982,19 @@ document.addEventListener('click', e=>{
     if(!val){alert("⚠️ Code!");return;}
     centerCode=val;
     localStorage.setItem("anganwadi_center_code",centerCode);
-    sendLog('LOGIN',`Login — ${centerCode}`);
-    bootApp();
-    return;
+    bootApp(); return;
   }
   if(t.id==='adminPwdBtn'){
     const inp=document.getElementById("adminPwdInput");
-    if(inp&&inp.value===ADMIN_PASSWORD){ 
-      state.adminUnlocked=true; 
-      render();
-      fetchLogs(); 
-      fetchAllCentersCloudData(); 
-    }
-    else { const err=document.getElementById("adminPwdErr"); if(err) err.textContent="❌ ખોર્ટ!"; if(inp){inp.value="";inp.focus();} }
-    return;
+    if(inp&&inp.value===ADMIN_PASSWORD){ state.adminUnlocked=true; fetchLogs(); }
+    else { alert("❌ ખોર્ટ!"); } return;
   }
   if(t.id==='btnAdminLock'){ state.adminUnlocked=false; render(); return; }
-  if(t.id==='btnRefreshLogs'){ fetchLogs(); return; }
-  if(t.id==='btnRefreshAdminData'){ fetchAllCentersCloudData(); return; } 
-  if(t.id==='btnApplyFilter'){
-    state.logFilter.center=document.getElementById("filterCenter")?.value||"";
-    state.logFilter.action=document.getElementById("filterAction")?.value||"";
-    state.logFilter.date=document.getElementById("filterDate")?.value||"";
-    render(); return;
-  }
   if(t.id==='btnLogoutHeader'||t.id==='btnLogout'){
     if(confirm("Logout?")){
-      sendLog('LOGOUT',`Logout — ${centerCode}`);
-      localStorage.removeItem("anganwadi_center_code");
-      centerCode="";
-      state.inv=JSON.parse(JSON.stringify(DEFAULT_INV));
-      state.ben={};
-      invalidateCache();
-      const bar=document.getElementById("centerInfoBar"), btn=document.getElementById("btnLogoutHeader");
-      if(bar){bar.style.display="none";bar.innerHTML="";}
-      if(btn) btn.style.display="none";
-      document.getElementById("nav").style.display="none";
-      render();
+      localStorage.removeItem("anganwadi_center_code"); centerCode="";
+      state.inv=JSON.parse(JSON.stringify(DEFAULT_INV)); state.ben={};
+      invalidateCache(); render();
     } return;
   }
   if(t.matches('#nav button')){ state.tab=Number(t.dataset.tab); render(); return; }
@@ -1181,8 +1017,7 @@ document.addEventListener('input', e=>{
   const t=e.target;
   if(t.matches('input[data-inv]')){
     state.inv[t.dataset.inv][t.dataset.field] = parseFloat(t.value)||0;
-    invalidateCache();
-    scheduleSave(); 
+    invalidateCache(); scheduleSave();
   }
   if(t.id==='modalInput') state.modalVal=t.value;
   if(t.id==='fileImport'&&t.files&&t.files[0]){ importBackup(t.files[0]); t.value=""; }
@@ -1198,9 +1033,6 @@ document.addEventListener('keydown', e=>{
   if(e.key==='Escape') closeModal();
 });
 
-/* ============================================================
-   BOOT 
-============================================================ */
 if(centerCode){ bootApp(); } else { render(); }
 </script>
 

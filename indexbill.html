@@ -729,16 +729,59 @@ function renderAdminPage(){
     return `<div class="container"><div class="card">
       <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">🛡️ Admin Panel</div>
       <div class="admin-gate"><div class="admin-gate-box">
+        <div style="font-size:48px;margin-bottom:10px">🛡️</div>
         <h2>Admin Access</h2>
-        <input id="adminPwdInput" type="password" class="admin-pwd-input" placeholder="• • • •">
+        <p>Admin password દાخল</p>
+        <input id="adminPwdInput" type="password" class="admin-pwd-input" placeholder="• • • •" maxlength="30">
         <div id="adminPwdErr" class="admin-err"></div>
         <button class="admin-pwd-btn" id="adminPwdBtn">🔓 Unlock</button>
       </div></div>
     </div></div>`;
   }
-  return `<div class="container tab-content"><div class="card"><div class="section-head">🛡️ Admin — Log Viewer <button id="btnAdminLock">🔒 Lock</button></div><div style="padding:20px;text-align:center">Admin Panel Active</div></div></div>`;
-}
 
+  const logs=state.logData||[];
+  const fc=state.logFilter.center.toLowerCase(), fa=state.logFilter.action, fd=state.logFilter.date;
+  const filtered=logs.filter(l=>{
+    if(fc&&!String(l.centerCode||"").toLowerCase().includes(fc)) return false;
+    if(fa&&l.action!==fa) return false;
+    if(fd&&!String(l.timestamp||"").startsWith(fd)) return false;
+    return true;
+  });
+  const uniqueCenters=[...new Set(logs.map(l=>l.centerCode).filter(Boolean))];
+  const today=new Date().toISOString().slice(0,10);
+  const actions=[...new Set(logs.map(l=>l.action).filter(Boolean))];
+  const tableRows=filtered.length>0?filtered.slice().reverse().map(l=>{
+    const ts=l.timestamp?new Date(l.timestamp).toLocaleString('gu-IN',{timeZone:'Asia/Kolkata'}):"—";
+    return `<tr><td>${ts}</td><td><b>${l.centerCode||"—"}</b></td><td><span class="log-badge log-${l.action||"SAVE"}">${l.action||"—"}</span></td><td>${l.details||"—"}</td></tr>`;
+  }).join(""):`<tr><td colspan="4" style="padding:20px;color:#94a3b8;text-align:center">— કોઈ log નθी —</td></tr>`;
+
+  return `<div class="container tab-content"><div class="card">
+    <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">
+      🛡️ Admin — Log Viewer
+      <button id="btnAdminLock" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.35);padding:4px 10px;border-radius:6px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">🔒 Lock</button>
+    </div>
+    <div class="stat-cards">
+      <div class="stat-card"><div class="s-num">${uniqueCenters.length}</div><div class="s-lbl">🏢 આ.</div></div>
+      <div class="stat-card"><div class="s-num">${logs.filter(l=>l.action==="NEW").length}</div><div class="s-lbl">🆕 New</div></div>
+      <div class="stat-card"><div class="s-num">${logs.filter(l=>l.action==="SAVE").length}</div><div class="s-lbl">💾 Save</div></div>
+      <div class="stat-card"><div class="s-num">${logs.filter(l=>String(l.timestamp||"").startsWith(today)).length}</div><div class="s-lbl">📅 આ.</div></div>
+      <div class="stat-card"><div class="s-num">${logs.length}</div><div class="s-lbl">📋 Total</div></div>
+    </div>
+    ${uniqueCenters.length>0?`<div style="padding:10px 12px;background:#f0fdf4;border-top:1px solid #d1dce8"><b style="font-size:12px;color:#166534">🏢 Centers:</b><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">${uniqueCenters.map(c=>`<span style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700">${c}</span>`).join("")}</div></div>`:""}
+    <div class="log-filter">
+      <input id="filterCenter" type="text" placeholder="Center" value="${state.logFilter.center}">
+      <select id="filterAction"><option value="">All</option>${actions.map(a=>`<option value="${a}" ${state.logFilter.action===a?"selected":""}>${a}</option>`).join("")}</select>
+      <input id="filterDate" type="date" value="${state.logFilter.date}">
+      <button id="btnApplyFilter">Filter</button>
+      <button class="btn-refresh" id="btnRefreshLogs">🔄</button>
+    </div>
+    <div class="log-table-wrap"><table class="log-table">
+      <thead><tr><th>📅 સ.</th><th>🏢 Code</th><th>⚡ Act.</th><th>📝 વ.</th></tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table></div>
+    <div style="padding:8px 12px;font-size:11px;color:#64748b;background:#f8fafc;border-top:1px solid #d1dce8">${filtered.length}/${logs.length}</div>
+  </div></div>`;
+}
 function renderModal(){
   if(!state.modal) return "";
   const {y,m,d}=state.modal;

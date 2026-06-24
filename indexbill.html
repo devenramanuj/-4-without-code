@@ -278,7 +278,7 @@ function loadLocalFallback(){
 }
 
 async function syncCloud(){
-  if(!_hasURL){ setStatus("⚠️ Apps Script URL સેટ નથી — Offline mode","#e67e22"); return; }
+  if(!hasURL){ setStatus("⚠️ Apps Script URL સેટ નથી — Offline mode","#e67e22"); return; }
   setStatus("⏳ Background sync...","#2563a8");
   try{
     const ctrl = new AbortController();

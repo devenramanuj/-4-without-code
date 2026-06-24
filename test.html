@@ -674,6 +674,79 @@ function renderBillPage(){
     }
   ];
 
+function renderBillPage(){
+  const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
+  
+  // ✅ ૧૦૦% સાચો સુધારો: માસ દરમિયાનના માત્ર ચણા + દાળના વાસ્તવિક લાભાર્થીની સંખ્યા
+  // તમારા calcUsage() ના નિયમ મુજબ બપોરે ચણા, દાળ કે ચણાદાળ ૨૦ ગ્રામ આપવામાં આવે છે.
+  // માટે કુલ વપરાયેલા ગ્રામ ભાગ્યા ૨૦ કરવાથી ચણા + દાળના કુલ સાચા લાભાર્થી મળી જશે.
+  const totalChanaGram = Number(curMU['chana'] || 0);
+  const totalDalGram   = Number(curMU['dal'] || 0);
+  const totalChanaDalGram = Number(curMU['chanadal'] || 0);
+  
+  const chanaDalBenCount = (totalChanaGram + totalDalGram + totalChanaDalGram) / 20;
+  
+  // ફ્રુટ બિલ કેલ્ક્યુલેશન (સોમવાર અને શુક્રવાર)
+  let fruitBenCount = 0;
+  const dim = new Date(state.calY, state.calM+1, 0).getDate();
+  for(let d=1; d<=dim; d++){
+    const k = dkf(state.calY, state.calM, d);
+    const n = Number(state.ben[k] || 0);
+    const dow = new Date(state.calY, state.calM, d).getDay();
+    if((dow === 1 || dow === 5) && n > 0) fruitBenCount += n;
+  }
+
+  const bills = [
+    {
+      name: "🍎 ફ્રુટ બિલ",
+      desc: "સોમવાર અને શુક્રવાર",
+      qty: fruitBenCount,
+      rate: 3.12,
+      total: fruitBenCount * 3.12,
+      note: `${fruitBenCount} લાભાર્થી × ₹3.12`
+    },
+    {
+      name: "🥒 ગરમ નાસ્તો બિલ",
+      desc: "કુલ લાભાર્થી દીઠ",
+      qty: curMU.totalN,
+      rate: 1.30,
+      total: curMU.totalN * 1.30,
+      note: `${curMU.totalN} લાભાર્થી × ₹1.30`
+    },
+    {
+      name: "🫘 ચણા અને તુવેર દાળ બિલ",
+      desc: "ચણા + દાળ લાભાર્થી",
+      qty: chanaDalBenCount,
+      rate: 1.60,
+      total: chanaDalBenCount * 1.60,
+      note: `${chanaDalBenCount} લાભાર્થી × ₹1.60`
+    },
+    {
+      name: "🥬 શાકભાજી બિલ",
+      desc: "કુલ લાભાર્થી દીઠ",
+      qty: curMU.totalN,
+      rate: 0.15,
+      total: curMU.totalN * 0.15,
+      note: `${curMU.totalN} લાભાર્થી × ₹0.15`
+    },
+    {
+      name: "🌶️ મસાલા બિલ",
+      desc: "કુલ લાભાર્થી દીઠ",
+      qty: curMU.totalN,
+      rate: 1.00,
+      total: curMU.totalN * 1.00,
+      note: `${curMU.totalN} લાભાર્થી × ₹1.00`
+    },
+    {
+      name: "🚗 વાહતુક બિલ",
+      desc: "કુલ લાભાર્થી દીઠ",
+      qty: curMU.totalN,
+      rate: 0.05,
+      total: curMU.totalN * 0.05,
+      note: `${curMU.totalN} લાભાર્થી × ₹0.05`
+    }
+  ];
+
   const billCards = bills.map(b => `
     <div class="card">
       <div class="section-head" style="background:linear-gradient(135deg,#0f5132,#198754);display:flex;justify-content:space-between;align-items:center">
@@ -727,6 +800,7 @@ function renderBillPage(){
     </div>
   </div>`;
 }
+
 
 function renderReportPage(){
   const today=new Date();

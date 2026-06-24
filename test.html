@@ -599,17 +599,16 @@ function renderMonthlyPage(curMU){
 }
 
 
-      function renderBillPage(){
-  // સુરક્ષિત રીતે ડેટા લોડ કરવો
+      
+    function renderBillPage(){
   const curMU = calcMonthUsage(state.calY, state.calM, state.ben) || {};
   
-  // ✅ ૧૦૦% સાચો અને સુરક્ષિત સુધારો:
-  // મુખ્ય ફંક્શનમાંથી સાચી કી (chanaA, dalA, chanadalA) ના ગ્રામ રીડ કરવા
-  const totalChanaGram    = Number(curMU['chanaA'] || 0);
-  const totalDalGram      = Number(curMU['dalA'] || 0);
-  const totalChanaDalGram = Number(curMU['chanadalA'] || 0);
+  // ✅ ૧૦૦% સચોટ સુધારો: તમારા કોડના મેઈન વેલ્યુ (Grams) માંથી જ ડેટા રીડ કરવો
+  const totalChanaGram    = Number(curMU['chana'] || 0);
+  const totalDalGram      = Number(curMU['dal'] || 0);
+  const totalChanaDalGram = Number(curMU['chanadal'] || 0);
   
-  // દરેક બાળક દીઠ બપોરે 20g ફિક્સ નિયમ છે, માટે કુલ ગ્રામ ભાગ્યા 20
+  // કુલ વપરાયેલા ગ્રામ ભાગ્યા ૨૦ કરવાથી ચણા + દાળના વાસ્તવિક લાભાર્થીની સાચી સંખ્યા મળશે
   const chanaDalBenCount = (totalChanaGram + totalDalGram + totalChanaDalGram) / 20;
   
   // ફ્રુટ બિલ કેલ્ક્યુલેશન (સોમવાર અને શુક્રવાર)

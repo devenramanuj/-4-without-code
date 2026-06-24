@@ -207,8 +207,8 @@ const ITEMS = Object.freeze([
   {id:"chanadal",name:"ચણાદાળ", emoji:"🫛", bg:"#e0f2fe", color:"#01579b"}
 ]);
 const DAYS_SHORT  = ["ર","સો","મં","બુ","ગુ","શુ","શ"];
-const DAYS_TBL    = ["રવિ","સોમ","મંગળ","બુધ","ગુ","શુ","શ"];
-const DAYS_FULL   = ["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","གુરુવાર","શુક્રવાર","શનિવાર"];
+const DAYS_TBL    = ["રવિ","સોમ","મંગળ","બુધ","ગુરૂ","શુક્ર","શનિ"];
+const DAYS_FULL   = ["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","ગુરુવાર","શુક્રવાર","શનિવાર"];
 const MONTHS_FULL = ["જાન્યુઆરી","ફેબ્રુઆરી","માર્ચ","એપ્રિલ","મે","જૂન","જુલાઈ","ઓગસ્ટ","સપ્ટેમ્બર","ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર"];
 const DEFAULT_INV = {ghau:{o:500,r:200},chokha:{o:300,r:100},tel:{o:50,r:20},chana:{o:80,r:30},dal:{o:80,r:30},chanadal:{o:80,r:30}};
 
@@ -323,7 +323,7 @@ function showNav(){
 function showHeaderInfo(){
   const bar = document.getElementById("centerInfoBar");
   const btn = document.getElementById("btnLogoutHeader");
-  if(bar && centerCode){ bar.style.display="block"; bar.innerHTML=`🏢 કeન्द्ર: <b style="color:#f39c12">${centerCode}</b>`; }
+  if(bar && centerCode){ bar.style.display="block"; bar.innerHTML=`🏢 કેન્દ્ર: <b style="color:#f39c12">${centerCode}</b>`; }
   if(btn) btn.style.display = "block";
 }
 
@@ -601,7 +601,6 @@ function renderMonthlyPage(curMU){
 function renderBillPage(){
   const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
   
-  // ચણા અને દાળના સાચા દિવસો વાઇઝ લાભાર્થી ગણવા માટેનું લોજિક
   let chanaDalBenCount = 0;
   const dimCount = new Date(state.calY, state.calM + 1, 0).getDate();
   for (let d = 1; d <= dimCount; d++) {

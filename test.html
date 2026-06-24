@@ -206,7 +206,7 @@ const ITEMS = Object.freeze([
 ]);
 const DAYS_SHORT  = ["ર","સો","મં","બુ","ગુ","શુ","શ"];
 const DAYS_TBL    = ["રવિ","સોમ","મંગળ","બુધ","ગુરૂ","શુક્ર","શનિ"];
-const DAYS_FULL   = ["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","ગુરુવાર","શુક્રવાર","શનિવાર"];
+const DAYS_FULL   = ["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","གુરુવાર","શુક્રવાર","શનિવાર"];
 const MONTHS_FULL = ["જાન્યુઆરી","ફેબ્રુઆરી","માર્ચ","એપ્રિલ","મે","જૂન","જુલાઈ","ઓગસ્ટ","સપ્ટેમ્બર","ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર"];
 const DEFAULT_INV = {ghau:{o:500,r:200},chokha:{o:300,r:100},tel:{o:50,r:20},chana:{o:80,r:30},dal:{o:80,r:30},chanadal:{o:80,r:30}};
 
@@ -268,7 +268,8 @@ async function syncCloud(){
     const data = await res.json();
     if(data && data.status !== "new_user" && data.status !== "error"){
       if(data.inv) state.inv = data.inv;
-      if(data.ben) data.ben = data.ben;
+      // ✅ ફિક્સ: હવે ડેટા સાચી રીતે લોડ થશે (state.ben = data.ben)
+      if(data.ben) state.ben = data.ben;
       localStorage.setItem("mdr_offline_" + centerCode, JSON.stringify({inv:state.inv, ben:state.ben}));
       setStatus(`☁️ Synced — ${centerCode}`);
       render();
@@ -537,12 +538,17 @@ function renderInventoryPage(curMU){
 
 function renderCalendarPage(){
   const y=state.calY, m=state.calM;
-  const first=new Date(y,m,1).getDay();
+  const first=new Date(y,m,1).getDay(); 
   const dim=new Date(y,m+1,0).getDate();
   const today=new Date();
   let cells="", monthN=0, monthD=0;
-  for(let i=0;i<first;i++) cells+=`<div class="cal-cell empty"></div>`;
-  for(let d=1;d<=dim;d++){
+  
+  // ફિક્સ: રવિવારથી શરૂ થતા કેલેન્ડર મુજબ પહેલા અઠવાડિયાના ખાલી બોક્સ સેટ કરવા
+  for(let i=0; i<first; i++) {
+    cells+=`<div class="cal-cell empty"></div>`;
+  }
+  
+  for(let d=1; d<=dim; d++){
     const k=dkf(y,m,d);
     const n=Number(state.ben[k]||0);
     const dow=new Date(y,m,d).getDay();
@@ -559,6 +565,11 @@ function renderCalendarPage(){
       <div class="section-head">📅 કેલેન્ડર</div>
       <div class="cal-head"><button id="prevM">‹</button><h3>${MONTHS_FULL[m]} ${y}</h3><button id="nextM">›</button></div>
       <div class="cal-grid">${heads}${cells}</div>
+      <div class="cal-totals">
+        <div>કુલ દિવસ<b>${monthD}</b></div>
+        <div>કુલ લાભાર્થી<b>${monthN}</b></div>
+        <div>સરેરાશ/દિ.<b>${monthD?fmt(monthN/monthD,1):0}</b></div>
+      </div>
     </div>
   </div>`;
 }
@@ -681,7 +692,7 @@ function renderReportPage(){
   ITEMS.forEach(it=>{ totals[it.id+"M"]=0;totals[it.id+"A"]=0;totals[it.id]=0; });
   const dim=new Date(state.calY,state.calM+1,0).getDate();
   const dateRowsArr = [];
-  for(let d=1;d<=dim;d++){
+  for(let d=1; d<=dim; d++){
     const k=dkf(state.calY,state.calM,d);
     const n=Number(state.ben[k]||0);
     const dow=new Date(state.calY,state.calM,d).getDay();
@@ -702,7 +713,6 @@ function renderReportPage(){
   const invHeads=ITEMS.map(it=>`<th colspan="4" style="background:${it.color}">${it.emoji} ${it.name}</th>`).join("");
   const subHeads=ITEMS.map(()=>`<th>સ. વ. (g)</th><th>બ. વ. (g)</th><th>કુલ (g)</th><th>સિલક (kg)</th>`).join("");
 
-  // ✅ રીસ્ટોર: માસિક સમરી (ઈન્વેન્ટરી સારાંશ) નું ટેબલ
   const summaryRows=ITEMS.map(it=>{
     const iv=state.inv[it.id], opening=iv.o+iv.r;
     const morN=curMU[it.id+"nM"]||0, aftN=curMU[it.id+"nA"]||0;

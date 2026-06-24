@@ -770,6 +770,20 @@ function renderMonthlyPage(curMU){
 
 function renderBillPage(){
   const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
+  // ૧. ચણા અને દાળના દિવસોના લાભાર્થી ગણવા માટે renderBillPage() ની શરૂઆતમાં આ લૂપ મૂકો:
+let chanaDalBenCount = 0;
+const dimCount = new Date(state.calY, state.calM + 1, 0).getDate();
+for (let d = 1; d <= dimCount; d++) {
+  const k = dkf(state.calY, state.calM, d);
+  const n = Number(state.ben[k] || 0);
+  const dow = new Date(state.calY, state.calM, d).getDay();
+  if (n > 0) {
+    // સોમવાર (1): દાળ, મંગળવાર (2): ચણા, બુધવાર (3): દાળ, ગુરુવાર (4): ચણા, શુક્રવાર (5): ચણા, શનિવાર (6): ચણાદાળ
+    if (dow === 1 || dow === 2 || dow === 3 || dow === 4 || dow === 5 || dow === 6) {
+      chanaDalBenCount += n;
+    }
+  }
+}
   
   // બિલ કેલ્ક્યુલેશન
   let fruitBenCount = 0;
@@ -798,14 +812,15 @@ function renderBillPage(){
       total: curMU.totalN * 1.30,
       note: `${curMU.totalN} લાભાર્થી × ₹1.30`
     },
-    {
+// ૨. હવે તમારા bills એરેમાં ત્રીજા ક્રમનું ઓબ્જેક્ટ આ રીતે અપડેટ કરો:
+{
   name: "🫘 ચણા અને તુવેર દાળ બિલ",
   desc: "ચણા + દાળ લાભાર્થી",
-  qty: ((curMU['chana'] || 0) + (curMU['dal'] || 0) + (curMU['chanadal'] || 0)) / 20,
+  qty: chanaDalBenCount,
   rate: 1.60,
-  total: (((curMU['chana'] || 0) + (curMU['dal'] || 0) + (curMU['chanadal'] || 0)) / 20) * 1.60,
-  note: `${((curMU['chana'] || 0) + (curMU['dal'] || 0) + (curMU['chanadal'] || 0)) / 20} લાભાર્થી × ₹1.60`
-   },
+  total: chanaDalBenCount * 1.60,
+  note: `${chanaDalBenCount} લાભાર્થી × ₹1.60`
+}
    {
       name: "🥬 શાકભાજી બિલ",
       desc: "કુલ લાભાર્થી દીઠ",

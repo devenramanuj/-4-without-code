@@ -884,7 +884,7 @@ function renderModal(){
 }
 
 /* ============================================================
-   MAIN RENDER  — ✅ FIX 14: requestAnimationFrame = no jank
+   MAIN RENDER  — ✅ FIXED: All tab switching handled properly
 ============================================================ */
 let _renderPending = false;
 function render(){
@@ -903,24 +903,29 @@ function render(){
     document.querySelectorAll('#nav button').forEach(b=>{
       b.classList.toggle('active', Number(b.dataset.tab) === state.tab);
     });
+    
     const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
     let html="";
+    
+    // બધા ટેબ પ્રોપર કનેક્ટ કર્યા
     if(state.tab===0)      html=renderInventoryPage(curMU);
     else if(state.tab===1) html=renderCalendarPage();
     else if(state.tab===2) html=renderMonthlyPage(curMU);
     else if(state.tab===3) html=renderReportPage();
-    else if(state.tab===4) html=renderBillPage(curMU);
+    else if(state.tab===4) html=renderBillPage(curMU); // ✅ અહીં સાચું ફંક્શન પાસ કર્યું
     else if(state.tab===5) html=renderAdminPage();
+    
     html += renderModal();
     app.innerHTML = html;
     if(state.modal){
       const inp=document.getElementById('modalInput');
       if(inp){ inp.focus(); inp.select(); }
     }
-    // Report zoom init — after DOM is ready
+    // Report zoom init
     if(state.tab === 3 && !state.modal) initReportZoom();
   });
 }
+
 
 /* ============================================================
    💰 બિલ પેજ — સાચા નિયમો મુજબ

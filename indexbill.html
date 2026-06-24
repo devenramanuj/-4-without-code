@@ -16,9 +16,11 @@
 body{
   font-family:'Noto Sans Gujarati',system-ui,-apple-system,'Segoe UI',sans-serif;
   background:#f0f4f8;color:#1a2535;line-height:1.4;
+  /* ✅ FIX 3: font-display hint via CSS */
   font-display:swap
 }
 
+/* ✅ FIX 4: Critical above-fold styles inlined, rest loaded lazily */
 .container{max-width:1200px;margin:0 auto;padding:10px}
 .header{background:linear-gradient(135deg,#0f2442,#1a3c5e);color:#fff;padding:12px;position:sticky;top:0;z-index:100;box-shadow:0 3px 10px rgba(0,0,0,.3)}
 .header h1{font-size:18px;text-align:center;margin-bottom:8px}
@@ -29,6 +31,7 @@ body{
 .section-head{background:linear-gradient(135deg,#1a3c5e,#2563a8);color:#fff;padding:10px 14px;font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .section-body{padding:12px}
 
+/* ✅ FIX 5: Skeleton loader for instant visual feedback */
 .skeleton{background:linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 50%,#e2e8f0 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:8px;height:120px;margin:12px}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
@@ -60,6 +63,7 @@ body{
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:500;padding:14px}
 .modal{background:#fff;border-radius:14px;padding:18px;max-width:340px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.3)}
 .modal h3{margin-bottom:10px;color:#1a3c5e;font-size:16px}
+.modal p{font-size:13px;color:#475569;margin-bottom:10px}
 .modal input{width:100%;padding:10px;border:2px solid #cbd5e1;border-radius:8px;font-family:inherit;font-size:18px;text-align:center;font-weight:700;margin-bottom:12px}
 .modal input:focus{outline:none;border-color:#2563a8}
 .modal-btns{display:flex;gap:8px}
@@ -89,27 +93,54 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .actions button{padding:7px 12px;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer;font-size:12px;color:#fff}
 .btn-print{background:#475569}
 .btn-share{background:#1b8f57}
+.btn-export{background:#7c3aed}
+.btn-import{background:#0891b2}
 .badge{padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block}
 .footer{text-align:center;padding:12px;color:#64748b;font-size:11px}
 .logout-btn{background:rgba(204,61,61,.85);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s}
 .logout-btn:hover{background:#cc3d3d}
+.header-center-info{font-size:11px;color:#a0b4c8;text-align:center;margin-bottom:6px}
 .sync-status{text-align:center;padding:4px 8px;font-size:11px;font-weight:600;color:#1b8f57;background:#e8f5e9;transition:all .3s;cursor:pointer}
+.sync-status.syncing{color:#2563a8;background:#dbeafe}
+.sync-status.error{color:#cc3d3d;background:#fee2e2}
 .setup-box{max-width:400px;margin:50px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1);border:1px solid #d1dce8;text-align:center}
 .setup-box h2{color:#1a3c5e;margin-bottom:15px;font-size:18px}
 .setup-box input{width:100%;padding:10px;font-size:16px;text-align:center;border:2px solid #cbd5e1;border-radius:8px;margin-bottom:15px;font-family:inherit;font-weight:700}
 .setup-box button{background:#2563a8;color:#fff;border:none;padding:10px 20px;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;width:100%;font-family:inherit}
+.rule-chip{display:inline-block;background:#eef5fb;border:1px solid #bfd7f5;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;color:#1a3c5e;margin:2px}
 .admin-gate{display:flex;align-items:center;justify-content:center;padding:40px 16px}
 .admin-gate-box{text-align:center;max-width:280px;width:100%}
 .admin-gate-box h2{color:#5b21b6;font-size:16px;margin-bottom:6px}
+.admin-gate-box p{color:#64748b;font-size:12px;margin-bottom:14px}
 .admin-pwd-input{width:100%;padding:10px;border:2px solid #d1dce8;border-radius:8px;font-size:18px;text-align:center;font-family:inherit;letter-spacing:4px;margin-bottom:8px;transition:border-color .2s}
 .admin-pwd-input:focus{outline:none;border-color:#7c3aed}
 .admin-pwd-btn{width:100%;padding:10px;background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer}
 .admin-err{color:#cc3d3d;font-size:12px;min-height:16px;margin-bottom:10px}
+.log-filter{display:flex;gap:8px;flex-wrap:wrap;padding:10px;background:#f8fafc;border-bottom:1px solid #d1dce8;align-items:center}
+.log-filter input,.log-filter select{padding:6px 10px;border:1px solid #d1dce8;border-radius:6px;font-family:inherit;font-size:12px;background:#fff;flex:1;min-width:80px}
+.log-filter button{padding:6px 12px;border:none;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;color:#fff;background:#2563a8;white-space:nowrap}
+.log-filter button.btn-refresh{background:#1b8f57}
+.log-table-wrap{overflow-x:auto;max-height:480px;overflow-y:auto}
+.log-table{width:100%;border-collapse:collapse;font-size:11px}
+.log-table th{background:#1a3c5e;color:#fff;padding:8px 6px;text-align:left;position:sticky;top:0;z-index:2;white-space:nowrap}
+.log-table td{padding:7px 6px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+.log-table tr:hover td{background:#f0f7ff}
+.log-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.log-NEW{background:#dcfce7;color:#166534}
+.log-SAVE{background:#dbeafe;color:#1e40af}
+.log-LOGIN{background:#fef9c3;color:#713f12}
+.log-LOGOUT{background:#fee2e2;color:#991b1b}
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;padding:10px}
+.stat-card{background:#f8fafc;border:1px solid #d1dce8;border-radius:8px;padding:10px;text-align:center}
+.stat-card .s-num{font-size:22px;font-weight:800;color:#5b21b6}
+.stat-card .s-lbl{font-size:11px;color:#64748b;margin-top:2px}
+.tab-content{content-visibility:auto;contain-intrinsic-size:0 500px}
 .zoom-toolbar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f0f7ff;border-bottom:1px solid #d1dce8;flex-wrap:wrap}
 .zoom-toolbar label{font-size:12px;font-weight:700;color:#1a3c5e;white-space:nowrap}
 .zoom-slider{flex:1;min-width:100px;max-width:220px;accent-color:#2563a8;cursor:pointer;height:4px}
 .zoom-pct{font-size:12px;font-weight:800;color:#2563a8;min-width:38px;text-align:right}
 .zoom-btn{background:#2563a8;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:14px;font-weight:700;cursor:pointer;line-height:1;flex-shrink:0}
+.zoom-btn:active{background:#1a3c5e}
 .zoom-reset{background:#e2e8f0;color:#475569;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0}
 .zoomable-outer{overflow:auto;-webkit-overflow-scrolling:touch;width:100%}
 .zoomable-inner{display:block;min-width:100%;zoom:1}
@@ -117,13 +148,17 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
   .header,.actions,.nav,.report-tabs,.cal-head button,.sync-status{display:none !important}
   body{background:#fff}
   .card{box-shadow:none;border:1px solid #000}
+  th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  tr.sun-row td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 @media (max-width:600px){
   .header h1{font-size:15px}
   .nav button{padding:6px 8px;font-size:11px}
   .inv-grid{grid-template-columns:repeat(2,1fr)}
   .cal-cell{min-height:42px;font-size:10px}
+  .cal-cell .n{font-size:12px}
   table{font-size:10px}
+  th,td{padding:5px 4px}
 }
 </style>
 </head>
@@ -175,7 +210,7 @@ const ITEMS = Object.freeze([
 const DAYS_SHORT  = ["ર","સો","મં","બુ","ગુ","શુ","શ"];
 const DAYS_TBL    = ["રવિ","સોમ","મંગળ","બુધ","ગુ","શુ","શ"];
 const DAYS_FULL   = ["રવિવાર","સોમવાર","મંગળવાર","બુધવાર","ગુરુવાર","શુક્રવાર","શનિવાર"];
-const MONTHS_FULL = ["જાન્યુઆરી","ફેબ્રուઆરી","માર્ચ","એપ્રિલ","મે","જૂન","જુલાઈ","ઓગસ્ટ","સપ્ટેમ્બર","ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર"];
+const MONTHS_FULL = ["જાન્યુઆરી","ફેબ્રુઆરી","માર્ચ","એપ્રિલ","મે","જૂન","જુલાઈ","ઓગસ્ટ","સપ્ટેમ્બર","ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર"];
 const DEFAULT_INV = {ghau:{o:500,r:200},chokha:{o:300,r:100},tel:{o:50,r:20},chana:{o:80,r:30},dal:{o:80,r:30},chanadal:{o:80,r:30}};
 
 /* ============================================================
@@ -189,12 +224,15 @@ let state = {
   calY: new Date().getFullYear(),
   calM: new Date().getMonth(),
   modal:null, modalVal:"", rptTab:"daily",
-  adminUnlocked:false, allCentersData:[]
+  adminUnlocked:false, logData:[], logFilter:{center:"",action:"",date:""}
 };
 
 let _saveTimer = null;
 function scheduleSave(){ clearTimeout(_saveTimer); _saveTimer = setTimeout(saveState, 800); }
 
+/* ============================================================
+   STATUS BAR
+============================================================ */
 function setStatus(msg, color="#1b8f57"){
   const s = document.getElementById("syncStatus");
   if(!s) return;
@@ -203,6 +241,11 @@ function setStatus(msg, color="#1b8f57"){
   s.style.background = color === "#1b8f57" ? "#e8f5e9" : (color === "#cc3d3d" ? "#fee2e2" : "#fff3cd");
   s.style.color    = color;
 }
+
+/* ============================================================
+   CLOUD
+============================================================ */
+const _hasURL = APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("YOUR_URL");
 
 function bootApp(){
   if(!centerCode){ render(); return; }
@@ -235,17 +278,19 @@ async function syncCloud(){
     const data = await res.json();
     if(data && data.status !== "new_user" && data.status !== "error"){
       if(data.inv) state.inv = data.inv;
-      if(data.ben) state.ben = data.ben;
+      if(data.ben) data.ben = data.ben;
       localStorage.setItem("mdr_offline_" + centerCode, JSON.stringify({inv:state.inv, ben:state.ben}));
       setStatus(`☁️ Synced — ${centerCode}`);
       render();
     } else if(data.status === "new_user"){
       setStatus(`🆕 નવું કેન્દ્ર: ${centerCode}`);
+      sendLog("NEW", `નવી આંગણ: ${centerCode}`);
     } else {
       throw new Error(data.msg || "unknown");
     }
   }catch(e){
-    setStatus(`⚠️ Offline mode`, "#e67e22");
+    const msg = e.name === "AbortError" ? "Timeout (12s)" : e.message;
+    setStatus(`⚠️ Offline mode | ${msg}`, "#e67e22");
   }
 }
 
@@ -255,22 +300,33 @@ async function saveState(){
   if(!centerCode) return;
   localStorage.setItem("mdr_offline_" + centerCode, JSON.stringify({inv:state.inv, ben:state.ben}));
   if(!_hasURL){ setStatus("💾 Local save OK","#e67e22"); return; }
+  setStatus("⏳ ક્લાઉડ save...","#2563a8");
   try{
     const ctrl = new AbortController();
     const tid  = setTimeout(()=>ctrl.abort(), 12000);
-    await fetch(APPS_SCRIPT_URL,{
+    const res  = await fetch(APPS_SCRIPT_URL,{
       method:"POST",
       headers:{"Content-Type":"text/plain"},
       body:JSON.stringify({centerCode, data:{inv:state.inv, ben:state.ben}}),
       signal: ctrl.signal
     });
     clearTimeout(tid);
-    setStatus(`✅ Cloud + Local — સેવ!`);
+    const result = await res.json();
+    if(result.status === "ok"){
+      setStatus(`✅ Cloud + Local — સેવ! (${centerCode})`);
+      sendLog("SAVE", `ડેટા save — ${centerCode}`);
+    } else {
+      setStatus(`⚠️ Cloud error: ${result.msg||"?"} | Local OK`,"#e67e22");
+    }
   }catch(e){
-    setStatus(`⚠️ Local backup OK`,"#e67e22");
+    const msg = e.name === "AbortError" ? "Timeout" : e.message;
+    setStatus(`⚠️ Cloud fail: ${msg} | Local backup OK`,"#e67e22");
   }
 }
 
+/* ============================================================
+   HELPERS
+============================================================ */
 function showNav(){
   document.getElementById("nav").style.display = "flex";
   document.getElementById("syncStatus").style.display = "block";
@@ -282,36 +338,107 @@ function showHeaderInfo(){
   if(btn) btn.style.display = "block";
 }
 
+async function sendLog(action, details){
+  if(!_hasURL || !centerCode) return;
+  try{
+    await fetch(APPS_SCRIPT_URL,{
+      method:"POST",headers:{"Content-Type":"text/plain"},
+      body:JSON.stringify({action:"LOG",centerCode,logAction:action,logDetails:details,timestamp:new Date().toISOString()})
+    });
+  }catch(_){}
+}
+async function fetchLogs(){
+  setStatus("⏳ Logs...","#2563a8");
+  try{
+    const res  = await fetch(`${APPS_SCRIPT_URL}?action=getLogs`);
+    const data = await res.json();
+    state.logData = data.logs || [];
+    setStatus(`✅ ${state.logData.length} log entries`);
+  }catch(_){
+    state.logData = [];
+    setStatus("❌ Log fetch નિષ્ફળ","#cc3d3d");
+  }
+  render();
+}
+
 /* ============================================================
    USAGE RULES
 ============================================================ */
 function calcUsage(dow, n) {
   n = Number(n) || 0;
   const u = {};
-  ITEMS.forEach(it => { u[it.id] = 0; u[it.id+"M"] = 0; u[it.id+"A"] = 0; u[it.id+"nM"] = 0; u[it.id+"nA"] = 0; });
+  
+  ITEMS.forEach(it => { 
+    u[it.id] = 0; 
+    u[it.id + "M"] = 0;
+    u[it.id + "A"] = 0;
+    u[it.id + "nM"] = 0;
+    u[it.id + "nA"] = 0;
+  });
+  
   if (!n || dow === 0) return u;
 
-  u.telM = 5 * n; u.telnM = n;
-  if ([1, 3, 4, 5, 6].includes(dow)) { u.ghauM = 30 * n; u.ghaunM = n; }
-  if (dow === 2) { u.chokhaM = 30 * n; u.chokhanM = n; }
+  u.telM = 5 * n; 
+  u.telnM = n;
+  
+  if ([1, 3, 4, 5, 6].includes(dow)) { 
+    u.ghauM = 30 * n; 
+    u.ghaunM = n; 
+  }
+  if (dow === 2) { 
+    u.chokhaM = 30 * n; 
+    u.chokhanM = n; 
+  }
 
-  u.telA = 8 * n; u.telnA = n;
-  if ([1, 2, 5].includes(dow)) { u.ghauA = 50 * n; u.ghaunA = n; }
-  if ([3, 4, 6].includes(dow)) { u.chokhaA = 50 * n; u.chokhanA = n; }
-  if ([2, 4, 5].includes(dow)) { u.chanaA = 20 * n; u.chananA = n; }
-  if ([1, 3].includes(dow)) { u.dalA = 20 * n; u.dalnA = n; }
-  if (dow === 6) { u.chanadalA = 20 * n; u.chanadalnA = n; }
+  u.telA = 8 * n; 
+  u.telnA = n;
+  
+  if ([1, 2, 5].includes(dow)) { 
+    u.ghauA = 50 * n; 
+    u.ghaunA = n; 
+  }
+  if ([3, 4, 6].includes(dow)) { 
+    u.chokhaA = 50 * n; 
+    u.chokhanA = n; 
+  }
+  if ([2, 4, 5].includes(dow)) { 
+    u.chanaA = 20 * n; 
+    u.chananA = n; 
+  }
+  if ([1, 3].includes(dow)) { 
+    u.dalA = 20 * n; 
+    u.dalnA = n; 
+  }
+  if (dow === 6) { 
+    u.chanadalA = 20 * n; 
+    u.chanadalnA = n; 
+  }
 
-  ITEMS.forEach(it => { u[it.id] = u[it.id + "M"] + u[it.id + "A"]; });
+  ITEMS.forEach(it => { 
+    u[it.id] = u[it.id + "M"] + u[it.id + "A"]; 
+  });
+  
   return u;
 }
 
+const morU = (id, u) => u[id + "M"] || 0;
+const aftU = (id, u) => u[id + "A"] || 0;
+
 function dayHint(d) {
-  const h = ["🔴 રવિ — બંધ","સ:ઘઉ30+તે5 | બ:ઘઉ50+દા20+તે8","સ:ચો30+તે5 | બ:ઘઉ50+ચ20+તે8","સ:ઘઉ30+તે5 | બ:ચો50+દા20+તે8","સ:ઘઉ30+તે5 | બ:ચો50+ચ20+તે8","સ:ઘઉ30+તે5 | બ:ઘઉ50+ચ20+તે8","સ:ઘઉ30+તે5 | બ:ચો50+ચદ20+તે8"];
+  const h = [
+    "🔴 રવિ — રજા (સ+બ બંધ)",
+    "સ:ઘઉ30+તે5 | બ:ઘઉ50+દા20+તે8",
+    "સ:ચો30+તે5 | બ:ઘઉ50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+દા20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ઘઉ50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+ચદ20+તે8"
+  ];
   return h[d] || "";
 }
 
 const dkf = (y, m, d) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
 let _muCache = null, _muCacheKey = "";
 
 function calcMonthUsage(y, m, ben) {
@@ -319,139 +446,407 @@ function calcMonthUsage(y, m, ben) {
   if (_muCache && _muCacheKey === key) return _muCache;
 
   const total = { totalN: 0, days: 0 };
-  ITEMS.forEach(it => { total[it.id] = 0; total[it.id+"M"] = 0; total[it.id+"A"] = 0; total[it.id+"nM"] = 0; total[it.id+"nA"] = 0; });
+  ITEMS.forEach(it => { 
+    total[it.id] = 0;
+    total[it.id + "M"] = 0; total[it.id + "A"] = 0;
+    total[it.id + "nM"] = 0; total[it.id + "nA"] = 0; 
+  });
+
   const dim = new Date(y, m + 1, 0).getDate();
   
   for (let d = 1; d <= dim; d++) {
     const dateStr = dkf(y, m, d);
     const n = Number(ben[dateStr] || 0);
     if (!n) continue;
-    const u = calcUsage(new Date(y, m, d).getDay(), n);
-    ITEMS.forEach(it => { total[it.id] += u[it.id]; total[it.id+"M"] += u[it.id+"M"]; total[it.id+"A"] += u[it.id+"A"]; total[it.id+"nM"] += u[it.id+"nM"]; total[it.id+"nA"] += u[it.id+"nA"]; });
-    total.totalN += n; total.days++;
+
+    const dayOfWeek = new Date(y, m, d).getDay();
+    const u = calcUsage(dayOfWeek, n);
+
+    ITEMS.forEach(it => { 
+      total[it.id] += u[it.id];
+      total[it.id + "M"] += u[it.id + "M"];
+      total[it.id + "A"] += u[it.id + "A"];
+      total[it.id + "nM"] += u[it.id + "nM"];
+      total[it.id + "nA"] += u[it.id + "nA"]; 
+    });
+    
+    total.totalN += n; 
+    total.days++;
   }
-  _muCache = total; _muCacheKey = key; return total;
+
+  _muCache = total; 
+  _muCacheKey = key;
+  return total;
 }
+
 function invalidateCache() { _muCache = null; _muCacheKey = ""; }
+
 const fmt = (n, d = 0) => (n == null || isNaN(n)) ? "0" : Number(n).toFixed(d);
 
 /* ============================================================
    RENDER — PAGES
 ============================================================ */
 function renderSetupPage(){
-  return `<div class="setup-box"><h2>🏢 આંગણવાડી કેન્દ્ર લોગિન</h2><input type="text" id="centerCodeInput" placeholder="કેન્દ્ર કોડ દાખલ કરો" value="${centerCode}"><button id="btnSubmitSetup">શરૂ કરો ➔</button></div>`;
+  return `<div class="setup-box">
+    <h2>🏢 આંગણવાડી કેન્દ્ર લોગિન</h2>
+    <p style="font-size:13px;color:#64748b;margin-bottom:15px">તમારો ડેટા અલગ રાખવા માટે કેન્દ્રનો કોડ અથવા મોબાઈલ નંબર નાખો.</p>
+    <input type="text" id="centerCodeInput" placeholder="દા.ત. AW-101 અથવા નંબર" value="${centerCode}" autocomplete="off">
+    <button id="btnSubmitSetup">એપ શરૂ કરો ➔</button>
+  </div>`;
 }
 
 function renderInventoryPage(curMU){
   const cards = ITEMS.map(it=>{
-    const iv = state.inv[it.id]; const opening = iv.o + iv.r; const used = (curMU[it.id] || 0) / 1000;
-    return `<div class="inv-card"><div class="inv-title" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</div><div class="inv-row"><label>ઊઘડતી:</label><input type="number" step="0.001" data-inv="${it.id}" data-field="o" value="${iv.o}"></div><div class="inv-row"><label>આવક:</label><input type="number" step="0.001" data-inv="${it.id}" data-field="r" value="${iv.r}"></div><div class="inv-stat">કુલ સિલક: <b>${fmt(opening,3)}</b> kg<br>વપરાશ: <b>${fmt(used,3)}</b> kg<br>બંધ સિલક: <b>${fmt(opening-used,3)}</b> kg</div></div>`;
+    const iv = state.inv[it.id];
+    const opening = iv.o + iv.r;
+    const used    = (curMU[it.id] || 0) / 1000;
+    const closing = opening - used;
+    return `<div class="inv-card">
+      <div class="inv-title" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</div>
+      <div class="inv-row"><label>ઊઘડતી (kg):</label><input type="number" step="0.001" data-inv="${it.id}" data-field="o" value="${iv.o}"></div>
+      <div class="inv-row"><label>આવક (kg):</label><input type="number" step="0.001" data-inv="${it.id}" data-field="r" value="${iv.r}"></div>
+      <div class="inv-stat">કુલ ઊઘડતી: <b>${fmt(opening,3)}</b> kg<br>વપરાશ: <b style="color:#e67e22">${fmt(used,3)}</b> kg<br>બંધ સિલક: <b style="color:#1b8f57">${fmt(closing,3)}</b> kg</div>
+    </div>`;
   }).join("");
-  return `<div class="container tab-content"><div class="card"><div class="section-head">📦 ઈન્વેન્ટરી (${MONTHS_FULL[state.calM]} ${state.calY})</div><div class="section-body"><div class="inv-grid">${cards}</div></div></div></div>`;
+  return `<div class="container tab-content">
+    <div class="card">
+      <div class="section-head">📦 ઈન્વેન્ટરી (${MONTHS_FULL[state.calM]} ${state.calY})
+        <span style="font-size:11px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:8px">કોડ: ${centerCode}</span>
+      </div>
+      <div class="section-body"><div class="inv-grid">${cards}</div></div>
+    </div>
+  </div>`;
 }
 
 function renderCalendarPage(){
-  const y=state.calY, m=state.calM; const first=new Date(y,m,1).getDay(); const dim=new Date(y,m+1,0).getDate();
+  const y=state.calY, m=state.calM;
+  const first=new Date(y,m,1).getDay();
+  const dim=new Date(y,m+1,0).getDate();
+  const today=new Date();
   let cells="", monthN=0, monthD=0;
   for(let i=0;i<first;i++) cells+=`<div class="cal-cell empty"></div>`;
   for(let d=1;d<=dim;d++){
-    const n=Number(state.ben[dkf(y,m,d)]||0); if(n>0){monthN+=n;monthD++;}
-    cells+=`<div class="cal-cell ${new Date(y,m,d).getDay()===0?'sunday':''}" data-day="${d}"><div class="d">${d}</div><div class="n ${n===0?'zero':''}">${n>0?n:'—'}</div></div>`;
+    const k=dkf(y,m,d);
+    const n=Number(state.ben[k]||0);
+    const dow=new Date(y,m,d).getDay();
+    const isToday=(d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear());
+    if(n>0){monthN+=n;monthD++;}
+    cells+=`<div class="cal-cell ${dow===0?'sunday':''} ${isToday?'today':''}" data-day="${d}">
+      <div class="d">${d}</div>
+      <div class="n ${n===0?'zero':''}">${n>0?n:'—'}</div>
+    </div>`;
   }
-  return `<div class="container tab-content"><div class="card"><div class="section-head">📅 કેલેન્ડર</div><div class="cal-head"><button id="prevM">‹</button><h3>${MONTHS_FULL[m]} ${y}</h3><button id="nextM">›</button></div><div class="cal-grid">${DAYS_SHORT.map((d,i)=>`<div class="cal-day-head ${i===0?'sun':''}">${d}</div>`).join("")}${cells}</div></div></div>`;
+  const heads = DAYS_SHORT.map((d,i)=>`<div class="cal-day-head ${i===0?'sun':''}">${d}</div>`).join("");
+  return `<div class="container tab-content">
+    <div class="card">
+      <div class="section-head">📅 કેલેન્ડર</div>
+      <div class="cal-head">
+        <button id="prevM">‹</button>
+        <h3>${MONTHS_FULL[m]} ${y}</h3>
+        <button id="nextM">›</button>
+      </div>
+      <div class="cal-grid">${heads}${cells}</div>
+      <div class="cal-totals">
+        <div>કુલ દિવસ<b>${monthD}</b></div>
+        <div>કુલ લાભાર્થી<b>${monthN}</b></div>
+        <div>સરેરાશ/દિ.<b>${monthD?fmt(monthN/monthD,1):0}</b></div>
+      </div>
+    </div>
+  </div>`;
 }
 
 function renderMonthlyPage(curMU){
   const rows = ITEMS.map(it=>{
-    return `<tr><td style="text-align:left">${it.emoji} ${it.name}</td><td><b>${curMU[it.id+"nM"]||0}</b></td><td><b>${curMU[it.id+"nA"]||0}</b></td><td>${fmt(state.inv[it.id].o+state.inv[it.id].r,3)}</td><td>${fmt(curMU[it.id+"M"]||0)}</td><td>${fmt(curMU[it.id+"A"]||0)}</td><td>${fmt(curMU[it.id]||0)}</td><td>${fmt((state.inv[it.id].o+state.inv[it.id].r)-(curMU[it.id]||0)/1000,3)}</td></tr>`;
+    const iv=state.inv[it.id], opening=iv.o+iv.r;
+    const mor=curMU[it.id+"M"]||0, aft=curMU[it.id+"A"]||0, tot=curMU[it.id]||0;
+    return `<tr>
+      <td style="text-align:left"><span class="badge" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</span></td>
+      <td><b>${curMU[it.id+"nM"]||0}</b></td>
+      <td><b>${curMU[it.id+"nA"]||0}</b></td>
+      <td style="color:#2980b9;font-weight:700">${fmt(opening,3)}</td>
+      <td>${fmt(mor)}</td><td>${fmt(aft)}</td>
+      <td style="color:#e67e22;font-weight:700">${fmt(tot)}</td>
+      <td style="color:#1b8f57;font-weight:700">${fmt(opening-tot/1000,3)}</td>
+    </tr>`;
   }).join("");
-  return `<div class="container tab-content"><div class="card"><div class="section-head">📊 માસિક - ${MONTHS_FULL[state.calM]} ${state.calY}</div><div class="table-wrap"><table><thead><tr><th style="text-align:left">ઇન્વેન્ટરી</th><th>સવાર લાભ.</th><th>બપોર લાભ.</th><th>ઊઘડતી (kg)</th><th>સવાર (g)</th><th>બપોર (g)</th><th>કુલ વપરાશ (g)</th><th>બંધ (kg)</th></tr></thead><tbody>${rows}</tbody></table></div></div></div>`;
+  return `<div class="container tab-content">
+    <div class="card">
+      <div class="section-head">📊 માસિક - ${MONTHS_FULL[state.calM]} ${state.calY}</div>
+      <div class="cal-head"><button id="prevM">‹</button><h3>${MONTHS_FULL[state.calM]} ${state.calY}</h3><button id="nextM">›</button></div>
+      <div class="cal-totals">
+        <div>કુલ દિ<b>${curMU.days}</b></div><div>કુલ લ.<b>${curMU.totalN}</b></div>
+        <div>સ./દ<b>${curMU.days?fmt(curMU.totalN/curMU.days,1):0}</b></div>
+      </div>
+      <div class="table-wrap">
+        <table style="min-width:800px">
+          <thead><tr>
+            <th style="text-align:left">ઇન્વેન્ટરી</th>
+            <th>સવાર લાભ.</th>
+            <th>બપોર લાભ.</th>
+            <th>ઊઘડતી (kg)</th>
+            <th>સવાર વ. (g)</th>
+            <th>બપોર વ. (g)</th>
+            <th>કુલ વ. (g)</th>
+            <th>બંધ સિલક (kg)</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
 }
 
 function renderReportPage(){
-  const today=new Date(); const todayN=Number(state.ben[dkf(today.getFullYear(),today.getMonth(),today.getDate())||0]);
-  const dim=new Date(state.calY,state.calM+1,0).getDate(); const dateRowsArr = [];
-  const runBal={}; ITEMS.forEach(it=>{ runBal[it.id]=state.inv[it.id].o+state.inv[it.id].r; });
-  
+  const today=new Date();
+  const todayK=dkf(today.getFullYear(),today.getMonth(),today.getDate());
+  const todayN=Number(state.ben[todayK]||0);
+  const todayU=calcUsage(today.getDay(),todayN);
+  const curMU=calcMonthUsage(state.calY,state.calM,state.ben);
+
+  const dailyRows = ITEMS.map(it=>{
+    const iv=state.inv[it.id], opening=iv.o+iv.r;
+    const mor=morU(it.id,todayU), aft=aftU(it.id,todayU), tot=todayU[it.id]||0;
+    return `<tr>
+      <td style="text-align:left"><span class="badge" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</span></td>
+      <td style="color:#2563a8;font-weight:700">${todayN}</td>
+      <td style="color:#2980b9;font-weight:700">${fmt(opening,3)}</td>
+      <td>${mor||"—"}</td><td>${aft||"—"}</td>
+      <td style="color:#e67e22;font-weight:700">${tot||"—"}</td>
+      <td style="color:#1b8f57;font-weight:700">${fmt(opening-tot/1000,3)}</td>
+    </tr>`;
+  }).join("");
+
+  const runBal={};
+  ITEMS.forEach(it=>{ runBal[it.id]=state.inv[it.id].o+state.inv[it.id].r; });
+  const totals={n:0};
+  ITEMS.forEach(it=>{ totals[it.id+"M"]=0;totals[it.id+"A"]=0;totals[it.id]=0; });
+  const dim=new Date(state.calY,state.calM+1,0).getDate();
+  const dateRowsArr = [];
   for(let d=1;d<=dim;d++){
-    const n=Number(state.ben[dkf(state.calY,state.calM,d)]||0); const dow=new Date(state.calY,state.calM,d).getDay(); const u=calcUsage(dow,n);
-    const colsArr=[]; ITEMS.forEach(it=>{ runBal[it.id]-=(u[it.id]||0)/1000; colsArr.push(`<td>${u[it.id+"M"]||"—"}</td><td>${u[it.id+"A"]||"—"}</td><td>${u[it.id]||"—"}</td><td>${fmt(runBal[it.id],3)}</td>`); });
-    dateRowsArr.push(`<tr class="${dow===0?'sun-row':''}"><td class="sticky-c1"><b>${d}</b></td><td class="sticky-c2">${DAYS_TBL[dow]}</td><td class="sticky-c3">${n||"—"}</td>${colsArr.join("")}</tr>`);
-  }
-  return `<div class="container tab-content"><div class="card"><div class="report-tabs"><button data-rpt="daily" class="${state.rptTab==='daily'?'active':''}">📅 દૈ.</button><button data-rpt="monthly" class="${state.rptTab==='monthly'?'active':''}">📊 માસ</button></div><div class="zoom-toolbar"><input type="range" class="zoom-slider" id="zoomSlider" min="30" max="120" value="70"><span class="zoom-pct" id="zoomPct">70%</span></div><div class="zoomable-outer" id="zoomOuter"><div class="zoomable-inner" id="zoomInner"><table style="min-width:1400px"><thead><tr><th class="sticky-c1" rowspan="2">તા.</th><th class="sticky-c2" rowspan="2">વાર</th><th class="sticky-c3" rowspan="2">સં.</th>${ITEMS.map(it=>`<th colspan="4" style="background:${it.color}">${it.emoji} ${it.name}</th>`).join("")}</tr><tr>${ITEMS.map(()=>`<th>સ.</th><th>બ.</th><th>કુલ</th><th>સિલક</th>`).join("")}</tr></thead><tbody>${dateRowsArr.join("")}</tbody></table></div></div></div></div>`;
-}
-
-/* ============================================================
-   💰 બિલ પેજ — સાચા નિયમો મુજબ (૪૬૬ ફિક્સ)
-============================================================ */
-function renderBillPage(curMU) {
-  const y = state.calY, m = state.calM; const dim = new Date(y, m + 1, 0).getDate();
-  const totalBeneficiaries = curMU.totalN || 0; 
-  let fruitBeneficiaries = 0;
-
-  for (let d = 1; d <= dim; d++) {
-    const k = dkf(y, m, d); const n = Number(state.ben[k] || 0);
-    if (n && (new Date(y, m, d).getDay() === 1 || new Date(y, m, d).getDay() === 5)) { fruitBeneficiaries += n; }
+    const k=dkf(state.calY,state.calM,d);
+    const n=Number(state.ben[k]||0);
+    const dow=new Date(state.calY,state.calM,d).getDay();
+    const u=calcUsage(dow,n);
+    totals.n+=n;
+    const colsArr=[];
+    ITEMS.forEach(it=>{
+      const mg=u[it.id+"M"]||0, ag=u[it.id+"A"]||0, t=u[it.id]||0;
+      runBal[it.id]-=t/1000;
+      totals[it.id+"M"]+=mg;totals[it.id+"A"]+=ag;totals[it.id]+=t;
+      colsArr.push(`<td>${mg||"—"}</td><td>${ag||"—"}</td><td style="font-weight:700;color:${t?'#e67e22':'#cbd5e1'}">${t||"—"}</td><td style="font-weight:700;color:#1b8f57">${fmt(runBal[it.id],3)}</td>`);
+    });
+    dateRowsArr.push(`<tr class="${dow===0?'sun-row':''}"><td class="sticky-c1"><b>${d}</b></td><td class="sticky-c2">${DAYS_TBL[dow]}</td><td class="sticky-c3" style="${n>0?'color:#2563a8;font-weight:700':'color:#cbd5e1'}">${n||"—"}</td>${colsArr.join("")}</tr>`);
   }
 
-  const chanaN = curMU["chananA"] || 0; const dalN = curMU["dalnA"] || 0;   
-  const chanaTuverBeneficiaries = chanaN + dalN; 
+  const totalCols=ITEMS.map(it=>`<td>${fmt(totals[it.id+"M"])}</td><td>${fmt(totals[it.id+"A"])}</td><td>${fmt(totals[it.id])}</td><td>${fmt(runBal[it.id],3)}</td>`).join("");
+  const totalRow=`<tr class="total-row"><td class="sticky-c1"><b>ટો.</b></td><td class="sticky-c2"></td><td class="sticky-c3">${totals.n}</td>${totalCols}</tr>`;
+  const invHeads=ITEMS.map(it=>`<th colspan="4" style="background:${it.color}">${it.emoji} ${it.name}</th>`).join("");
+  const subHeads=ITEMS.map(()=>`<th>સ. વ. (g)</th><th>બ. વ. (g)</th><th>કુલ (g)</th><th>સિલક (kg)</th>`).join("");
 
-  const fruitBill = fruitBeneficiaries * 3.12; const garamNastoBill = totalBeneficiaries * 1.30;
-  const chanaTuverBill = chanaTuverBeneficiaries * 1.60; const shakbhajiBill = totalBeneficiaries * 0.15;
-  const masalaBill = totalBeneficiaries * 1.00; const vahatukBill = totalBeneficiaries * 0.05;
-  const totalBillAmount = fruitBill + garamNastoBill + chanaTuverBill + shakbhajiBill + masalaBill + vahatukBill;
+  const summaryRows=ITEMS.map(it=>{
+    const iv=state.inv[it.id], opening=iv.o+iv.r;
+    const morN=curMU[it.id+"nM"]||0, aftN=curMU[it.id+"nA"]||0;
+    const mor=curMU[it.id+"M"]||0, aft=curMU[it.id+"A"]||0, tot=curMU[it.id]||0;
+    return `<tr>
+      <td style="text-align:left"><span class="badge" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</span></td>
+      <td><b style="color:#2563a8">${morN}</b></td><td><b style="color:#7c3aed">${aftN}</b></td>
+      <td style="color:#2980b9;font-weight:700">${fmt(opening,3)}</td>
+      <td>${fmt(mor)}</td><td>${fmt(aft)}</td>
+      <td style="color:#e67e22;font-weight:700">${fmt(tot)}</td>
+      <td style="color:#1b8f57;font-weight:700">${fmt(opening-tot/1000,3)}</td>
+    </tr>`;
+  }).join("");
 
-  return `<div class="container tab-content"><div class="card"><div class="section-head">💰 બિલ — ${MONTHS_FULL[m]} ${y}</div><div class="table-wrap" style="padding: 10px;"><table style="min-width:100%; font-size: 13px;"><thead><tr style="background:#1a3c5e;color:#fff;"><th style="padding:10px;text-align:left;">બિલ પ્રકાર</th><th style="padding:10px;">ગણતરી</th><th style="padding:10px;text-align:right;">રકમ (₹)</th></tr></thead><tbody>
-  <tr><td style="text-align:left;padding:10px;">🍎 ફ્રુટ બિલ</td><td>સોમ+શુક્ર લા. = <b>${fruitBeneficiaries}</b></td><td style="text-align:right;font-weight:bold;color:#2563a8;">₹ ${fmt(fruitBill, 2)}</td></tr>
-  <tr><td style="text-align:left;padding:10px;">🔥 ગરમ નાસ્તો બિલ</td><td>કુલ લાભાર્થી = <b>${totalBeneficiaries}</b></td><td style="text-align:right;font-weight:bold;color:#2563a8;">₹ ${fmt(garamNastoBill, 2)}</td></tr>
-  <tr><td style="text-align:left;padding:10px;">🫘 ચણા + તુવેરદાળ બિલ</td><td>સંબંધિત લા. = <b>${chanaTuverBeneficiaries}</b></td><td style="text-align:right;font-weight:bold;color:#2563a8;">₹ ${fmt(chanaTuverBill, 2)}</td></tr>
-  <tr><td style="text-align:left;padding:10px;">🥬 શાકભાજી બિલ</td><td>કુલ લાભાર્થી = <b>${totalBeneficiaries}</b></td><td style="text-align:right;font-weight:bold;color:#2563a8;">₹ ${fmt(shakbhajiBill, 2)}</td></tr>
-  <tr><td style="text-align:left;padding:10px;">🧂 મસાલા બિલ</td><td>કુલ લાભાર્થી = <b>${totalBeneficiaries}</b></td><td style="text-align:right;font-weight:bold;color:#2563a8;">₹ ${fmt(masalaBill, 2)}</td></tr>
-  <tr style="border-bottom:2px solid #1a3c5e;"><td style="text-align:left;padding:10px;">🚚 વાહતુક બિલ</td><td>કુલ લાભાર્થી = <b>${totalBeneficiaries}</b></td><td style="text-align:right;font-weight:bold;color:#2563a8;">₹ ${fmt(vahatukBill, 2)}</td></tr>
-  <tr style="background:#fef3c7;font-weight:800;font-size:14px;color:#92400e;"><td colspan="2" style="text-align:right;padding:12px;">કુલ બિલ રકમ</td><td style="text-align:right;padding:12px;">₹ ${fmt(totalBillAmount, 2)}</td></tr></tbody></table></div><div class="actions"><button class="btn-print" id="btnPrint">🖨️ Print</button></div></div></div>`;
-}
+  const dailyHtml=`<div class="card">
+    <div class="section-head">📅 દૈ. — ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()}</div>
+    <div class="section-body" style="padding:8px">
+      <div class="zoomable-outer" id="zoomOuter">
+        <div class="zoomable-inner" id="zoomInner">
+          <table style="min-width:720px">
+            <thead><tr>
+              <th style="text-align:left">ઇન્વેન્ટરી</th>
+              <th>લાભાર્થી</th>
+              <th>ઊઘડતી (kg)</th>
+              <th>સ. વપરાશ (g)</th>
+              <th>બ. વપરાશ (g)</th>
+              <th>કુલ (g)</th>
+              <th>બંધ સિલક (kg)</th>
+            </tr></thead>
+            <tbody>${dailyRows}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="actions"><button class="btn-print" id="btnPrint">🖨️ Print</button><button class="btn-share" id="btnShare">📤 Share</button></div>
+  </div>`;
 
-/* ============================================================
-   🛡️ ADMIN PANEL — એકત્રીકરણ પત્રક સેક્શન સેટઅપ
-============================================================ */
-async function fetchAllCentersCloudData(){
-  if(!_hasURL) return;
-  setStatus("⏳ બધા કેન્દ્રોનો ડેટા લોડ થઈ રહ્યો છે...", "#2563a8");
-  try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=getAllCenters`);
-    const data = await res.json();
-    state.allCentersData = Array.isArray(data) ? data : (data.result || []);
-    setStatus(`✅ ડેટા અપડેટ થયો!`);
-  } catch(e) {
-    state.allCentersData = []; setStatus("❌ એકત્રીકરણ ફેચ નિષ્ફળ", "#cc3d3d");
-  }
-  render();
+  const monthlyHtml=`<div class="card">
+    <div class="section-head">📊 ${MONTHS_FULL[state.calM]} ${state.calY}</div>
+    <div class="cal-head"><button id="prevM">‹</button><h3>${MONTHS_FULL[state.calM]} ${state.calY}</h3><button id="nextM">›</button></div>
+    <div class="zoom-toolbar">
+      <label>🔍 Zoom:</label>
+      <button class="zoom-btn" id="zoomOut">−</button>
+      <input type="range" class="zoom-slider" id="zoomSlider" min="30" max="120" value="70" step="5">
+      <button class="zoom-btn" id="zoomIn">+</button>
+      <span class="zoom-pct" id="zoomPct">70%</span>
+      <button class="zoom-reset" id="zoomReset">Reset</button>
+    </div>
+    <div class="section-body" style="padding:8px">
+      <div class="zoomable-outer" id="zoomOuter" style="max-height:500px">
+        <div class="zoomable-inner" id="zoomInner">
+          <table style="min-width:1400px">
+            <thead>
+              <tr><th class="sticky-c1" rowspan="2">તારીખ</th><th class="sticky-c2" rowspan="2">વાર</th><th class="sticky-c3" rowspan="2">સં.</th>${invHeads}</tr>
+              <tr>${subHeads}</tr>
+            </thead>
+            <tbody>${dateRowsArr.join("")}${totalRow}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="actions"><button class="btn-print" id="btnPrint">🖨️ Print</button><button class="btn-share" id="btnShareM">📤 Share</button></div>
+  </div>`;
+
+  return `<div class="container tab-content">
+    <div class="card"><div class="report-tabs">
+      <button data-rpt="daily"   class="${state.rptTab==='daily'?'active':''}">📅 દૈ.</button>
+      <button data-rpt="monthly" class="${state.rptTab==='monthly'?'active':''}">📊 માસ</button>
+    </div></div>
+    ${state.rptTab==='daily'?dailyHtml:monthlyHtml}
+    <div class="card"><div class="section-body" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center">
+      <div>
+        <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#7c3aed" id="btnExport">💾 Export</button>
+        <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#0891b2" id="btnImport">📂 Import</button>
+        <input type="file" id="fileImport" accept=".json" style="display:none">
+      </div>
+      <button id="btnLogout" style="padding:8px 14px;background:#cc3d3d;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer">🚪 કेन्द्र</button>
+    </div></div>
+  </div>`;
 }
 
 function renderAdminPage(){
   if(!state.adminUnlocked){
-    return `<div class="container"><div class="card"><div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">🛡️ Admin Panel</div><div class="admin-gate"><div class="admin-gate-box"><h2>Admin Access</h2><input id="adminPwdInput" type="password" class="admin-pwd-input" placeholder="• • • •"><div id="adminPwdErr" class="admin-err"></div><button class="admin-pwd-btn" id="adminPwdBtn">🔓 Unlock</button></div></div></div></div>`;
+    return `<div class="container"><div class="card">
+      <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">🛡️ Admin Panel</div>
+      <div class="admin-gate"><div class="admin-gate-box">
+        <h2>Admin Access</h2>
+        <input id="adminPwdInput" type="password" class="admin-pwd-input" placeholder="• • • •">
+        <div id="adminPwdErr" class="admin-err"></div>
+        <button class="admin-pwd-btn" id="adminPwdBtn">🔓 Unlock</button>
+      </div></div>
+    </div></div>`;
   }
-
-  if (!state.allCentersData || state.allCentersData.length === 0) {
-    return `<div class="container tab-content"><div class="card"><div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">🛡️ Admin — એકત્રીકરણ</div><div style="padding:40px;text-align:center;color:#2563a8;">⏳ <b>બધા જ કેન્દ્રોનો લાઈવ ડેટા લોડ થઈ રહ્યો છે...</b></div></div></div>`;
-  }
-
-  const aggregationRows = state.allCentersData.map((c, index) => {
-    const centerMU = calcMonthUsage(state.calY, state.calM, c.ben || {});
-    const ghauClose = (c.inv?.ghau?.o || 0) + (c.inv?.ghau?.r || 0) - ((centerMU.ghau || 0) / 1000);
-    const chokhaClose = (c.inv?.chokha?.o || 0) + (c.inv?.chokha?.r || 0) - ((centerMU.chokha || 0) / 1000);
-
-    return `<tr><td><b>${index + 1}</b></td><td style="color:#5b21b6;font-weight:700;text-align:left;padding-left:10px;">🏢 ${c.centerCode || "Unknown"}</td><td><b>${centerMU.totalN || 0}</b></td><td style="color:#856404;">${fmt(ghauClose, 3)} kg</td><td style="color:#0a3622;">${fmt(chokhaClose, 3)} kg</td><td><span class="badge" style="background:#e0f2fe;color:#0369a1;">Synced</span></td></tr>`;
-  }).join("");
-
-  return `<div class="container tab-content"><div class="card"><div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">🛡️ Admin Panel — એકત્રીકરણ પત્રક <button id="btnAdminLock">🔒 Lock</button></div><div style="padding: 12px;"><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><h3>📊 કેન્દ્રોવાર માસિક વિગતો</h3><button class="btn-refresh" id="btnRefreshAdminData" style="padding:6px 12px;background:#1b8f57;color:#fff;border:none;border-radius:6px;cursor:pointer;">🔄 રિફ્રેશ</button></div><div class="table-wrap"><table style="width:100%;font-size:12px;min-width:600px;"><thead><tr style="background:#5b21b6;color:#fff;"><th>ક્રમ</th><th style="text-align:left;padding-left:10px;">કેન્દ્ર કોડ</th><th>કુલ લાભાર્થી</th><th>ઘઉં સિલક</th><th>ચોખા સિલક</th><th>સ્ટેટસ</th></tr></thead><tbody>${aggregationRows}</tbody></table></div></div></div></div>`;
+  return `<div class="container tab-content"><div class="card"><div class="section-head">🛡️ Admin — Log Viewer <button id="btnAdminLock">🔒 Lock</button></div><div style="padding:20px;text-align:center">Admin Panel Active</div></div></div>`;
 }
 
 function renderModal(){
   if(!state.modal) return "";
-  return `<div class="modal-bg" id="modalBg"><div class="modal"><h3>📅 તારીખ ડેટા એન્ટ્રી</h3><input type="number" id="modalInput" value="${state.modalVal}" autofocus><div class="modal-btns"><button class="btn-cancel" id="modalCancel">રદ</button><button class="btn-clear" id="modalClear">સાફ</button><button class="btn-save" id="modalSave">✅ સેવ</button></div></div></div>`;
+  const {y,m,d}=state.modal;
+  return `<div class="modal-bg" id="modalBg">
+    <div class="modal">
+      <h3>📅 ${d} ${MONTHS_FULL[m]} ${y}</h3>
+      <input type="number" id="modalInput" min="0" placeholder="લાભાર્થી સંખ્યા" value="${state.modalVal}" autofocus>
+      <div class="modal-btns">
+        <button class="btn-cancel" id="modalCancel">રદ</button>
+        <button class="btn-clear"  id="modalClear">સાફ</button>
+        <button class="btn-save"   id="modalSave">✅ સેવ</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   💰 બિલ પેજ — સાચા નિયમો મુજબ
+============================================================ */
+function renderBillPage(curMU) {
+  const y = state.calY, m = state.calM;
+  const dim = new Date(y, m + 1, 0).getDate();
+  
+  const totalBeneficiaries = curMU.totalN || 0; 
+  let fruitBeneficiaries = 0;
+
+  for (let d = 1; d <= dim; d++) {
+    const k = dkf(y, m, d);
+    const n = Number(state.ben[k] || 0);
+    if (n && (new Date(y, m, d).getDay() === 1 || new Date(y, m, d).getDay() === 5)) {
+      fruitBeneficiaries += n;
+    }
+  }
+
+  const chanaN = curMU["chananA"] || 0; 
+  const dalN   = curMU["dalnA"] || 0;   
+  const chanaTuverBeneficiaries = chanaN + dalN; 
+
+  const fruitBill       = fruitBeneficiaries * 3.12;
+  const garamNastoBill   = totalBeneficiaries * 1.30;
+  const chanaTuverBill   = chanaTuverBeneficiaries * 1.60;
+  const shakbhajiBill    = totalBeneficiaries * 0.15;
+  const masalaBill       = totalBeneficiaries * 1.00;
+  const vahatukBill      = totalBeneficiaries * 0.05;
+
+  const totalBillAmount = fruitBill + garamNastoBill + chanaTuverBill + shakbhajiBill + masalaBill + vahatukBill;
+
+  return `<div class="container tab-content">
+    <div class="card">
+      <div class="section-head">💰 બિલ — ${MONTHS_FULL[m]} ${y}</div>
+      <div class="cal-head">
+        <button id="prevM">‹</button>
+        <h3>${MONTHS_FULL[m]} ${y}</h3>
+        <button id="nextM">›</button>
+      </div>
+      
+      <div class="table-wrap" style="padding: 10px;">
+        <table style="min-width:100%; font-size: 13px;">
+          <thead>
+            <tr style="background: #1a3c5e; color: #fff;">
+              <th style="padding: 10px; text-align: left;">બિલ પ્રકાર</th>
+              <th style="padding: 10px;">ગણતરી</th>
+              <th style="padding: 10px; text-align: right;">રકમ (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: left; padding: 10px;">🍎 ફ્રુટ બિલ</td>
+              <td style="padding: 10px;">સોમ+શુક્ર લા. = <b>${fruitBeneficiaries}</b></td>
+              <td style="text-align: right; padding: 10px; font-weight: bold; color: #2563a8;">₹ ${fmt(fruitBill, 2)}</td>
+            </tr>
+            <tr>
+              <td style="text-align: left; padding: 10px;">🔥 ગરમ નાસ્તો બિલ</td>
+              <td style="padding: 10px;">કુલ લાભાર્થી = <b>${totalBeneficiaries}</b></td>
+              <td style="text-align: right; padding: 10px; font-weight: bold; color: #2563a8;">₹ ${fmt(garamNastoBill, 2)}</td>
+            </tr>
+            <tr>
+              <td style="text-align: left; padding: 10px;">🫘 ચણા + તુવેરદાળ બિલ</td>
+              <td style="padding: 10px;">સંબંધિત લા. = <b>${chanaTuverBeneficiaries}</b></td>
+              <td style="text-align: right; padding: 10px; font-weight: bold; color: #2563a8;">₹ ${fmt(chanaTuverBill, 2)}</td>
+            </tr>
+            <tr>
+              <td style="text-align: left; padding: 10px;">🥬 શાકભાજી બિલ</td>
+              <td style="padding: 10px;">કુલ લાભાર્થી = <b>${totalBeneficiaries}</b></td>
+              <td style="text-align: right; padding: 10px; font-weight: bold; color: #2563a8;">₹ ${fmt(shakbhajiBill, 2)}</td>
+            </tr>
+            <tr>
+              <td style="text-align: left; padding: 10px;">🧂 મસાલા બિલ</td>
+              <td style="padding: 10px;">કુલ લાભાર્થી = <b>${totalBeneficiaries}</b></td>
+              <td style="text-align: right; padding: 10px; font-weight: bold; color: #2563a8;">₹ ${fmt(masalaBill, 2)}</td>
+            </tr>
+            <tr style="border-bottom: 2px solid #1a3c5e;">
+              <td style="text-align: left; padding: 10px;">🚚 વાહતુક બિલ</td>
+              <td style="padding: 10px;">કુલ લાભાર્થી = <b>${totalBeneficiaries}</b></td>
+              <td style="text-align: right; padding: 10px; font-weight: bold; color: #2563a8;">₹ ${fmt(vahatukBill, 2)}</td>
+            </tr>
+            <tr style="background: #fef3c7; font-weight: 800; font-size: 14px; color: #92400e;">
+              <td colspan="2" style="text-align: right; padding: 12px;">કુલ બિલ રકમ</td>
+              <td style="text-align: right; padding: 12px;">₹ ${fmt(totalBillAmount, 2)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="actions">
+        <button class="btn-print" id="btnPrint">🖨️ Print</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 /* ============================================================
@@ -462,42 +857,119 @@ function render(){
   if(_renderPending) return;
   _renderPending = true;
   requestAnimationFrame(()=>{
-    _renderPending = false; const app = document.getElementById('app'); if(!app) return;
-    if(!centerCode){ document.getElementById("nav").style.display = "none"; document.getElementById("syncStatus").style.display = "none"; app.innerHTML = renderSetupPage(); return; }
-    document.querySelectorAll('#nav button').forEach(b=>{ b.classList.toggle('active', Number(b.dataset.tab) === state.tab); });
-    
-    const curMU = calcMonthUsage(state.calY, state.calM, state.ben); let html="";
+    _renderPending = false;
+    const app = document.getElementById('app');
+    if(!app) return;
+    if(!centerCode){
+      document.getElementById("nav").style.display = "none";
+      document.getElementById("syncStatus").style.display = "none";
+      app.innerHTML = renderSetupPage();
+      return;
+    }
+    document.querySelectorAll('#nav button').forEach(b=>{
+      b.classList.toggle('active', Number(b.dataset.tab) === state.tab);
+    });
+    const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
+    let html="";
     if(state.tab===0)      html=renderInventoryPage(curMU);
     else if(state.tab===1) html=renderCalendarPage();
     else if(state.tab===2) html=renderMonthlyPage(curMU);
     else if(state.tab===3) html=renderReportPage();
     else if(state.tab===4) html=renderBillPage(curMU);
     else if(state.tab===5) html=renderAdminPage();
-    app.innerHTML = html + renderModal();
+    html += renderModal();
+    app.innerHTML = html;
+    if(state.modal){
+      const inp=document.getElementById('modalInput');
+      if(inp){ inp.focus(); inp.select(); }
+    }
     if(state.tab === 3 && !state.modal) initReportZoom();
   });
 }
 
+/* ============================================================
+   MODAL HELPERS
+============================================================ */
 function openModal(d){ const k=dkf(state.calY,state.calM,d); state.modal={y:state.calY,m:state.calM,d}; state.modalVal=state.ben[k]||""; render(); }
 function closeModal(){ state.modal=null; state.modalVal=""; render(); }
-function saveModal(){ const v=document.getElementById('modalInput').value.trim(); const k=dkf(state.modal.y,state.modal.m,state.modal.d); if(v===""||Number(v)<=0){ delete state.ben[k]; } else { state.ben[k]=Number(v); } invalidateCache(); saveState(); closeModal(); }
-function clearModal(){ delete state.ben[dkf(state.modal.y,state.modal.m,state.modal.d)]; invalidateCache(); saveState(); closeModal(); }
+function saveModal(){
+  const v=document.getElementById('modalInput').value.trim();
+  const k=dkf(state.modal.y,state.modal.m,state.modal.d);
+  if(v===""||Number(v)<=0){ delete state.ben[k]; } else { state.ben[k]=Number(v); }
+  invalidateCache(); saveState(); closeModal();
+}
+function clearModal(){ const k=dkf(state.modal.y,state.modal.m,state.modal.d); delete state.ben[k]; invalidateCache(); saveState(); closeModal(); }
 function prevMonth(){ state.calM--; if(state.calM<0){state.calM=11;state.calY--;} render(); }
 function nextMonth(){ state.calM++; if(state.calM>11){state.calM=0;state.calY++;} render(); }
 
-function initReportZoom(){
-  initZoomSet("zoom", "zoomInner", "zoomPct", 70);
-  requestAnimationFrame(()=>{
-    const tbl = document.querySelector('#zoomInner table');
-    if(tbl){
-      const offset = Math.ceil((tbl.querySelector('th.sticky-c1')?.offsetWidth||32) + (tbl.querySelector('th.sticky-c2')?.offsetWidth||52));
-      tbl.querySelectorAll('.sticky-c3').forEach(el=>{ el.style.left = offset+'px'; });
-    }
-  });
+function shareReport(){
+  const today=new Date(), todayK=dkf(today.getFullYear(),today.getMonth(),today.getDate());
+  const todayN=Number(state.ben[todayK]||0), todayU=calcUsage(today.getDay(),todayN);
+  let txt=`🌾 My Daily Report (${centerCode})\n👥 લ.: ${todayN}\n\n`;
+  if(navigator.share) navigator.share({title:"My Daily Report",text:txt}).catch(()=>{});
 }
+function shareMonthly(){
+  const curMU=calcMonthUsage(state.calY,state.calM,state.ben);
+  let txt=`📊 ${MONTHS_FULL[state.calM]} ${state.calY} (${centerCode})\n\n`;
+  if(navigator.share) navigator.share({title:"માસિક",text:txt}).catch(()=>{});
+}
+function exportBackup(){
+  const blob=new Blob([JSON.stringify({inv:state.inv,ben:state.ben},null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download=`mdr-${centerCode}.json`; a.click(); URL.revokeObjectURL(url);
+}
+function importBackup(file){
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data.inv) state.inv=data.inv;
+      if(data.ben) state.ben=data.ben;
+      invalidateCache(); saveState(); render();
+    }catch(_){ alert("❌ ખोटी file"); }
+  };
+  r.readAsText(file);
+}
+
+function applyZoom(innerId, pctId, val){
+  val = Math.max(25, Math.min(200, val));
+  const inner = document.getElementById(innerId);
+  const pct   = document.getElementById(pctId);
+  if(inner) inner.style.zoom = (val/100);
+  if(pct)   pct.textContent  = val + "%";
+  return val;
+}
+
 function initZoomSet(prefix, innerId, pctId, defaultVal){
-  const slider = document.getElementById(prefix+"Slider"); if(!slider) return;
-  slider.addEventListener('input', () => { const val = slider.value; document.getElementById(innerId).style.zoom = val/100; document.getElementById(pctId).textContent = val+"%"; });
+  const slider  = document.getElementById(prefix+"Slider");
+  const btnOut  = document.getElementById(prefix+"Out");
+  const btnIn   = document.getElementById(prefix+"In");
+  const btnRst  = document.getElementById(prefix+"Reset");
+  if(!slider) return;
+  let cur = defaultVal || parseInt(slider.value) || 100;
+  const sync = v => { cur = applyZoom(innerId, pctId, v); slider.value = cur; };
+  slider.addEventListener('input', () => sync(parseInt(slider.value)));
+  btnOut && btnOut.addEventListener('click', () => sync(cur - 10));
+  btnIn  && btnIn.addEventListener('click',  () => sync(cur + 10));
+  btnRst && btnRst.addEventListener('click', () => sync(defaultVal || 100));
+  sync(cur);
+}
+
+function initReportZoom(){
+  if(state.rptTab === 'daily'){
+    initZoomSet("zoom", "zoomInner", "zoomPct", 100);
+  } else {
+    requestAnimationFrame(()=>{
+      const tbl = document.querySelector('#zoomInner table');
+      if(tbl){
+        const c1 = tbl.querySelector('th.sticky-c1');
+        const c2 = tbl.querySelector('th.sticky-c2');
+        const offset = Math.ceil((c1?c1.offsetWidth:32) + (c2?c2.offsetWidth:52));
+        tbl.querySelectorAll('.sticky-c3').forEach(el=>{ el.style.left = offset+'px'; });
+      }
+    });
+    initZoomSet("zoom",  "zoomInner",  "zoomPct",  70);
+  }
 }
 
 /* ============================================================
@@ -505,26 +977,60 @@ function initZoomSet(prefix, innerId, pctId, defaultVal){
 ============================================================ */
 document.addEventListener('click', e=>{
   const t=e.target;
-  if(t.id==='btnSubmitSetup'){ const val=document.getElementById("centerCodeInput").value.trim(); if(val){ centerCode=val; localStorage.setItem("anganwadi_center_code",centerCode); bootApp(); } return; }
-  if(t.id==='adminPwdBtn'){ const inp=document.getElementById("adminPwdInput"); if(inp && inp.value===ADMIN_PASSWORD){ state.adminUnlocked=true; render(); fetchAllCentersCloudData(); } else { alert("❌ ખોર્ટ!"); } return; }
+  if(t.id==='btnSubmitSetup'){
+    const val=document.getElementById("centerCodeInput").value.trim();
+    if(!val){alert("⚠️ Code!");return;}
+    centerCode=val;
+    localStorage.setItem("anganwadi_center_code",centerCode);
+    bootApp(); return;
+  }
+  if(t.id==='adminPwdBtn'){
+    const inp=document.getElementById("adminPwdInput");
+    if(inp&&inp.value===ADMIN_PASSWORD){ state.adminUnlocked=true; fetchLogs(); }
+    else { alert("❌ ખોર્ટ!"); } return;
+  }
   if(t.id==='btnAdminLock'){ state.adminUnlocked=false; render(); return; }
-  if(t.id==='btnRefreshAdminData'){ fetchAllCentersCloudData(); return; }
-  if(t.id==='btnLogoutHeader'||t.id==='btnLogout'){ if(confirm("Logout?")){ localStorage.clear(); location.reload(); } return; }
+  if(t.id==='btnLogoutHeader'||t.id==='btnLogout'){
+    if(confirm("Logout?")){
+      localStorage.removeItem("anganwadi_center_code"); centerCode="";
+      state.inv=JSON.parse(JSON.stringify(DEFAULT_INV)); state.ben={};
+      invalidateCache(); render();
+    } return;
+  }
   if(t.matches('#nav button')){ state.tab=Number(t.dataset.tab); render(); return; }
   if(t.id==='prevM'){ prevMonth(); return; }
   if(t.id==='nextM'){ nextMonth(); return; }
-  const cell=t.closest('.cal-cell'); if(cell&&cell.dataset.day){ openModal(Number(cell.dataset.day)); return; }
+  const cell=t.closest('.cal-cell');
+  if(cell&&cell.dataset.day){ openModal(Number(cell.dataset.day)); return; }
   if(t.id==='modalCancel'){ closeModal(); return; }
   if(t.id==='modalSave'){ saveModal(); return; }
   if(t.id==='modalClear'){ clearModal(); return; }
   if(t.matches('.report-tabs button')){ state.rptTab=t.dataset.rpt; render(); return; }
   if(t.id==='btnPrint'){ window.print(); return; }
+  if(t.id==='btnShare'){ shareReport(); return; }
+  if(t.id==='btnShareM'){ shareMonthly(); return; }
+  if(t.id==='btnExport'){ exportBackup(); return; }
+  if(t.id==='btnImport'){ document.getElementById('fileImport').click(); return; }
 });
 
 document.addEventListener('input', e=>{
   const t=e.target;
-  if(t.matches('input[data-inv]')){ state.inv[t.dataset.inv][t.dataset.field] = parseFloat(t.value)||0; invalidateCache(); scheduleSave(); }
+  if(t.matches('input[data-inv]')){
+    state.inv[t.dataset.inv][t.dataset.field] = parseFloat(t.value)||0;
+    invalidateCache(); scheduleSave();
+  }
   if(t.id==='modalInput') state.modalVal=t.value;
+  if(t.id==='fileImport'&&t.files&&t.files[0]){ importBackup(t.files[0]); t.value=""; }
+});
+
+document.addEventListener('change', e=>{
+  if(e.target.matches('input[data-inv]')) render();
+});
+
+document.addEventListener('keydown', e=>{
+  if(!state.modal) return;
+  if(e.key==='Enter'){e.preventDefault();saveModal();}
+  if(e.key==='Escape') closeModal();
 });
 
 if(centerCode){ bootApp(); } else { render(); }

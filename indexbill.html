@@ -76,8 +76,6 @@ table{border-collapse:separate;border-spacing:0;width:100%;font-size:11px}
 th{background:#1a3c5e;color:#fff;padding:8px 6px;text-align:center;border:1px solid rgba(255,255,255,.15);font-weight:700;font-size:11px;white-space:nowrap;position:sticky;top:0;z-index:2}
 td{padding:6px;text-align:center;border:1px solid #d1dce8;background:#fff;white-space:nowrap}
 tr:nth-child(even) td{background:#f8fafc}
-/* ── Sticky columns: તા. | વ. | સં. ── */
-/* c1=તારીખ 32px | c2=વાર fit | c3=સં. 32px */
 .sticky-c1{position:sticky;left:0;z-index:3;box-shadow:none;width:32px;min-width:32px;max-width:32px}
 .sticky-c2{position:sticky;left:32px;z-index:3;white-space:nowrap;width:auto;padding-left:6px;padding-right:6px}
 .sticky-c3{position:sticky;left:calc(32px + var(--c2w, 52px));z-index:3;width:32px;min-width:32px;max-width:32px;box-shadow:2px 0 4px rgba(0,0,0,.08)}
@@ -102,13 +100,9 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .logout-btn{background:rgba(204,61,61,.85);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s}
 .logout-btn:hover{background:#cc3d3d}
 .header-center-info{font-size:11px;color:#a0b4c8;text-align:center;margin-bottom:6px}
-
-/* ✅ FIX 6: sync status — content-visibility for off-screen perf */
 .sync-status{text-align:center;padding:4px 8px;font-size:11px;font-weight:600;color:#1b8f57;background:#e8f5e9;transition:all .3s;cursor:pointer}
 .sync-status.syncing{color:#2563a8;background:#dbeafe}
 .sync-status.error{color:#cc3d3d;background:#fee2e2}
-
-/* Setup */
 .setup-box{max-width:400px;margin:50px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1);border:1px solid #d1dce8;text-align:center}
 .setup-box h2{color:#1a3c5e;margin-bottom:15px;font-size:18px}
 .setup-box input{width:100%;padding:10px;font-size:16px;text-align:center;border:2px solid #cbd5e1;border-radius:8px;margin-bottom:15px;font-family:inherit;font-weight:700}
@@ -140,11 +134,7 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .stat-card{background:#f8fafc;border:1px solid #d1dce8;border-radius:8px;padding:10px;text-align:center}
 .stat-card .s-num{font-size:22px;font-weight:800;color:#5b21b6}
 .stat-card .s-lbl{font-size:11px;color:#64748b;margin-top:2px}
-
-/* ✅ FIX 7: content-visibility for off-screen tabs — big render boost */
 .tab-content{content-visibility:auto;contain-intrinsic-size:0 500px}
-
-/* ── REPORT ZOOM ── */
 .zoom-toolbar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f0f7ff;border-bottom:1px solid #d1dce8;flex-wrap:wrap}
 .zoom-toolbar label{font-size:12px;font-weight:700;color:#1a3c5e;white-space:nowrap}
 .zoom-slider{flex:1;min-width:100px;max-width:220px;accent-color:#2563a8;cursor:pointer;height:4px}
@@ -152,11 +142,8 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .zoom-btn{background:#2563a8;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:14px;font-weight:700;cursor:pointer;line-height:1;flex-shrink:0}
 .zoom-btn:active{background:#1a3c5e}
 .zoom-reset{background:#e2e8f0;color:#475569;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0}
-/* outer clip — scrollable container */
 .zoomable-outer{overflow:auto;-webkit-overflow-scrolling:touch;width:100%}
-/* ✅ CSS zoom (not transform) — sticky position works correctly inside zoom */
 .zoomable-inner{display:block;min-width:100%;zoom:1}
-
 @media print{
   .header,.actions,.nav,.report-tabs,.cal-head button,.sync-status{display:none !important}
   body{background:#fff}
@@ -177,7 +164,6 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 </head>
 <body>
 
-<!-- ✅ FIX 8: Header renders IMMEDIATELY — no JS needed -->
 <div class="header">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
     <h1 style="font-size:16px;margin:0;flex:1;text-align:center">🌾 My Daily Report</h1>
@@ -196,7 +182,6 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 
 <div id="syncStatus" class="sync-status" style="display:none;cursor:pointer" onclick="if(centerCode)loadCloudData()">☁️ ક્લાઉડ સાથે સિંક થયેલ છે &nbsp;🔄</div>
 
-<!-- ✅ FIX 9: Skeleton shown INSTANTLY while JS runs -->
 <div id="app">
   <div class="skeleton"></div>
   <div class="skeleton" style="height:200px;margin-top:0"></div>
@@ -209,10 +194,10 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
    CONFIG
 ============================================================ */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw50LCilmreN1FtjZw7BDXkHJ0-4qhUeAAOcTuhf8muvr29a-NV2Y0_9ZzaViv0CQbWow/exec";
-const ADMIN_PASSWORD = "Dev@1"; // ← Admin password અહીં બદલો
+const ADMIN_PASSWORD = "Dev@1";
 
 /* ============================================================
-   CONSTANTS  (frozen objects = faster property lookup)
+   CONSTANTS
 ============================================================ */
 const ITEMS = Object.freeze([
   {id:"ghau",    name:"ઘઉં",     emoji:"🌾", bg:"#fff3cd", color:"#856404"},
@@ -242,7 +227,6 @@ let state = {
   adminUnlocked:false, logData:[], logFilter:{center:"",action:"",date:""}
 };
 
-/* ✅ FIX 10: Debounce saves — avoid save on every keystroke */
 let _saveTimer = null;
 function scheduleSave(){ clearTimeout(_saveTimer); _saveTimer = setTimeout(saveState, 800); }
 
@@ -259,18 +243,16 @@ function setStatus(msg, color="#1b8f57"){
 }
 
 /* ============================================================
-   CLOUD  — load & save
+   CLOUD
 ============================================================ */
 const _hasURL = APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("YOUR_URL");
 
-/* ✅ FIX 11: Load local FIRST (instant), cloud in background */
 function bootApp(){
   if(!centerCode){ render(); return; }
-  loadLocalFallback();           // Instant — no network wait
+  loadLocalFallback();
   showNav();
   showHeaderInfo();
   render();
-  // Cloud sync quietly in background after 200ms
   setTimeout(syncCloud, 200);
 }
 
@@ -296,7 +278,7 @@ async function syncCloud(){
     const data = await res.json();
     if(data && data.status !== "new_user" && data.status !== "error"){
       if(data.inv) state.inv = data.inv;
-      if(data.ben) state.ben = data.ben;
+      if(data.ben) data.ben = data.ben;
       localStorage.setItem("mdr_offline_" + centerCode, JSON.stringify({inv:state.inv, ben:state.ben}));
       setStatus(`☁️ Synced — ${centerCode}`);
       render();
@@ -312,7 +294,6 @@ async function syncCloud(){
   }
 }
 
-// Alias for manual refresh tap
 async function loadCloudData(){ await syncCloud(); }
 
 async function saveState(){
@@ -383,23 +364,20 @@ async function fetchLogs(){
 /* ============================================================
    USAGE RULES
 ============================================================ */
-
 function calcUsage(dow, n) {
   n = Number(n) || 0;
   const u = {};
   
-  // ઈનિશિયલાઈઝેશન (બધા આઈટમ આઈડી માટે 0 સેટ કરવું)
   ITEMS.forEach(it => { 
     u[it.id] = 0; 
-    u[it.id + "M"] = 0;   // સવારની વપરાશ (ગ્રામ)
-    u[it.id + "A"] = 0;   // બપોરની વપરાશ (ગ્રામ)
-    u[it.id + "nM"] = 0;  // સવારના લાભાર્થીની સંખ્યા
-    u[it.id + "nA"] = 0;  // બપોરના લાભાર્થીની સંખ્યા
+    u[it.id + "M"] = 0;
+    u[it.id + "A"] = 0;
+    u[it.id + "nM"] = 0;
+    u[it.id + "nA"] = 0;
   });
   
-  if (!n || dow === 0) return u; // જો લાભાર્થી 0 હોય કે રવિવાર હોય તો 0 રિટર્ન કરો
+  if (!n || dow === 0) return u;
 
-  // 1. સવારનો નાસ્તો (Morning)
   u.telM = 5 * n; 
   u.telnM = n;
   
@@ -412,7 +390,6 @@ function calcUsage(dow, n) {
     u.chokhanM = n; 
   }
 
-  // 2. બપોરનો નાસ્તો / ભોજન (Afternoon)
   u.telA = 8 * n; 
   u.telnA = n;
   
@@ -437,7 +414,6 @@ function calcUsage(dow, n) {
     u.chanadalnA = n; 
   }
 
-  // કુલ વપરાશ (સવાર + બપોર)
   ITEMS.forEach(it => { 
     u[it.id] = u[it.id + "M"] + u[it.id + "A"]; 
   });
@@ -451,20 +427,18 @@ const aftU = (id, u) => u[id + "A"] || 0;
 function dayHint(d) {
   const h = [
     "🔴 રવિ — રજા (સ+બ બંધ)",
-    "સ:ઘઉ30+તે5 | બ:ઘઉ50+દા20+તે8",   // સોમ
-    "સ:ચો30+તે5 | બ:ઘઉ50+ચ20+તે8",    // મંગળ
-    "સ:ઘઉ30+તે5 | બ:ચો50+દા20+તે8",   // બુધ
-    "સ:ઘઉ30+તે5 | બ:ચો50+ચ20+તે8",    // ગુરુ
-    "સ:ઘઉ30+તે5 | બ:ઘઉ50+ચ20+તે8",    // શુક્ર
-    "સ:ઘઉ30+તે5 | બ:ચો50+ચદ20+તે8"    // શનિ
+    "સ:ઘઉ30+તે5 | બ:ઘઉ50+દા20+તે8",
+    "સ:ચો30+તે5 | બ:ઘઉ50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+દા20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ઘઉ50+ચ20+તે8",
+    "સ:ઘઉ30+તે5 | બ:ચો50+ચદ20+તે8"
   ];
   return h[d] || "";
 }
 
-// Date Key Formatter: YYYY-MM-DD
 const dkf = (y, m, d) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
-/* ✅ FIX 12: calcMonthUsage cached — avoid recompute on every render */
 let _muCache = null, _muCacheKey = "";
 
 function calcMonthUsage(y, m, ben) {
@@ -478,7 +452,7 @@ function calcMonthUsage(y, m, ben) {
     total[it.id + "nM"] = 0; total[it.id + "nA"] = 0; 
   });
 
-  const dim = new Date(y, m + 1, 0).getDate(); // મહિનાના કુલ દિવસો
+  const dim = new Date(y, m + 1, 0).getDate();
   
   for (let d = 1; d <= dim; d++) {
     const dateStr = dkf(y, m, d);
@@ -531,7 +505,7 @@ function renderInventoryPage(curMU){
       <div class="inv-title" style="background:${it.bg};color:${it.color}">${it.emoji} ${it.name}</div>
       <div class="inv-row"><label>ઊઘડતી (kg):</label><input type="number" step="0.001" data-inv="${it.id}" data-field="o" value="${iv.o}"></div>
       <div class="inv-row"><label>આવક (kg):</label><input type="number" step="0.001" data-inv="${it.id}" data-field="r" value="${iv.r}"></div>
-      <div class="inv-stat">કુલ ઊઘડતી: <b>${fmt(opening,3)}</b> kg<br>વپراশ: <b style="color:#e67e22">${fmt(used,3)}</b> kg<br>બંધ સિલક: <b style="color:#1b8f57">${fmt(closing,3)}</b> kg</div>
+      <div class="inv-stat">કુલ ઊઘડતી: <b>${fmt(opening,3)}</b> kg<br>વપરાશ: <b style="color:#e67e22">${fmt(used,3)}</b> kg<br>બંધ સિલક: <b style="color:#1b8f57">${fmt(closing,3)}</b> kg</div>
     </div>`;
   }).join("");
   return `<div class="container tab-content">
@@ -540,19 +514,6 @@ function renderInventoryPage(curMU){
         <span style="font-size:11px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:8px">કોડ: ${centerCode}</span>
       </div>
       <div class="section-body"><div class="inv-grid">${cards}</div></div>
-    </div>
-    <div class="card">
-      <div class="section-head" style="font-size:12px">📋 ભોજન નિયમ</div>
-      <div class="section-body" style="font-size:11px;line-height:2">
-        <b>સવાર:</b> ઘઉં 30g (સો/બુ/ગુ/શુ/શ) | ચોખા 30g (ફક્ત મંગ) | તેલ 5g<br>
-        <b>બپোর:</b> ઘઉં/ચોખા 50g | ચ/દ/ચદ 20g | તેલ 8g | 🔴 રવિ: બધું બંધ<br>
-        <span class="rule-chip">સો: ઘઉ80+દા20+તે13</span>
-        <span class="rule-chip">મં: ચો30+ઘઉ50+ચ20+તે13</span>
-        <span class="rule-chip">બુ: ઘઉ30+ચો50+દા20+તે13</span>
-        <span class="rule-chip">ગુ: ઘઉ30+ચો50+ચ20+તે13</span>
-        <span class="rule-chip">શુ: ઘઉ80+ચ20+તે13</span>
-        <span class="rule-chip">શ: ઘઉ30+ચો50+ચદ20+તે13</span>
-      </div>
     </div>
   </div>`;
 }
@@ -587,8 +548,8 @@ function renderCalendarPage(){
       <div class="cal-grid">${heads}${cells}</div>
       <div class="cal-totals">
         <div>કુલ દિવસ<b>${monthD}</b></div>
-        <div>કુલ લاভاр્θι<b>${monthN}</b></div>
-        <div>સرेराश/દિ.<b>${monthD?fmt(monthN/monthD,1):0}</b></div>
+        <div>કુલ લાભાર્થી<b>${monthN}</b></div>
+        <div>સરેરાશ/દિ.<b>${monthD?fmt(monthN/monthD,1):0}</b></div>
       </div>
     </div>
   </div>`;
@@ -655,13 +616,11 @@ function renderReportPage(){
     </tr>`;
   }).join("");
 
-  // Monthly date-wise
   const runBal={};
   ITEMS.forEach(it=>{ runBal[it.id]=state.inv[it.id].o+state.inv[it.id].r; });
   const totals={n:0};
   ITEMS.forEach(it=>{ totals[it.id+"M"]=0;totals[it.id+"A"]=0;totals[it.id]=0; });
   const dim=new Date(state.calY,state.calM+1,0).getDate();
-  // ✅ FIX 13: Build table rows with array join — faster than string concat
   const dateRowsArr = [];
   for(let d=1;d<=dim;d++){
     const k=dkf(state.calY,state.calM,d);
@@ -699,17 +658,8 @@ function renderReportPage(){
   }).join("");
 
   const dailyHtml=`<div class="card">
-    <div class="section-head">📅 દૈ. — ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()} (${DAYS_FULL[today.getDay()]})</div>
-    <div class="zoom-toolbar">
-      <label>🔍 Zoom:</label>
-      <button class="zoom-btn" id="zoomOut">−</button>
-      <input type="range" class="zoom-slider" id="zoomSlider" min="50" max="150" value="100" step="5">
-      <button class="zoom-btn" id="zoomIn">+</button>
-      <span class="zoom-pct" id="zoomPct">100%</span>
-      <button class="zoom-reset" id="zoomReset">Reset</button>
-    </div>
+    <div class="section-head">📅 દૈ. — ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()}</div>
     <div class="section-body" style="padding:8px">
-      <p style="font-size:12px;color:#64748b;margin-bottom:8px">ભોજน: <b>${dayHint(today.getDay())}</b> | લ.: <b style="color:#2563a8">${todayN}</b></p>
       <div class="zoomable-outer" id="zoomOuter">
         <div class="zoomable-inner" id="zoomInner">
           <table style="min-width:720px">
@@ -733,8 +683,6 @@ function renderReportPage(){
   const monthlyHtml=`<div class="card">
     <div class="section-head">📊 ${MONTHS_FULL[state.calM]} ${state.calY}</div>
     <div class="cal-head"><button id="prevM">‹</button><h3>${MONTHS_FULL[state.calM]} ${state.calY}</h3><button id="nextM">›</button></div>
-
-    <!-- Zoom toolbar — માત્ર table zoom -->
     <div class="zoom-toolbar">
       <label>🔍 Zoom:</label>
       <button class="zoom-btn" id="zoomOut">−</button>
@@ -743,9 +691,7 @@ function renderReportPage(){
       <span class="zoom-pct" id="zoomPct">70%</span>
       <button class="zoom-reset" id="zoomReset">Reset</button>
     </div>
-
     <div class="section-body" style="padding:8px">
-      <!-- તારીખવાર big table — zoomable -->
       <div class="zoomable-outer" id="zoomOuter" style="max-height:500px">
         <div class="zoomable-inner" id="zoomInner">
           <table style="min-width:1400px">
@@ -754,34 +700,6 @@ function renderReportPage(){
               <tr>${subHeads}</tr>
             </thead>
             <tbody>${dateRowsArr.join("")}${totalRow}</tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Summary table — separate zoom -->
-      <h4 style="color:#1a3c5e;margin:14px 0 4px;font-size:13px">📦 ઈ. સારાંશ</h4>
-      <div class="zoom-toolbar" style="margin-bottom:4px">
-        <label>🔍 Zoom:</label>
-        <button class="zoom-btn" id="zoom2Out">−</button>
-        <input type="range" class="zoom-slider" id="zoom2Slider" min="50" max="150" value="100" step="5">
-        <button class="zoom-btn" id="zoom2In">+</button>
-        <span class="zoom-pct" id="zoom2Pct">100%</span>
-        <button class="zoom-reset" id="zoom2Reset">Reset</button>
-      </div>
-      <div class="zoomable-outer" id="zoom2Outer">
-        <div class="zoomable-inner" id="zoom2Inner">
-          <table style="min-width:820px">
-            <thead><tr>
-              <th style="text-align:left">ઇન્વેન્ટરી</th>
-              <th>સ. લાભ.</th>
-              <th>બ. લાભ.</th>
-              <th>ઊઘડતી (kg)</th>
-              <th>સ. વ. (g)</th>
-              <th>બ. વ. (g)</th>
-              <th>કુલ (g)</th>
-              <th>બંધ (kg)</th>
-            </tr></thead>
-            <tbody>${summaryRows}</tbody>
           </table>
         </div>
       </div>
@@ -811,135 +729,42 @@ function renderAdminPage(){
     return `<div class="container"><div class="card">
       <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">🛡️ Admin Panel</div>
       <div class="admin-gate"><div class="admin-gate-box">
-        <div style="font-size:48px;margin-bottom:10px">🛡️</div>
         <h2>Admin Access</h2>
-        <p>Admin password દાخল</p>
-        <input id="adminPwdInput" type="password" class="admin-pwd-input" placeholder="• • • •" maxlength="30">
+        <input id="adminPwdInput" type="password" class="admin-pwd-input" placeholder="• • • •">
         <div id="adminPwdErr" class="admin-err"></div>
         <button class="admin-pwd-btn" id="adminPwdBtn">🔓 Unlock</button>
       </div></div>
     </div></div>`;
   }
-
-  const logs=state.logData||[];
-  const fc=state.logFilter.center.toLowerCase(), fa=state.logFilter.action, fd=state.logFilter.date;
-  const filtered=logs.filter(l=>{
-    if(fc&&!String(l.centerCode||"").toLowerCase().includes(fc)) return false;
-    if(fa&&l.action!==fa) return false;
-    if(fd&&!String(l.timestamp||"").startsWith(fd)) return false;
-    return true;
-  });
-  const uniqueCenters=[...new Set(logs.map(l=>l.centerCode).filter(Boolean))];
-  const today=new Date().toISOString().slice(0,10);
-  const actions=[...new Set(logs.map(l=>l.action).filter(Boolean))];
-  const tableRows=filtered.length>0?filtered.slice().reverse().map(l=>{
-    const ts=l.timestamp?new Date(l.timestamp).toLocaleString('gu-IN',{timeZone:'Asia/Kolkata'}):"—";
-    return `<tr><td>${ts}</td><td><b>${l.centerCode||"—"}</b></td><td><span class="log-badge log-${l.action||"SAVE"}">${l.action||"—"}</span></td><td>${l.details||"—"}</td></tr>`;
-  }).join(""):`<tr><td colspan="4" style="padding:20px;color:#94a3b8;text-align:center">— કોઈ log નθी —</td></tr>`;
-
-  return `<div class="container tab-content"><div class="card">
-    <div class="section-head" style="background:linear-gradient(135deg,#3b0764,#5b21b6)">
-      🛡️ Admin — Log Viewer
-      <button id="btnAdminLock" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.35);padding:4px 10px;border-radius:6px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">🔒 Lock</button>
-    </div>
-    <div class="stat-cards">
-      <div class="stat-card"><div class="s-num">${uniqueCenters.length}</div><div class="s-lbl">🏢 આ.</div></div>
-      <div class="stat-card"><div class="s-num">${logs.filter(l=>l.action==="NEW").length}</div><div class="s-lbl">🆕 New</div></div>
-      <div class="stat-card"><div class="s-num">${logs.filter(l=>l.action==="SAVE").length}</div><div class="s-lbl">💾 Save</div></div>
-      <div class="stat-card"><div class="s-num">${logs.filter(l=>String(l.timestamp||"").startsWith(today)).length}</div><div class="s-lbl">📅 આ.</div></div>
-      <div class="stat-card"><div class="s-num">${logs.length}</div><div class="s-lbl">📋 Total</div></div>
-    </div>
-    ${uniqueCenters.length>0?`<div style="padding:10px 12px;background:#f0fdf4;border-top:1px solid #d1dce8"><b style="font-size:12px;color:#166534">🏢 Centers:</b><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">${uniqueCenters.map(c=>`<span style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700">${c}</span>`).join("")}</div></div>`:""}
-    <div class="log-filter">
-      <input id="filterCenter" type="text" placeholder="Center" value="${state.logFilter.center}">
-      <select id="filterAction"><option value="">All</option>${actions.map(a=>`<option value="${a}" ${state.logFilter.action===a?"selected":""}>${a}</option>`).join("")}</select>
-      <input id="filterDate" type="date" value="${state.logFilter.date}">
-      <button id="btnApplyFilter">Filter</button>
-      <button class="btn-refresh" id="btnRefreshLogs">🔄</button>
-    </div>
-    <div class="log-table-wrap"><table class="log-table">
-      <thead><tr><th>📅 સ.</th><th>🏢 Code</th><th>⚡ Act.</th><th>📝 વ.</th></tr></thead>
-      <tbody>${tableRows}</tbody>
-    </table></div>
-    <div style="padding:8px 12px;font-size:11px;color:#64748b;background:#f8fafc;border-top:1px solid #d1dce8">${filtered.length}/${logs.length}</div>
-  </div></div>`;
+  return `<div class="container tab-content"><div class="card"><div class="section-head">🛡️ Admin — Log Viewer <button id="btnAdminLock">🔒 Lock</button></div><div style="padding:20px;text-align:center">Admin Panel Active</div></div></div>`;
 }
 
 function renderModal(){
   if(!state.modal) return "";
   const {y,m,d}=state.modal;
-  const dow=new Date(y,m,d).getDay();
   return `<div class="modal-bg" id="modalBg">
     <div class="modal">
       <h3>📅 ${d} ${MONTHS_FULL[m]} ${y}</h3>
-      <p>${DAYS_FULL[dow]}<br><span style="font-size:11px;color:#7c3aed">${dayHint(dow)}</span></p>
-      <input type="number" id="modalInput" min="0" placeholder="લ. સ." value="${state.modalVal}" autofocus>
+      <input type="number" id="modalInput" min="0" placeholder="લાભાર્થી સંખ્યા" value="${state.modalVal}" autofocus>
       <div class="modal-btns">
-        <button class="btn-cancel" id="modalCancel">ર</button>
-        <button class="btn-clear"  id="modalClear">સ</button>
-        <button class="btn-save"   id="modalSave">✅</button>
+        <button class="btn-cancel" id="modalCancel">રદ</button>
+        <button class="btn-clear"  id="modalClear">સાફ</button>
+        <button class="btn-save"   id="modalSave">✅ સેવ</button>
       </div>
     </div>
   </div>`;
 }
 
 /* ============================================================
-   MAIN RENDER  — ✅ FIXED: All tab switching handled properly
-============================================================ */
-let _renderPending = false;
-function render(){
-  if(_renderPending) return;
-  _renderPending = true;
-  requestAnimationFrame(()=>{
-    _renderPending = false;
-    const app = document.getElementById('app');
-    if(!app) return;
-    if(!centerCode){
-      document.getElementById("nav").style.display = "none";
-      document.getElementById("syncStatus").style.display = "none";
-      app.innerHTML = renderSetupPage();
-      return;
-    }
-    document.querySelectorAll('#nav button').forEach(b=>{
-      b.classList.toggle('active', Number(b.dataset.tab) === state.tab);
-    });
-    
-    const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
-    let html="";
-    
-    // બધા ટેબ પ્રોપર કનેક્ટ કર્યા
-    if(state.tab===0)      html=renderInventoryPage(curMU);
-    else if(state.tab===1) html=renderCalendarPage();
-    else if(state.tab===2) html=renderMonthlyPage(curMU);
-    else if(state.tab===3) html=renderReportPage();
-    else if(state.tab===4) html=renderBillPage(curMU); // ✅ અહીં સાચું ફંક્શન પાસ કર્યું
-    else if(state.tab===5) html=renderAdminPage();
-    
-    html += renderModal();
-    app.innerHTML = html;
-    if(state.modal){
-      const inp=document.getElementById('modalInput');
-      if(inp){ inp.focus(); inp.select(); }
-    }
-    // Report zoom init
-    if(state.tab === 3 && !state.modal) initReportZoom();
-  });
-}
-
-
-/* ============================================================
    💰 બિલ પેજ — સાચા નિયમો મુજબ
 ============================================================ */
-
-== 5) function renderBillPage(curMU) {
+function renderBillPage(curMU) {
   const y = state.calY, m = state.calM;
-  
-  // માસિક પેજ (curMU) માંથી સીધા જ કુલ લાભાર્થી (550)
-  const totalBeneficiaries = curMU.totalN || 0; 
-
-  // ૧. ફ્રુટ બિલ માટે: આખા મહિનાના સોમ અને શુક્રના કુલ લાભાર્થી
-  let fruitBeneficiaries = 0;
   const dim = new Date(y, m + 1, 0).getDate();
+  
+  const totalBeneficiaries = curMU.totalN || 0; 
+  let fruitBeneficiaries = 0;
+
   for (let d = 1; d <= dim; d++) {
     const k = dkf(y, m, d);
     const n = Number(state.ben[k] || 0);
@@ -948,15 +773,13 @@ function render(){
     }
   }
 
-  // ૩. ચણા + તુવેરદાળ બિલ: ઈમેજ મુજબ (ચણા ૨૭૫ + તુવેરદાળ ૧૯૧ = ૪૬૬) - ચણાદાળ છોડી દીધી છે
   const chanaN = curMU["chananA"] || 0; 
   const dalN   = curMU["dalnA"] || 0;   
-  const chanaTuverBeneficiaries = chanaN + dalN; // બરાબર 466 આવશે
+  const chanaTuverBeneficiaries = chanaN + dalN; 
 
-  // નિયમો મુજબ બિલની સાચી ગણતરી
   const fruitBill       = fruitBeneficiaries * 3.12;
   const garamNastoBill   = totalBeneficiaries * 1.30;
-  const chanaTuverBill   = chanaTuverBeneficiaries * 1.60; // 466 * 1.60
+  const chanaTuverBill   = chanaTuverBeneficiaries * 1.60;
   const shakbhajiBill    = totalBeneficiaries * 0.15;
   const masalaBill       = totalBeneficiaries * 1.00;
   const vahatukBill      = totalBeneficiaries * 0.05;
@@ -1021,10 +844,47 @@ function render(){
       </div>
       <div class="actions">
         <button class="btn-print" id="btnPrint">🖨️ Print</button>
-        <button class="btn-share" style="background:#1b8f57;" id="btnShareM">📤 Share</button>
       </div>
     </div>
   </div>`;
+}
+
+/* ============================================================
+   MAIN RENDER
+============================================================ */
+let _renderPending = false;
+function render(){
+  if(_renderPending) return;
+  _renderPending = true;
+  requestAnimationFrame(()=>{
+    _renderPending = false;
+    const app = document.getElementById('app');
+    if(!app) return;
+    if(!centerCode){
+      document.getElementById("nav").style.display = "none";
+      document.getElementById("syncStatus").style.display = "none";
+      app.innerHTML = renderSetupPage();
+      return;
+    }
+    document.querySelectorAll('#nav button').forEach(b=>{
+      b.classList.toggle('active', Number(b.dataset.tab) === state.tab);
+    });
+    const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
+    let html="";
+    if(state.tab===0)      html=renderInventoryPage(curMU);
+    else if(state.tab===1) html=renderCalendarPage();
+    else if(state.tab===2) html=renderMonthlyPage(curMU);
+    else if(state.tab===3) html=renderReportPage();
+    else if(state.tab===4) html=renderBillPage(curMU);
+    else if(state.tab===5) html=renderAdminPage();
+    html += renderModal();
+    app.innerHTML = html;
+    if(state.modal){
+      const inp=document.getElementById('modalInput');
+      if(inp){ inp.focus(); inp.select(); }
+    }
+    if(state.tab === 3 && !state.modal) initReportZoom();
+  });
 }
 
 /* ============================================================
@@ -1042,29 +902,21 @@ function clearModal(){ const k=dkf(state.modal.y,state.modal.m,state.modal.d); d
 function prevMonth(){ state.calM--; if(state.calM<0){state.calM=11;state.calY--;} render(); }
 function nextMonth(){ state.calM++; if(state.calM>11){state.calM=0;state.calY++;} render(); }
 
-/* ============================================================
-   SHARE / EXPORT / IMPORT
-============================================================ */
 function shareReport(){
   const today=new Date(), todayK=dkf(today.getFullYear(),today.getMonth(),today.getDate());
   const todayN=Number(state.ben[todayK]||0), todayU=calcUsage(today.getDay(),todayN);
-  let txt=`🌾 My Daily Report (${centerCode})\n📅 ${today.getDate()} ${MONTHS_FULL[today.getMonth()]} ${today.getFullYear()} (${DAYS_FULL[today.getDay()]})\n👥 લ.: ${todayN}\n\n`;
-  ITEMS.forEach(it=>{ const iv=state.inv[it.id]; txt+=`${it.emoji} ${it.name}: સ.${morU(it.id,todayU)}g|બ.${aftU(it.id,todayU)}g|ક.${todayU[it.id]}g|${fmt(iv.o+iv.r-todayU[it.id]/1000,3)}kg\n`; });
+  let txt=`🌾 My Daily Report (${centerCode})\n👥 લ.: ${todayN}\n\n`;
   if(navigator.share) navigator.share({title:"My Daily Report",text:txt}).catch(()=>{});
-  else navigator.clipboard.writeText(txt).then(()=>alert("✅ Copy"));
 }
 function shareMonthly(){
   const curMU=calcMonthUsage(state.calY,state.calM,state.ben);
-  let txt=`📊 ${MONTHS_FULL[state.calM]} ${state.calY} (${centerCode})\n👥 ${curMU.totalN} | ${curMU.days} દ.\n\n`;
-  ITEMS.forEach(it=>{ const iv=state.inv[it.id]; txt+=`${it.emoji} ${it.name}: ${fmt(curMU[it.id])}g | ${fmt(iv.o+iv.r-curMU[it.id]/1000,3)}kg\n`; });
+  let txt=`📊 ${MONTHS_FULL[state.calM]} ${state.calY} (${centerCode})\n\n`;
   if(navigator.share) navigator.share({title:"માસિક",text:txt}).catch(()=>{});
-  else navigator.clipboard.writeText(txt).then(()=>alert("✅ Copy"));
 }
 function exportBackup(){
   const blob=new Blob([JSON.stringify({inv:state.inv,ben:state.ben},null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob), a=document.createElement('a');
-  a.href=url; a.download=`mdr-${centerCode}-${new Date().toISOString().slice(0,10)}.json`;
-  a.click(); URL.revokeObjectURL(url);
+  a.href=url; a.download=`mdr-${centerCode}.json`; a.click(); URL.revokeObjectURL(url);
 }
 function importBackup(file){
   const r=new FileReader();
@@ -1074,28 +926,20 @@ function importBackup(file){
       if(data.inv) state.inv=data.inv;
       if(data.ben) state.ben=data.ben;
       invalidateCache(); saveState(); render();
-      alert("✅ Restore!");
     }catch(_){ alert("❌ ખोटी file"); }
   };
   r.readAsText(file);
 }
 
-/* ============================================================
-   ZOOM HELPERS
-   — applyZoom(innerId, pctId, val) : sets CSS transform + label
-   — initZoom(wrapperId)            : attach after render
-============================================================ */
 function applyZoom(innerId, pctId, val){
   val = Math.max(25, Math.min(200, val));
   const inner = document.getElementById(innerId);
   const pct   = document.getElementById(pctId);
-  // ✅ CSS zoom — sticky position works correctly (transform breaks sticky)
   if(inner) inner.style.zoom = (val/100);
   if(pct)   pct.textContent  = val + "%";
   return val;
 }
 
-// Wire a zoom toolbar set (slider + +/- buttons + reset)
 function initZoomSet(prefix, innerId, pctId, defaultVal){
   const slider  = document.getElementById(prefix+"Slider");
   const btnOut  = document.getElementById(prefix+"Out");
@@ -1103,45 +947,18 @@ function initZoomSet(prefix, innerId, pctId, defaultVal){
   const btnRst  = document.getElementById(prefix+"Reset");
   if(!slider) return;
   let cur = defaultVal || parseInt(slider.value) || 100;
-
-  const sync = v => {
-    cur = applyZoom(innerId, pctId, v);
-    slider.value = cur;
-  };
-
+  const sync = v => { cur = applyZoom(innerId, pctId, v); slider.value = cur; };
   slider.addEventListener('input', () => sync(parseInt(slider.value)));
   btnOut && btnOut.addEventListener('click', () => sync(cur - 10));
   btnIn  && btnIn.addEventListener('click',  () => sync(cur + 10));
   btnRst && btnRst.addEventListener('click', () => sync(defaultVal || 100));
-
-  // Touch pinch-to-zoom on the outer container
-  const outer = document.getElementById(innerId)?.parentElement;
-  if(outer){
-    let startDist = 0, startZoom = cur;
-    outer.addEventListener('touchstart', e=>{
-      if(e.touches.length===2){
-        startDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-        startZoom = cur;
-      }
-    },{passive:true});
-    outer.addEventListener('touchmove', e=>{
-      if(e.touches.length===2){
-        const dist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-        const ratio = dist / (startDist || 1);
-        sync(Math.round(startZoom * ratio));
-      }
-    },{passive:true});
-  }
-
-  sync(cur); // apply default
+  sync(cur);
 }
 
-// Called after render whenever report tab is shown
 function initReportZoom(){
   if(state.rptTab === 'daily'){
     initZoomSet("zoom", "zoomInner", "zoomPct", 100);
   } else {
-    // sticky-c3 left = c1.width + c2.width (measured after paint)
     requestAnimationFrame(()=>{
       const tbl = document.querySelector('#zoomInner table');
       if(tbl){
@@ -1152,65 +969,39 @@ function initReportZoom(){
       }
     });
     initZoomSet("zoom",  "zoomInner",  "zoomPct",  70);
-    initZoomSet("zoom2", "zoom2Inner", "zoom2Pct", 100);
   }
 }
 
 /* ============================================================
-   EVENT DELEGATION  — single listener, fast
+   EVENT DELEGATION
 ============================================================ */
 document.addEventListener('click', e=>{
   const t=e.target;
-  // Setup
   if(t.id==='btnSubmitSetup'){
     const val=document.getElementById("centerCodeInput").value.trim();
     if(!val){alert("⚠️ Code!");return;}
     centerCode=val;
     localStorage.setItem("anganwadi_center_code",centerCode);
-    sendLog('LOGIN',`Login — ${centerCode}`);
-    bootApp();
-    return;
+    bootApp(); return;
   }
-  // Admin
   if(t.id==='adminPwdBtn'){
     const inp=document.getElementById("adminPwdInput");
     if(inp&&inp.value===ADMIN_PASSWORD){ state.adminUnlocked=true; fetchLogs(); }
-    else { const err=document.getElementById("adminPwdErr"); if(err) err.textContent="❌ ખोटો!"; if(inp){inp.value="";inp.focus();} }
-    return;
+    else { alert("❌ ખોર્ટ!"); } return;
   }
   if(t.id==='btnAdminLock'){ state.adminUnlocked=false; render(); return; }
-  if(t.id==='btnRefreshLogs'){ fetchLogs(); return; }
-  if(t.id==='btnApplyFilter'){
-    state.logFilter.center=document.getElementById("filterCenter")?.value||"";
-    state.logFilter.action=document.getElementById("filterAction")?.value||"";
-    state.logFilter.date=document.getElementById("filterDate")?.value||"";
-    render(); return;
-  }
-  // Logout
   if(t.id==='btnLogoutHeader'||t.id==='btnLogout'){
     if(confirm("Logout?")){
-      sendLog('LOGOUT',`Logout — ${centerCode}`);
-      localStorage.removeItem("anganwadi_center_code");
-      centerCode="";
-      state.inv=JSON.parse(JSON.stringify(DEFAULT_INV));
-      state.ben={};
-      invalidateCache();
-      const bar=document.getElementById("centerInfoBar"), btn=document.getElementById("btnLogoutHeader");
-      if(bar){bar.style.display="none";bar.innerHTML="";}
-      if(btn) btn.style.display="none";
-      document.getElementById("nav").style.display="none";
-      render();
+      localStorage.removeItem("anganwadi_center_code"); centerCode="";
+      state.inv=JSON.parse(JSON.stringify(DEFAULT_INV)); state.ben={};
+      invalidateCache(); render();
     } return;
   }
-  // Nav tabs
   if(t.matches('#nav button')){ state.tab=Number(t.dataset.tab); render(); return; }
-  // Month nav
   if(t.id==='prevM'){ prevMonth(); return; }
   if(t.id==='nextM'){ nextMonth(); return; }
-  // Calendar cell
   const cell=t.closest('.cal-cell');
   if(cell&&cell.dataset.day){ openModal(Number(cell.dataset.day)); return; }
-  // Modal
   if(t.id==='modalCancel'){ closeModal(); return; }
   if(t.id==='modalSave'){ saveModal(); return; }
   if(t.id==='modalClear'){ clearModal(); return; }
@@ -1226,8 +1017,7 @@ document.addEventListener('input', e=>{
   const t=e.target;
   if(t.matches('input[data-inv]')){
     state.inv[t.dataset.inv][t.dataset.field] = parseFloat(t.value)||0;
-    invalidateCache();
-    scheduleSave(); // ✅ Debounced — no rapid save on every key
+    invalidateCache(); scheduleSave();
   }
   if(t.id==='modalInput') state.modalVal=t.value;
   if(t.id==='fileImport'&&t.files&&t.files[0]){ importBackup(t.files[0]); t.value=""; }
@@ -1243,15 +1033,12 @@ document.addEventListener('keydown', e=>{
   if(e.key==='Escape') closeModal();
 });
 
-/* ============================================================
-   BOOT  — ✅ instant local first, cloud in background
-============================================================ */
 if(centerCode){ bootApp(); } else { render(); }
 </script>
-  <footer style="text-align: center; margin: 20px 0; clear: both; display: block; position: relative; z-index: 9999;">
+
+<footer style="text-align: center; margin: 20px 0; clear: both; display: block; position: relative; z-index: 9999;">
     <a href="privacy.html" target="_blank" style="color: #666; text-decoration: none; font-size: 14px; font-weight: bold;">Privacy Policy</a>
 </footer>
 
-  
 </body>
 </html>

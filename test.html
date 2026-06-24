@@ -799,14 +799,14 @@ function renderBillPage(){
       note: `${curMU.totalN} લાભાર્થી × ₹1.30`
     },
     {
-      name: "🫘 ચણા અને તુવેર દાળ બિલ",
-      desc: "ચણા + દાળ લાભાર્થી",
-      qty: (curMU['chananA'] || 0) + (curMU['dalnA'] || 0) + (curMU['chanadalnA'] || 0),
-      rate: 1.60,
-      total: ((curMU['chananA'] || 0) + (curMU['dalnA'] || 0) + (curMU['chanadalnA'] || 0)) * 1.60,
-      note: `${(curMU['chananA'] || 0) + (curMU['dalnA'] || 0) + (curMU['chanadalnA'] || 0)} લાભાર્થી × ₹1.60`
-    },
-    {
+  name: "🫘 ચણા અને તુવેર દાળ બિલ",
+  desc: "ચણા + દાળ લાભાર્થી",
+  qty: ((curMU['chana'] || 0) + (curMU['dal'] || 0) + (curMU['chanadal'] || 0)) / 20,
+  rate: 1.60,
+  total: (((curMU['chana'] || 0) + (curMU['dal'] || 0) + (curMU['chanadal'] || 0)) / 20) * 1.60,
+  note: `${((curMU['chana'] || 0) + (curMU['dal'] || 0) + (curMU['chanadal'] || 0)) / 20} લાભાર્થી × ₹1.60`
+   },
+   {
       name: "🥬 શાકભાજી બિલ",
       desc: "કુલ લાભાર્થી દીઠ",
       qty: curMU.totalN,

@@ -249,6 +249,8 @@ input, textarea, button, a{
   -webkit-user-select: text;
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.5.0/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.5.0/vfs_fonts.min.js"></script>
 </head>
 <body>
 
@@ -1284,6 +1286,7 @@ function renderReportPage(){
     ${state.rptTab==='daily'?dailyHtml:monthlyHtml}
     <div class="card"><div class="section-body" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center">
       <div>
+        <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#d97706" id="btnPDF">📄 Monthly PDF</button>
         <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#7c3aed" id="btnExport">💾 Export</button>
         <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#0891b2" id="btnImport">📂 Import</button>
         <input type="file" id="fileImport" accept=".json" style="display:none">
@@ -1466,6 +1469,153 @@ function exportBackup(){
   a.href=url; a.download=`mdr-${centerCode}-${new Date().toISOString().slice(0,10)}.json`;
   a.click(); URL.revokeObjectURL(url);
 }
+
+function generateMonthlyPDF(){
+  if(typeof pdfMake === 'undefined'){
+    alert('❌ PDF library loading... try again');
+    return;
+  }
+  
+  const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
+  const monthName = MONTHS_FULL[state.calM];
+  const today = new Date();
+  
+  // Bills calculation
+  let fruitBenCount = 0;
+  const dim = new Date(state.calY, state.calM+1, 0).getDate();
+  for(let d=1; d<=dim; d++){
+    const k = dkf(state.calY, state.calM, d);
+    const n = Number(state.ben[k] || 0);
+    const dow = new Date(state.calY, state.calM, d).getDay();
+    if((dow === 1 || dow === 4)) fruitBenCount += n;
+  }
+  
+  const chanaDalBenCount = (curMU['chananA'] || 0) + (curMU['dalnA'] || 0);
+  
+  const bills = [
+    {name: '🍎 ફ્રુટ બીલ', qty: fruitBenCount, rate: 3.12, total: fruitBenCount * 3.12},
+    {name: '🥒 ગરમ નાસ્તો બીલ', qty: curMU.totalN, rate: 1.30, total: curMU.totalN * 1.30},
+    {name: '🫘 ચણા + તુવેર દાળ બીલ', qty: chanaDalBenCount, rate: 1.60, total: chanaDalBenCount * 1.60},
+    {name: '🥬 શાકભાજી બીલ', qty: curMU.totalN, rate: 0.15, total: curMU.totalN * 0.15},
+    {name: '🌶️ મસાલા બીલ', qty: curMU.totalN, rate: 1.00, total: curMU.totalN * 1.00},
+    {name: '🚗 વાહતુક બીલ', qty: curMU.totalN, rate: 0.05, total: curMU.totalN * 0.05}
+  ];
+  
+  const grandTotal = bills.reduce((sum, b) => sum + b.total, 0);
+  
+  // Inventory data
+  const invRows = ITEMS.map(it => {
+    const iv = state.inv[it.id];
+    const opening = iv.o + iv.r;
+    const used = (curMU[it.id] || 0) / 1000;
+    return [it.name, fmt(opening,2), fmt(used,2), fmt(opening - used, 2)];
+  });
+  
+  // Bill rows for PDF
+  const billRows = bills.map(b => [b.name, b.qty, '₹' + fmt(b.rate, 2), '₹' + fmt(b.total, 2)]);
+  
+  // Meal summary - first 5 days as sample
+  const mealRows = [];
+  for(let d=1; d<=Math.min(5, dim); d++){
+    const k = dkf(state.calY, state.calM, d);
+    const n = Number(state.ben[k] || 0);
+    const dow = new Date(state.calY, state.calM, d).getDay();
+    if(n > 0) mealRows.push([d + ' ' + DAYS_SHORT[dow], n, n > 0 ? '✓' : '−']);
+  }
+  if(mealRows.length === 0) mealRows.push(['(No data)', '−', '−']);
+  
+  const docDefinition = {
+    pageSize: 'A4',
+    pageMargins: [30, 30, 30, 60],
+    header: {
+      text: '🌾 My Daily Report - ' + monthName + ' ' + state.calY,
+      alignment: 'center',
+      fontSize: 14,
+      bold: true,
+      margin: [0, 0, 0, 10]
+    },
+    footer: (currentPage, pageCount) => ({
+      text: currentPage + ' / ' + pageCount,
+      alignment: 'center',
+      fontSize: 9
+    }),
+    content: [
+      {text: '📋 Center Details', style: 'heading'},
+      {
+        columns: [
+          {text: 'કેન્દ્ર: ' + centerCode, fontSize: 10},
+          {text: 'તારીખ: ' + today.toLocaleDateString('gu-IN'), fontSize: 10, alignment: 'right'}
+        ],
+        margin: [0, 0, 0, 12]
+      },
+      
+      {text: '📊 Monthly Summary', style: 'heading'},
+      {
+        table: {
+          headerRows: 1,
+          widths: ['*', '*', '*'],
+          body: [
+            ['કાર્ય દિવસ', 'કુલ લાભાર્થી', 'દર દિવસ સરેરાશ'],
+            [curMU.days.toString(), curMU.totalN.toString(), fmt(curMU.totalN/curMU.days || 0, 1)]
+          ]
+        },
+        margin: [0, 0, 0, 12]
+      },
+      
+      {text: '💰 Bills Summary', style: 'heading'},
+      {
+        table: {
+          headerRows: 1,
+          widths: ['35%', '20%', '20%', '25%'],
+          body: [
+            ['ન. બીલ', 'જથ્થો', 'દર', 'કુલ'],
+            ...billRows,
+            ['કુલ રકમ', '', '', '₹' + fmt(grandTotal, 2)]
+          ]
+        },
+        margin: [0, 0, 0, 12]
+      },
+      
+      {text: '📦 Inventory Status', style: 'heading'},
+      {
+        table: {
+          headerRows: 1,
+          widths: ['25%', '25%', '25%', '25%'],
+          body: [
+            ['આઇટમ', 'ઊઘડતી (kg)', 'વપરાશ (kg)', 'બંધ (kg)'],
+            ...invRows
+          ]
+        },
+        margin: [0, 0, 0, 12]
+      },
+      
+      {text: '📅 Sample Meal Record', style: 'heading'},
+      {
+        table: {
+          headerRows: 1,
+          widths: ['40%', '30%', '30%'],
+          body: [
+            ['તારીખ', 'લાભાર્થી', 'સેવા'],
+            ...mealRows,
+            ['કુલ', curMU.days.toString(), '✓']
+          ]
+        },
+        margin: [0, 0, 0, 20]
+      },
+      
+      {text: 'અધિકૃત હસ્તાક્ષર', style: 'heading', margin: [0, 40, 0, 30]},
+      {text: '_'.repeat(40), fontSize: 10, margin: [0, 0, 0, 5]},
+      {text: 'Center-in-Charge', fontSize: 9, color: '#666'}
+    ],
+    
+    styles: {
+      heading: {fontSize: 11, bold: true, margin: [0, 10, 0, 8], color: '#1a3c5e'}
+    }
+  };
+  
+  pdfMake.createPdf(docDefinition).download(`mdr-${centerCode}-${monthName}-${state.calY}.pdf`);
+  setStatus('✅ PDF Downloaded!', '#1b8f57');
+}
 function importBackup(file){
   const r=new FileReader();
   r.onload=e=>{
@@ -1628,6 +1778,7 @@ document.addEventListener('click', e=>{
   if(t.id==='btnPrint'){ window.print(); return; }
   if(t.id==='btnShare'){ shareReport(); return; }
   if(t.id==='btnShareM'){ shareMonthly(); return; }
+  if(t.id==='btnPDF'){ generateMonthlyPDF(); return; }
   if(t.id==='btnExport'){ exportBackup(); return; }
   if(t.id==='btnImport'){ document.getElementById('fileImport').click(); return; }
 });

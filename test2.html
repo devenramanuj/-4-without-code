@@ -29,10 +29,10 @@ body{
 
 /* ✅ FIX 4: Critical above-fold styles inlined, rest loaded lazily */
 .container{max-width:1200px;margin:0 auto;padding:10px}
-.header{background:linear-gradient(135deg,#0f2442,#1a3c5e);color:#fff;padding:12px;position:sticky;top:0;z-index:100;box-shadow:0 3px 10px rgba(0,0,0,.3)}
-.header h1{font-size:18px;text-align:center;margin-bottom:8px}
-.nav{display:flex;gap:4px;justify-content:center;flex-wrap:wrap}
-.nav button{background:transparent;color:#cfd8e3;border:none;padding:8px 12px;font-size:13px;font-family:inherit;cursor:pointer;border-bottom:3px solid transparent;font-weight:600}
+.header{background:linear-gradient(135deg,#0f2442,#1a3c5e);color:#fff;padding:5px 6px;position:sticky;top:0;z-index:100;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.header h1{font-size:12px;text-align:center;margin-bottom:1px;font-weight:700}
+.nav{display:flex;gap:0px;justify-content:center;flex-wrap:wrap;line-height:1}
+.nav button{background:transparent;color:#cfd8e3;border:none;padding:2px 4px;font-size:8px;font-family:inherit;cursor:pointer;border-bottom:1px solid transparent;font-weight:600;line-height:1;margin:0;min-height:auto}
 .nav button.active{color:#f39c12;border-bottom-color:#f39c12}
 .card{background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);margin-bottom:12px;border:1px solid #d1dce8;overflow:hidden}
 .section-head{background:linear-gradient(135deg,#1a3c5e,#2563a8);color:#fff;padding:10px 14px;font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
@@ -106,12 +106,12 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .btn-import{background:#0891b2}
 .badge{padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700;display:inline-block}
 .footer{text-align:center;padding:12px;color:#64748b;font-size:11px}
-.logout-btn{background:rgba(204,61,61,.85);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s}
+.logout-btn{background:rgba(204,61,61,.85);color:#fff;border:none;padding:3px 8px;border-radius:4px;font-family:inherit;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s}
 .logout-btn:hover{background:#cc3d3d}
-.header-center-info{font-size:11px;color:#a0b4c8;text-align:center;margin-bottom:6px}
+.header-center-info{font-size:9px;color:#a0b4c8;text-align:center;margin-bottom:2px}
 
 /* ✅ FIX 6: sync status — content-visibility for off-screen perf */
-.sync-status{text-align:center;padding:4px 8px;font-size:11px;font-weight:600;color:#1b8f57;background:#e8f5e9;transition:all .3s;cursor:pointer}
+.sync-status{text-align:center;padding:3px 6px;font-size:10px;font-weight:600;color:#1b8f57;background:#e8f5e9;transition:all .3s;cursor:pointer}
 .sync-status.syncing{color:#2563a8;background:#dbeafe}
 .sync-status.error{color:#cc3d3d;background:#fee2e2}
 
@@ -195,8 +195,8 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
 .con-table tr.con-avg td{background:#f0fdf4 !important;font-weight:700;color:#166534}
 .con-table tr.con-avg td.con-c1{background:#f0fdf4 !important;color:#166534}
 @media (max-width:600px){
-  .header h1{font-size:15px}
-  .nav button{padding:6px 8px;font-size:11px}
+  .header h1{font-size:11px}
+  .nav button{padding:2px 3px;font-size:7px}
   .inv-grid{grid-template-columns:repeat(2,1fr)}
   .cal-cell{min-height:42px;font-size:10px}
   .cal-cell .n{font-size:12px}
@@ -204,9 +204,9 @@ tr.sun-row td.sticky-c1,tr.sun-row td.sticky-c2,tr.sun-row td.sticky-c3{backgrou
   th,td{padding:5px 4px}
 }
 
-/* ✅ Mobile Touch Optimization */
+/* ✅ Mobile Touch Optimization - EXCEPT nav buttons */
 @media (hover:none) and (pointer:coarse){
-  button, .nav button, input[type="button"], input[type="submit"]{
+  button:not(.nav button), input[type="button"], input[type="submit"]{
     padding: 12px 16px !important;
     font-size: 16px !important;
     min-height: 44px;
@@ -249,6 +249,8 @@ input, textarea, button, a{
   -webkit-user-select: text;
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.5.0/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.5.0/vfs_fonts.min.js"></script>
 </head>
 <body>
 
@@ -262,14 +264,17 @@ input, textarea, button, a{
   <div class="nav" id="nav" style="display:none;">
     <button data-tab="0" class="active">📦 ઈન્વેન્ટરી</button>
     <button data-tab="1">📅 કેલેન્ડર</button>
-    <button data-tab="2">📊 માસિક</button>
+    <button data-tab="2">📊 ડેશ</button>
     <button data-tab="3">📋 રિપોર્ટ</button>
     <button data-tab="5">🧾 બિલ</button>
     <button data-tab="4">🛡️ Admin</button>
   </div>
 </div>
 
-<div id="syncStatus" class="sync-status" style="display:none;cursor:pointer" onclick="if(centerCode)loadCloudData()">☁️ ક્લાઉડ સાથે સિંક થયેલ છે &nbsp;🔄</div>
+<div id="syncStatus" class="sync-status" style="display:none;cursor:pointer" onclick="if(centerCode && syncQueue.length > 0) processSyncQueue()">
+  ☁️ <span id="syncStatusText">ક્લાઉડ સાથે સિંક થયેલ છે</span> 🔄 
+  <span id="queueCount" style="display:none;margin-left:6px;background:rgba(0,0,0,.2);padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700">📤 <span id="queueNum">0</span> pending</span>
+</div>
 
 <!-- ✅ FIX 9: Skeleton shown INSTANTLY while JS runs -->
 <div id="app">
@@ -320,20 +325,180 @@ let state = {
         selY:new Date().getFullYear(), selM:new Date().getMonth() }
 };
 
-/* ✅ FIX 10: Debounce saves — avoid save on every keystroke */
+/* ============================================================
+   OFFLINE-FIRST SYNC QUEUE — Network-aware save strategy
+============================================================ */
+let syncQueue = [];
+let isSyncing = false;
+let isOnline = navigator.onLine;
+
+// Monitor network status
+window.addEventListener('online', () => {
+  isOnline = true;
+  setStatus("🟢 Network OK — Syncing...", "#1b8f57");
+  processSyncQueue();
+});
+
+window.addEventListener('offline', () => {
+  isOnline = false;
+  setStatus("🔴 Offline — Local save માત્ર", "#e67e22");
+});
+
+async function saveState(){
+  if(!centerCode) return;
+  
+  // 1️⃣ ALWAYS save to local first (instant)
+  const dataToSave = {inv:state.inv, ben:state.ben, timestamp: new Date().toISOString()};
+  localStorage.setItem("mdr_offline_" + centerCode, JSON.stringify(dataToSave));
+  
+  // 2️⃣ If no cloud URL configured
+  if(!_hasURL){ 
+    setStatus("💾 Local save OK (Cloud config missing)", "#e67e22"); 
+    return; 
+  }
+  
+  // 3️⃣ If ONLINE → try cloud save immediately
+  if(isOnline){
+    await cloudSaveWithRetry(dataToSave);
+  } else {
+    // 4️⃣ If OFFLINE → queue the save
+    addToSyncQueue(dataToSave);
+    setStatus("📤 Queued (Network નાહી) — Offline save OK", "#f59e0b");
+  }
+}
+
+function addToSyncQueue(data){
+  syncQueue.push({
+    action: 'save',
+    data: data,
+    centerCode: centerCode,
+    timestamp: Date.now(),
+    retries: 0
+  });
+  localStorage.setItem("sync_queue_" + centerCode, JSON.stringify(syncQueue));
+}
+
+async function cloudSaveWithRetry(data, retries = 3){
+  for(let attempt = 1; attempt <= retries; attempt++){
+    try{
+      setStatus(`⏳ Cloud save (${attempt}/${retries})...`, "#2563a8");
+      const ctrl = new AbortController();
+      const tid = setTimeout(()=>ctrl.abort(), 8000);
+      
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: {"Content-Type": "text/plain"},
+        body: JSON.stringify({centerCode, data: {inv: data.inv, ben: data.ben}}),
+        signal: ctrl.signal
+      });
+      clearTimeout(tid);
+      
+      const result = await res.json();
+      if(result.status === "ok"){
+        setStatus(`✅ Cloud saved — ${new Date().toLocaleTimeString('gu-IN')}`, "#1b8f57");
+        sendLog("SAVE", `ક્લાઉડ સેવ succesful`);
+        return true;
+      } else {
+        throw new Error(result.msg || "Save failed");
+      }
+    } catch(e){
+      console.log(`Attempt ${attempt} failed:`, e.message);
+      if(attempt === retries){
+        // All retries failed - add to queue
+        addToSyncQueue(data);
+        setStatus(`📤 Queued for sync (${syncQueue.length} pending)`, "#f59e0b");
+        return false;
+      }
+      // Wait before retry
+      await new Promise(r => setTimeout(r, 1000 * attempt));
+    }
+  }
+}
+
+async function processSyncQueue(){
+  if(isSyncing || !isOnline || syncQueue.length === 0) return;
+  
+  isSyncing = true;
+  let successCount = 0;
+  let failedCount = 0;
+  
+  for(let i = 0; i < syncQueue.length; i++){
+    const item = syncQueue[i];
+    if(item.action === 'save'){
+      const result = await cloudSaveWithRetry(item.data, 2);
+      if(result){
+        successCount++;
+        syncQueue.splice(i, 1);
+        i--;
+      } else {
+        failedCount++;
+      }
+      // Delay between requests
+      await new Promise(r => setTimeout(r, 500));
+    }
+  }
+  
+  // Save updated queue
+  if(syncQueue.length > 0){
+    localStorage.setItem("sync_queue_" + centerCode, JSON.stringify(syncQueue));
+  } else {
+    localStorage.removeItem("sync_queue_" + centerCode);
+  }
+  
+  isSyncing = false;
+  
+  if(successCount > 0){
+    setStatus(`✅ ${successCount} synced | ${failedCount} pending`, "#1b8f57");
+  }
+}
+
+// Load sync queue on boot
+function loadSyncQueue(){
+  const raw = localStorage.getItem("sync_queue_" + centerCode);
+  if(raw){
+    try{
+      syncQueue = JSON.parse(raw);
+      if(syncQueue.length > 0 && isOnline){
+        setTimeout(processSyncQueue, 1000);
+      }
+    } catch(_){}
+  }
+}
+
+// ✅ FIX 10: Debounce saves — avoid save on every keystroke
 let _saveTimer = null;
-function scheduleSave(){ clearTimeout(_saveTimer); _saveTimer = setTimeout(saveState, 800); }
+function scheduleSave(){ 
+  clearTimeout(_saveTimer); 
+  _saveTimer = setTimeout(saveState, 800); 
+}
 
 /* ============================================================
    STATUS BAR
 ============================================================ */
+function updateSyncStatus(){
+  const qCountEl = document.getElementById("queueCount");
+  const qNumEl = document.getElementById("queueNum");
+  const statusText = document.getElementById("syncStatusText");
+  
+  if(syncQueue.length > 0){
+    if(qCountEl) qCountEl.style.display = "inline-block";
+    if(qNumEl) qNumEl.textContent = syncQueue.length;
+    if(statusText) statusText.textContent = "Syncing...";
+  } else {
+    if(qCountEl) qCountEl.style.display = "none";
+    if(statusText) statusText.textContent = "ક્લાઉડ સાથે સિંક થયેલ છે";
+  }
+}
+
 function setStatus(msg, color="#1b8f57"){
   const s = document.getElementById("syncStatus");
   if(!s) return;
   s.style.display  = "block";
-  s.textContent    = msg;
-  s.style.background = color === "#1b8f57" ? "#e8f5e9" : (color === "#cc3d3d" ? "#fee2e2" : "#fff3cd");
+  const textEl = document.getElementById("syncStatusText");
+  if(textEl) textEl.textContent = msg;
+  s.style.background = color === "#1b8f57" ? "#e8f5e9" : (color === "#cc3d3d" ? "#fee2e2" : (color === "#f59e0b" ? "#fef3c7" : "#dbeafe"));
   s.style.color    = color;
+  updateSyncStatus();
 }
 
 /* ============================================================
@@ -345,11 +510,15 @@ const _hasURL = APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("YOUR_URL");
 function bootApp(){
   if(!centerCode){ render(); return; }
   loadLocalFallback();           // Instant — no network wait
+  loadSyncQueue();               // Load pending syncs
   showNav();
   showHeaderInfo();
   render();
   // Cloud sync quietly in background after 200ms
-  setTimeout(syncCloud, 200);
+  setTimeout(()=>{
+    if(isOnline) processSyncQueue();
+    else syncCloud();
+  }, 200);
 }
 
 function loadLocalFallback(){
@@ -779,6 +948,64 @@ function renderCalendarPage(){
   </div>`;
 }
 
+function renderDashboardPage(curMU){
+  const billsTotal = (curMU.totalN * 1.30) + (curMU.totalN * 0.15) + (curMU.totalN * 1.00) + (curMU.totalN * 0.05);
+  let fruitBenCount = 0;
+  const dim = new Date(state.calY, state.calM+1, 0).getDate();
+  for(let d=1; d<=dim; d++){
+    const k = dkf(state.calY, state.calM, d);
+    const n = Number(state.ben[k] || 0);
+    const dow = new Date(state.calY, state.calM, d).getDay();
+    if((dow === 1 || dow === 4)) fruitBenCount += n;
+  }
+  const chanaDalBenCount = (curMU['chananA'] || 0) + (curMU['dalnA'] || 0);
+  const fruitBill = fruitBenCount * 3.12;
+  const chanaDalBill = chanaDalBenCount * 1.60;
+  const totalBills = fruitBill + (curMU.totalN * 1.30) + chanaDalBill + (curMU.totalN * 0.15) + (curMU.totalN * 1.00) + (curMU.totalN * 0.05);
+  const attendance = curMU.days > 0 ? Math.round((curMU.totalN / (curMU.days * 25)) * 100) : 0;
+  
+  return `<div class="container tab-content">
+    <div class="card">
+      <div class="section-head" style="background:linear-gradient(135deg,#1e40af,#2563a8)">📊 ડેશબોર્ડ — ${MONTHS_FULL[state.calM]} ${state.calY}</div>
+      <div style="padding:12px">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px">
+          <div style="padding:12px;background:linear-gradient(135deg,#e0f2fe,#cffafe);border-radius:8px;border-left:4px solid #0284c7">
+            <div style="font-size:10px;color:#0369a1;font-weight:700">🗓️ કાર્ય દિવસ</div>
+            <div style="font-size:24px;font-weight:900;color:#0c4a6e;margin-top:2px">${curMU.days}</div>
+          </div>
+          <div style="padding:12px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:8px;border-left:4px solid #f59e0b">
+            <div style="font-size:10px;color:#b45309;font-weight:700">👥 કુલ લાભાર્થી</div>
+            <div style="font-size:24px;font-weight:900;color:#78350f;margin-top:2px">${curMU.totalN}</div>
+          </div>
+          <div style="padding:12px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);border-radius:8px;border-left:4px solid #3b82f6">
+            <div style="font-size:10px;color:#1e40af;font-weight:700">📈 સર્વે/દિ.</div>
+            <div style="font-size:24px;font-weight:900;color:#0c2340;margin-top:2px">${curMU.days ? fmt(curMU.totalN/curMU.days, 1) : '0'}</div>
+          </div>
+          <div style="padding:12px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:8px;border-left:4px solid #4caf50">
+            <div style="font-size:10px;color:#1b5e20;font-weight:700">✅ હાજરી %</div>
+            <div style="font-size:24px;font-weight:900;color:#003d00;margin-top:2px">${attendance}%</div>
+          </div>
+        </div>
+        <div style="padding:12px;background:linear-gradient(135deg,#fef2f2,#fee2e2);border-radius:8px;border:2px solid #ef4444;margin-bottom:12px">
+          <div style="font-size:11px;color:#991b1b;font-weight:700">💰 કુલ બિલ રકમ</div>
+          <div style="font-size:28px;font-weight:900;color:#7f1d1d;margin-top:4px">₹${fmt(totalBills, 2)}</div>
+        </div>
+        <div style="padding:10px;background:#f8fafc;border-radius:8px;border:1px solid #cbd5e1;font-size:9px">
+          <div style="font-weight:700;margin-bottom:6px">📦 બિલ બ્રેકડાઉન</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div style="padding:4px;background:#fff3cd;border-radius:3px">🍎 ₹${fmt(fruitBill,2)}</div>
+            <div style="padding:4px;background:#e7f3ff;border-radius:3px">🥒 ₹${fmt(curMU.totalN * 1.30,2)}</div>
+            <div style="padding:4px;background:#f0e7ff;border-radius:3px">🫘 ₹${fmt(chanaDalBill,2)}</div>
+            <div style="padding:4px;background:#e8f5e9;border-radius:3px">🥬 ₹${fmt(curMU.totalN * 0.15,2)}</div>
+            <div style="padding:4px;background:#ffd9b3;border-radius:3px">🌶️ ₹${fmt(curMU.totalN * 1.00,2)}</div>
+            <div style="padding:4px;background:#d4edda;border-radius:3px">🚗 ₹${fmt(curMU.totalN * 0.05,2)}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderMonthlyPage(curMU){
   const rows = ITEMS.map(it=>{
     const iv=state.inv[it.id], opening=iv.o+iv.r;
@@ -895,7 +1122,7 @@ function renderBillPage(){
       <div class="section-body">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
           <div style="padding:10px;background:#f0f6f1;border-radius:8px;text-align:center">
-            <div style="font-size:11px;color:#64748b;margin-bottom:4px">જથ્થો</div>
+            <div style="font-size:11px;color:#64748b;margin-bottom:4px">સંખ્યા</div>
             <div style="font-size:24px;font-weight:800;color:#198754">${b.qty}</div>
           </div>
           <div style="padding:10px;background:#fffbeb;border-radius:8px;text-align:center">
@@ -1047,7 +1274,7 @@ function renderReportPage(){
         </div>
       </div>
     </div>
-    <div class="actions"><button class="btn-print" id="btnPrint">🖨️ Print</button><button class="btn-share" id="btnShare">📤 Share</button></div>
+    <div class="actions"><button class="btn-pdf" id="btnReportPDF" style="background:#d97706;color:#fff;border:none;padding:6px 10px;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer">📄 PDF</button><button class="btn-print" id="btnPrint">🖨️ Print</button><button class="btn-share" id="btnShare">📤 Share</button></div>
   </div>`;
 
   const monthlyHtml=`<div class="card">
@@ -1106,7 +1333,7 @@ function renderReportPage(){
         </div>
       </div>
     </div>
-    <div class="actions"><button class="btn-print" id="btnPrint">🖨️ Print</button><button class="btn-share" id="btnShareM">📤 Share</button></div>
+    <div class="actions"><button class="btn-pdf" id="btnMonthlyPDF" style="background:#d97706;color:#fff;border:none;padding:6px 10px;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer">📄 PDF</button><button class="btn-print" id="btnPrint">🖨️ Print</button><button class="btn-share" id="btnShareM">📤 Share</button></div>
   </div>`;
 
   return `<div class="container tab-content">
@@ -1117,6 +1344,7 @@ function renderReportPage(){
     ${state.rptTab==='daily'?dailyHtml:monthlyHtml}
     <div class="card"><div class="section-body" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center">
       <div>
+        <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#d97706" id="btnPDF">📄 Monthly PDF</button>
         <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#7c3aed" id="btnExport">💾 Export</button>
         <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#0891b2" id="btnImport">📂 Import</button>
         <input type="file" id="fileImport" accept=".json" style="display:none">
@@ -1245,7 +1473,7 @@ function render(){
     let html="";
     if(state.tab===0)      html=renderInventoryPage(curMU);
     else if(state.tab===1) html=renderCalendarPage();
-    else if(state.tab===2) html=renderMonthlyPage(curMU);
+    else if(state.tab===2) html=renderDashboardPage(curMU);
     else if(state.tab===3) html=renderReportPage();
     else if(state.tab===5) html=renderBillPage();
     else if(state.tab===4) html=renderAdminPage();
@@ -1278,6 +1506,84 @@ function nextMonth(){ state.calM++; if(state.calM>11){state.calM=0;state.calY++;
 /* ============================================================
    SHARE / EXPORT / IMPORT
 ============================================================ */
+function generateReportPDF(){
+  if(typeof pdfMake === 'undefined'){
+    alert('❌ PDF loading... try again');
+    return;
+  }
+  
+  const today = new Date();
+  const todayK = dkf(today.getFullYear(), today.getMonth(), today.getDate());
+  const todayN = Number(state.ben[todayK] || 0);
+  const todayU = calcUsage(today.getDay(), todayN);
+  const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
+  
+  // Daily report
+  const dailyTable = ITEMS.map(it => {
+    const iv = state.inv[it.id], opening = iv.o + iv.r;
+    const mor = morU(it.id, todayU), aft = aftU(it.id, todayU), tot = todayU[it.id] || 0;
+    return [it.name, todayN.toString(), fmt(opening,2), (mor||'—'), (aft||'—'), (tot||'—'), fmt(opening - tot/1000, 2)];
+  });
+  
+  // Monthly summary
+  const monthlyTable = ITEMS.map(it => {
+    const iv = state.inv[it.id], opening = iv.o + iv.r;
+    const mor = curMU[it.id + 'M'] || 0, aft = curMU[it.id + 'A'] || 0, tot = curMU[it.id] || 0;
+    return [it.name, fmt(mor), fmt(aft), fmt(opening), fmt(tot), fmt(opening - tot/1000, 2)];
+  });
+  
+  const docDef = {
+    pageSize: 'A4',
+    pageMargins: [20, 20, 20, 40],
+    header: {
+      text: '🌾 My Daily Report - ' + centerCode,
+      alignment: 'center',
+      fontSize: 12,
+      bold: true,
+      margin: [0, 0, 0, 8]
+    },
+    footer: (currentPage, pageCount) => ({
+      text: currentPage + ' / ' + pageCount,
+      alignment: 'center',
+      fontSize: 8
+    }),
+    content: [
+      {text: '📅 આજે - ' + today.getDate() + ' ' + MONTHS_FULL[today.getMonth()] + ' ' + today.getFullYear(), style: 'heading'},
+      {
+        table: {
+          headerRows: 1,
+          widths: ['20%', '10%', '12%', '10%', '10%', '10%', '13%'],
+          body: [
+            ['આઇટમ', 'લાભા.', 'ઊઘ. (kg)', 'સ. (g)', 'બ. (g)', 'કુલ (g)', 'સિલક (kg)'],
+            ...dailyTable
+          ]
+        },
+        margin: [0, 0, 0, 16]
+      },
+      
+      {text: '📊 ' + MONTHS_FULL[state.calM] + ' ' + state.calY + ' - સારાંશ', style: 'heading'},
+      {
+        table: {
+          headerRows: 1,
+          widths: ['20%', '12%', '12%', '13%', '13%', '15%'],
+          body: [
+            ['આઇટમ', 'સ. વ. (g)', 'બ. વ. (g)', 'ઊઘ. (kg)', 'કુલ (g)', 'સિલક (kg)'],
+            ...monthlyTable
+          ]
+        },
+        margin: [0, 0, 0, 0]
+      }
+    ],
+    
+    styles: {
+      heading: {fontSize: 10, bold: true, margin: [0, 10, 0, 8], color: '#1a3c5e'}
+    }
+  };
+  
+  pdfMake.createPdf(docDef).download(`mdr-report-${centerCode}-${today.toISOString().slice(0,10)}.pdf`);
+  setStatus('✅ PDF Downloaded!', '#1b8f57');
+}
+
 function shareReport(){
   const today=new Date(), todayK=dkf(today.getFullYear(),today.getMonth(),today.getDate());
   const todayN=Number(state.ben[todayK]||0), todayU=calcUsage(today.getDay(),todayN);
@@ -1298,6 +1604,153 @@ function exportBackup(){
   const url=URL.createObjectURL(blob), a=document.createElement('a');
   a.href=url; a.download=`mdr-${centerCode}-${new Date().toISOString().slice(0,10)}.json`;
   a.click(); URL.revokeObjectURL(url);
+}
+
+function generateMonthlyPDF(){
+  if(typeof pdfMake === 'undefined'){
+    alert('❌ PDF library loading... try again');
+    return;
+  }
+  
+  const curMU = calcMonthUsage(state.calY, state.calM, state.ben);
+  const monthName = MONTHS_FULL[state.calM];
+  const today = new Date();
+  
+  // Bills calculation
+  let fruitBenCount = 0;
+  const dim = new Date(state.calY, state.calM+1, 0).getDate();
+  for(let d=1; d<=dim; d++){
+    const k = dkf(state.calY, state.calM, d);
+    const n = Number(state.ben[k] || 0);
+    const dow = new Date(state.calY, state.calM, d).getDay();
+    if((dow === 1 || dow === 4)) fruitBenCount += n;
+  }
+  
+  const chanaDalBenCount = (curMU['chananA'] || 0) + (curMU['dalnA'] || 0);
+  
+  const bills = [
+    {name: '🍎 ફ્રુટ બીલ', qty: fruitBenCount, rate: 3.12, total: fruitBenCount * 3.12},
+    {name: '🥒 ગરમ નાસ્તો બીલ', qty: curMU.totalN, rate: 1.30, total: curMU.totalN * 1.30},
+    {name: '🫘 ચણા + તુવેર દાળ બીલ', qty: chanaDalBenCount, rate: 1.60, total: chanaDalBenCount * 1.60},
+    {name: '🥬 શાકભાજી બીલ', qty: curMU.totalN, rate: 0.15, total: curMU.totalN * 0.15},
+    {name: '🌶️ મસાલા બીલ', qty: curMU.totalN, rate: 1.00, total: curMU.totalN * 1.00},
+    {name: '🚗 વાહતુક બીલ', qty: curMU.totalN, rate: 0.05, total: curMU.totalN * 0.05}
+  ];
+  
+  const grandTotal = bills.reduce((sum, b) => sum + b.total, 0);
+  
+  // Inventory data
+  const invRows = ITEMS.map(it => {
+    const iv = state.inv[it.id];
+    const opening = iv.o + iv.r;
+    const used = (curMU[it.id] || 0) / 1000;
+    return [it.name, fmt(opening,2), fmt(used,2), fmt(opening - used, 2)];
+  });
+  
+  // Bill rows for PDF
+  const billRows = bills.map(b => [b.name, b.qty, '₹' + fmt(b.rate, 2), '₹' + fmt(b.total, 2)]);
+  
+  // Meal summary - first 5 days as sample
+  const mealRows = [];
+  for(let d=1; d<=Math.min(5, dim); d++){
+    const k = dkf(state.calY, state.calM, d);
+    const n = Number(state.ben[k] || 0);
+    const dow = new Date(state.calY, state.calM, d).getDay();
+    if(n > 0) mealRows.push([d + ' ' + DAYS_SHORT[dow], n, n > 0 ? '✓' : '−']);
+  }
+  if(mealRows.length === 0) mealRows.push(['(No data)', '−', '−']);
+  
+  const docDefinition = {
+    pageSize: 'A4',
+    pageMargins: [30, 30, 30, 60],
+    header: {
+      text: '🌾 My Daily Report - ' + monthName + ' ' + state.calY,
+      alignment: 'center',
+      fontSize: 14,
+      bold: true,
+      margin: [0, 0, 0, 10]
+    },
+    footer: (currentPage, pageCount) => ({
+      text: currentPage + ' / ' + pageCount,
+      alignment: 'center',
+      fontSize: 9
+    }),
+    content: [
+      {text: '📋 Center Details', style: 'heading'},
+      {
+        columns: [
+          {text: 'કેન્દ્ર: ' + centerCode, fontSize: 10},
+          {text: 'તારીખ: ' + today.toLocaleDateString('gu-IN'), fontSize: 10, alignment: 'right'}
+        ],
+        margin: [0, 0, 0, 12]
+      },
+      
+      {text: '📊 Monthly Summary', style: 'heading'},
+      {
+        table: {
+          headerRows: 1,
+          widths: ['*', '*', '*'],
+          body: [
+            ['કાર્ય દિવસ', 'કુલ લાભાર્થી', 'દર દિવસ સરેરાશ'],
+            [curMU.days.toString(), curMU.totalN.toString(), fmt(curMU.totalN/curMU.days || 0, 1)]
+          ]
+        },
+        margin: [0, 0, 0, 12]
+      },
+      
+      {text: '💰 Bills Summary', style: 'heading'},
+      {
+        table: {
+          headerRows: 1,
+          widths: ['35%', '20%', '20%', '25%'],
+          body: [
+            ['ન. બીલ', 'સંખ્યા', 'દર', 'કુલ'],
+            ...billRows,
+            ['કુલ રકમ', '', '', '₹' + fmt(grandTotal, 2)]
+          ]
+        },
+        margin: [0, 0, 0, 12]
+      },
+      
+      {text: '📦 Inventory Status', style: 'heading'},
+      {
+        table: {
+          headerRows: 1,
+          widths: ['25%', '25%', '25%', '25%'],
+          body: [
+            ['આઇટમ', 'ઊઘડતી (kg)', 'વપરાશ (kg)', 'બંધ (kg)'],
+            ...invRows
+          ]
+        },
+        margin: [0, 0, 0, 12]
+      },
+      
+      {text: '📅 Sample Meal Record', style: 'heading'},
+      {
+        table: {
+          headerRows: 1,
+          widths: ['40%', '30%', '30%'],
+          body: [
+            ['તારીખ', 'લાભાર્થી', 'સેવા'],
+            ...mealRows,
+            ['કુલ', curMU.days.toString(), '✓']
+          ]
+        },
+        margin: [0, 0, 0, 20]
+      },
+      
+      {text: 'અધિકૃત હસ્તાક્ષર', style: 'heading', margin: [0, 40, 0, 30]},
+      {text: '_'.repeat(40), fontSize: 10, margin: [0, 0, 0, 5]},
+      {text: 'Center-in-Charge', fontSize: 9, color: '#666'}
+    ],
+    
+    styles: {
+      heading: {fontSize: 11, bold: true, margin: [0, 10, 0, 8], color: '#1a3c5e'}
+    }
+  };
+  
+  pdfMake.createPdf(docDefinition).download(`mdr-${centerCode}-${monthName}-${state.calY}.pdf`);
+  setStatus('✅ PDF Downloaded!', '#1b8f57');
 }
 function importBackup(file){
   const r=new FileReader();
@@ -1458,9 +1911,12 @@ document.addEventListener('click', e=>{
   if(t.id==='modalSave'){ saveModal(); return; }
   if(t.id==='modalClear'){ clearModal(); return; }
   if(t.matches('.report-tabs button')){ state.rptTab=t.dataset.rpt; render(); return; }
+  if(t.id==='btnReportPDF'){ generateReportPDF(); return; }
+  if(t.id==='btnMonthlyPDF'){ generateMonthlyPDF(); return; }
   if(t.id==='btnPrint'){ window.print(); return; }
   if(t.id==='btnShare'){ shareReport(); return; }
   if(t.id==='btnShareM'){ shareMonthly(); return; }
+  if(t.id==='btnPDF'){ generateMonthlyPDF(); return; }
   if(t.id==='btnExport'){ exportBackup(); return; }
   if(t.id==='btnImport'){ document.getElementById('fileImport').click(); return; }
 });
@@ -1494,66 +1950,56 @@ document.addEventListener('keydown', e=>{
 ============================================================ */
 if(centerCode){ bootApp(); } else { render(); }
 
+// ✅ Periodic sync check every 30 seconds (જો queue હોય તો)
+setInterval(() => {
+  if(centerCode && isOnline && syncQueue.length > 0){
+    processSyncQueue();
+  }
+  // Check network status
+  if(navigator.onLine !== isOnline){
+    isOnline = navigator.onLine;
+    if(isOnline){
+      setStatus("🟢 Network OK — Syncing...", "#1b8f57");
+      processSyncQueue();
+    } else {
+      setStatus("🔴 Offline — Local save માત્ર", "#e67e22");
+    }
+  }
+}, 30000);
+
 /* ============================================================
-   SERVICE WORKER — offline support + app-like experience
+   SERVICE WORKER — OPTIONAL (offline caching)
+   Note: If SW fails, offline-first sync queue still works via localStorage
 ============================================================ */
-if('serviceWorker' in navigator){
+// SW is optional - core offline functionality works with localStorage
+if('serviceWorker' in navigator && navigator.onLine !== undefined){
   window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('data:application/javascript,'
-      + encodeURIComponent(`
-const CACHE_NAME = 'mdr-v1';
-const urlsToCache = ['/'];
-
-self.addEventListener('install', event => {
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(clients.claim());
-});
-
-self.addEventListener('fetch', event => {
-  if(event.request.method !== 'GET') return;
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      if(response) return response;
-      return fetch(event.request).then(response => {
-        if(!response || response.status !== 200) return response;
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseToCache);
-        });
-        return response;
-      }).catch(() => {
-        return caches.match('/') || new Response('Offline');
-      });
-    })
-  );
-});
-`)
-    ).catch(err => console.log('SW registration failed:', err));
+    // Disabled in some environments, but not critical
+    // Offline-first queue already handles sync via localStorage
   });
 }
 
-/* Mobile install prompt */
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  const msg = '📲 Home screen પર add કરો!';
-  setStatus(msg, '#2563a8');
-  setTimeout(() => {
-    if(centerCode && deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if(choiceResult.outcome === 'accepted') {
-          setStatus('✅ App installed!', '#1b8f57');
-        }
-        deferredPrompt = null;
-      });
-    }
-  }, 3000);
-});
+// Mobile install prompt - optional feature
+if(window.beforeinstallprompt){
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const msg = '📲 Home screen પર add કરો!';
+    setStatus(msg, '#2563a8');
+    setTimeout(() => {
+      if(centerCode && deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if(choiceResult.outcome === 'accepted') {
+            setStatus('✅ App installed!', '#1b8f57');
+          }
+          deferredPrompt = null;
+        });
+      }
+    }, 3000);
+  });
+}
 </script>
   <footer style="text-align: center; margin: 20px 0; clear: both; display: block; position: relative; z-index: 9999;">
     <a href="privacy.html" target="_blank" style="color: #666; text-decoration: none; font-size: 14px; font-weight: bold;">Privacy Policy</a>

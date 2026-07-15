@@ -1370,7 +1370,7 @@ function renderReportPage(){
         <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#d97706" id="btnPDF">📄 Monthly PDF</button>
         <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#7c3aed" id="btnExport">💾 Export</button>
         <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#0891b2" id="btnImport">📂 Import</button>
-        <input type="file" id="fileImport" accept=".json" style="display:none">
+        <input type="file" id="fileImport" accept=".json, application/json" style="display:none">
       </div>
       <button id="btnLogout" style="padding:8px 14px;background:#cc3d3d;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer">🚪 કેન્દ્ર</button>
     </div></div>
@@ -1951,16 +1951,34 @@ document.addEventListener('click', e=>{
   if(t.id==='btnShareM'){ shareMonthly(); return; }
   if(t.id==='btnPDF'){ generateMonthlyPDF(); return; }
   if(t.id==='btnExport'){ exportBackup(); return; }
-  if(t.id==='btnImport'){ document.getElementById('fileImport').click(); return; }
+  if(t.id==='btnImport'){ 
+    const fileInput = document.getElementById('fileImport');
+    if(fileInput){
+      fileInput.value = ''; // Clear previous value
+      fileInput.click();
+    }
+    return; 
+  }
 });
 
-// File import handler
-document.getElementById('fileImport')?.addEventListener('change', e=>{
-  if(e.target.files && e.target.files[0]){
+// File import handler - Mobile compatible
+const fileImportInput = document.getElementById('fileImport');
+if(fileImportInput){
+  fileImportInput.addEventListener('change', function(e){
+    if(this.files && this.files[0]){
+      importBackup(this.files[0]);
+      this.value = '';
+    }
+  });
+}
+
+// Fallback handler for different event types
+document.addEventListener('change', function(e){
+  if(e.target && e.target.id === 'fileImport' && e.target.files && e.target.files[0]){
     importBackup(e.target.files[0]);
     e.target.value = '';
   }
-});
+}, true);
 
 document.addEventListener('input', e=>{
   const t=e.target;

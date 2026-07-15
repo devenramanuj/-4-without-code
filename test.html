@@ -1779,9 +1779,30 @@ function importBackup(file){
   const r=new FileReader();
   r.onload=e=>{
     try{
-      const data=JSON.parse(e.target.result);
-      if(data.inv) state.inv=data.inv;
-      if(data.ben) state.ben=data.ben;
+      const text = e.target.result;
+      
+      // Try to parse JSON
+      let data;
+      try{
+        data = JSON.parse(text);
+      } catch(parseErr){
+        throw new Error('JSON parse failed: ' + parseErr.message);
+      }
+      
+      // Validate structure
+      if(!data.inv && !data.ben){
+        throw new Error('File must have "inv" or "ben" properties');
+      }
+      
+      // Import inventory
+      if(data.inv && typeof data.inv === 'object'){
+        state.inv = data.inv;
+      }
+      
+      // Import beneficiaries
+      if(data.ben && typeof data.ben === 'object'){
+        state.ben = data.ben;
+      }
       
       // Force save to localStorage
       if(centerCode){
@@ -1794,7 +1815,7 @@ function importBackup(file){
       alert("✅ ડેટા import થયો!");
     }catch(err){ 
       console.error('Import error:', err);
-      alert("❌ ખોટી file - JSON format બરાબર નથી"); 
+      alert("❌ Import failed:\n" + err.message); 
     }
   };
   r.onerror=()=>{ alert("❌ File read failed"); };

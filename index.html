@@ -288,7 +288,7 @@ input, textarea, button, a{
 /* ============================================================
    CONFIG
 ============================================================ */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw50LCilmreN1FtjZw7BDXkHJ0-4qhUeAAOcTuhf8muvr29a-NV2Y0_9ZzaViv0CQbWow/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6SmphbB4OkZnnaKP4JLORVORy2mIx4r_0LOewzNJnHFXtDkJ65MAdYEHFTq37oy77qg/exec";
 const ADMIN_PASSWORD  = "Dev@1";
 
 /* ============================================================
@@ -387,19 +387,25 @@ async function cloudSaveWithRetry(data, retries = 3){
       
       const res = await fetch(APPS_SCRIPT_URL, {
         method: "POST",
-        headers: {"Content-Type": "text/plain"},
-        body: JSON.stringify({centerCode, data: {inv: data.inv, ben: data.ben}}),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          action: "SAVE",
+          centerCode: centerCode,
+          sajoName: null,
+          inv: data.inv,
+          ben: data.ben
+        }),
         signal: ctrl.signal
       });
       clearTimeout(tid);
       
       const result = await res.json();
-      if(result.status === "ok"){
+      if(result.success){
         setStatus(`✅ Cloud saved — ${new Date().toLocaleTimeString('gu-IN')}`, "#1b8f57");
-        sendLog("SAVE", `ક્લાઉડ સેવ succesful`);
+        sendLog("SAVE", `ક્લાઉડ સેવ successful`);
         return true;
       } else {
-        throw new Error(result.msg || "Save failed");
+        throw new Error(result.message || "Save failed");
       }
     } catch(e){
       console.log(`Attempt ${attempt} failed:`, e.message);
@@ -616,11 +622,20 @@ async function sendLog(action, details){
 async function fetchLogs(){
   setStatus("⏳ Logs...","#2563a8");
   try{
-    const res  = await fetch(`${APPS_SCRIPT_URL}?action=getLogs`);
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        action: "GET_CENTERS",
+        centerCode: centerCode,
+        sajoName: null
+      })
+    });
     const data = await res.json();
-    state.logData = data.logs || [];
-    setStatus(`✅ ${state.logData.length} log entries`);
-  }catch(_){
+    state.logData = data.data || [];
+    setStatus(`✅ ${state.logData.length} centers`);
+  } catch(err) {
+    console.error('Log fetch error:', err);
     state.logData = [];
     setStatus("❌ Log fetch નિષ્ફળ","#cc3d3d");
   }
@@ -866,12 +881,35 @@ const fmt = (n,d=0) => (n==null||isNaN(n)) ? "0" : Number(n).toFixed(d);
 /* ============================================================
    RENDER — PAGES
 ============================================================ */
+function restoreData(){
+  const allKeys = Object.keys(localStorage);
+  
+  // Find all Aw05 variants (case insensitive)
+  const aw05Keys = allKeys.filter(k => 
+    (k.includes('Aw05') || k.includes('AW05') || k.includes('aw05') || k.includes('Aw 05')) && 
+    k.includes('offline')
+  );
+  
+  if(aw05Keys.length === 0){
+    alert("❌ ડેટા મિલ્યો નહીં");
+    return;
+  }
+  
+  // Copy all variants to standard key
+  const sourceKey = aw05Keys[0];
+  const data = localStorage.getItem(sourceKey);
+  
+  localStorage.setItem('mdr_offline_Aw05', data);
+  alert("✅ ડેટા પુનર્સ્થાપિત થયો!\nાર હવે 'Aw05' લખીને શરૂ કરો");
+}
+
 function renderSetupPage(){
   return `<div class="setup-box">
     <h2>🏢 આંગણવાડી કેન્દ્ર લોગિન</h2>
-    <p style="font-size:13px;color:#64748b;margin-bottom:15px">તમારો ડેટા અલગ રાખવા માટે કેન્દ્રનો કોડ અથવા મોબાઈલ નંબર નાખો.</p>
-    <input type="text" id="centerCodeInput" placeholder="દા.ત. AW-101 અથવા નંબર" value="${centerCode}" autocomplete="off">
+    <p style="font-size:13px;color:#64748b;margin-bottom:15px">તમારો ડેટા અલગ રાખવા માટે કેન્દ્રનો કોડ નાખો.</p>
+    <input type="text" id="centerCodeInput" placeholder="દા.ત. Aw05" value="${centerCode}" autocomplete="off">
     <button id="btnSubmitSetup">એપ શરૂ કરો ➔</button>
+    <button id="btnRestoreData" style="width:100%;padding:8px;background:#f39c12;color:#fff;border:none;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;margin-top:8px">📥 ડેટા પુનર્સ્થાપિત કરો</button>
   </div>`;
 }
 
@@ -1347,7 +1385,7 @@ function renderReportPage(){
         <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#d97706" id="btnPDF">📄 Monthly PDF</button>
         <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#7c3aed" id="btnExport">💾 Export</button>
         <button style="padding:8px 14px;border:none;border-radius:6px;font-family:inherit;color:#fff;font-weight:700;cursor:pointer;background:#0891b2" id="btnImport">📂 Import</button>
-        <input type="file" id="fileImport" accept=".json" style="display:none">
+        <input type="file" id="fileImport" accept=".json, application/json" style="display:none">
       </div>
       <button id="btnLogout" style="padding:8px 14px;background:#cc3d3d;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer">🚪 કેન્દ્ર</button>
     </div></div>
@@ -1756,13 +1794,46 @@ function importBackup(file){
   const r=new FileReader();
   r.onload=e=>{
     try{
-      const data=JSON.parse(e.target.result);
-      if(data.inv) state.inv=data.inv;
-      if(data.ben) state.ben=data.ben;
-      invalidateCache(); saveState(); render();
-      alert("✅ Restore!");
-    }catch(_){ alert("❌ ખોટી file"); }
+      const text = e.target.result;
+      
+      // Try to parse JSON
+      let data;
+      try{
+        data = JSON.parse(text);
+      } catch(parseErr){
+        throw new Error('JSON parse failed: ' + parseErr.message);
+      }
+      
+      // Validate structure
+      if(!data.inv && !data.ben){
+        throw new Error('File must have "inv" or "ben" properties');
+      }
+      
+      // Import inventory
+      if(data.inv && typeof data.inv === 'object'){
+        state.inv = data.inv;
+      }
+      
+      // Import beneficiaries
+      if(data.ben && typeof data.ben === 'object'){
+        state.ben = data.ben;
+      }
+      
+      // Force save to localStorage
+      if(centerCode){
+        const dataToSave = {inv:state.inv, ben:state.ben, timestamp: new Date().toISOString()};
+        localStorage.setItem("mdr_offline_" + centerCode, JSON.stringify(dataToSave));
+      }
+      
+      invalidateCache(); 
+      render();
+      alert("✅ ડેટા import થયો!");
+    }catch(err){ 
+      console.error('Import error:', err);
+      alert("❌ Import failed:\n" + err.message); 
+    }
   };
+  r.onerror=()=>{ alert("❌ File read failed"); };
   r.readAsText(file);
 }
 
@@ -1916,8 +1987,34 @@ document.addEventListener('click', e=>{
   if(t.id==='btnShareM'){ shareMonthly(); return; }
   if(t.id==='btnPDF'){ generateMonthlyPDF(); return; }
   if(t.id==='btnExport'){ exportBackup(); return; }
-  if(t.id==='btnImport'){ document.getElementById('fileImport').click(); return; }
+  if(t.id==='btnImport'){ 
+    const fileInput = document.getElementById('fileImport');
+    if(fileInput){
+      fileInput.value = ''; // Clear previous value
+      fileInput.click();
+    }
+    return; 
+  }
 });
+
+// File import handler - Mobile compatible
+const fileImportInput = document.getElementById('fileImport');
+if(fileImportInput){
+  fileImportInput.addEventListener('change', function(e){
+    if(this.files && this.files[0]){
+      importBackup(this.files[0]);
+      this.value = '';
+    }
+  });
+}
+
+// Fallback handler for different event types
+document.addEventListener('change', function(e){
+  if(e.target && e.target.id === 'fileImport' && e.target.files && e.target.files[0]){
+    importBackup(e.target.files[0]);
+    e.target.value = '';
+  }
+}, true);
 
 document.addEventListener('input', e=>{
   const t=e.target;
